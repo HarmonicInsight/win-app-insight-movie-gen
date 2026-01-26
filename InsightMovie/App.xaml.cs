@@ -1,0 +1,99 @@
+namespace InsightMovie;
+
+using System;
+using System.Windows;
+using InsightMovie.Core;
+using InsightMovie.Video;
+using InsightMovie.Views;
+using InsightMovie.VoiceVox;
+
+/// <summary>
+/// Application entry point. Handles first-run setup, engine discovery,
+/// FFmpeg initialisation, and main window creation.
+/// </summary>
+public partial class App : Application
+{
+    protected override async void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        // ── 1. Load configuration ──────────────────────────────────
+        var config = new Config();
+
+        // ── 2. First-run setup wizard ──────────────────────────────
+        VoiceVoxClient? wizardClient = null;
+
+        if (config.IsFirstRun)
+        {
+            var wizard = new SetupWizard();
+            var result = wizard.ShowDialog();
+
+            if (result == true)
+            {
+                // Persist the values chosen in the wizard.
+                // The wizard creates its own VoiceVoxClient internally;
+                // retrieve the connected client and speaker ID.
+                wizardClient = wizard.GetClient();
+                var wizardSpeakerId = wizard.GetSpeakerId();
+
+                if (wizardClient != null)
+                {
+                    config.EngineUrl = wizardClient.BaseUrl;
+                }
+
+                if (wizardSpeakerId >= 0)
+                {
+                    config.DefaultSpeakerId = wizardSpeakerId;
+                }
+
+                config.MarkSetupCompleted();
+            }
+            else
+            {
+                // User cancelled -- nothing to do, shut down.
+                Shutdown();
+                return;
+            }
+        }
+
+        // ── 3. Create VOICEVOX client ──────────────────────────────
+        // Reuse the client from the wizard when available; otherwise create a new one.
+        var client = wizardClient ?? new VoiceVoxClient(config.EngineUrl);
+
+        if (!config.IsFirstRun)
+        {
+            // Quick connection check; try auto-discovery on failure.
+            var version = await client.CheckConnectionAsync();
+            if (version == null)
+            {
+                var discovered = await client.DiscoverEngineAsync();
+                if (discovered != null)
+                {
+                    config.EngineUrl = discovered.BaseUrl;
+                }
+            }
+        }
+
+        // ── 4. FFmpeg wrapper ──────────────────────────────────────
+        FFmpegWrapper? ffmpeg = null;
+        try
+        {
+            ffmpeg = new FFmpegWrapper();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"FFmpeg の初期化に失敗しました。\n動画生成機能は使用できません。\n\n{ex.Message}",
+                "InsightMovie",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
+        // ── 5. Default speaker ID ──────────────────────────────────
+        int speakerId = config.DefaultSpeakerId ?? 13;
+
+        // ── 6. Show main window ────────────────────────────────────
+        var mainWindow = new MainWindow(client, speakerId, ffmpeg, config);
+        mainWindow.Show();
+    }
+}

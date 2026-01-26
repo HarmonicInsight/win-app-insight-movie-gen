@@ -1,0 +1,325 @@
+<Window x:Class="InsightMovie.Views.SetupWizard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="InsightMovie - 初回セットアップ"
+        MinWidth="700" MinHeight="500"
+        Width="750" Height="530"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#1E1E2E">
+
+    <Window.Resources>
+        <!-- Color Palette -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#7C3AED"/>
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#6D28D9"/>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#2A2A3D"/>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#1E1E2E"/>
+        <SolidColorBrush x:Key="ForegroundBrush" Color="#E2E8F0"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#94A3B8"/>
+        <SolidColorBrush x:Key="SuccessBrush" Color="#22C55E"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#3F3F5A"/>
+
+        <!-- Button Style -->
+        <Style x:Key="WizardButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="24,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Secondary Button Style -->
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="20,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3A3A50"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Title Text Style -->
+        <Style x:Key="PageTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="26"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Subtitle Text Style -->
+        <Style x:Key="PageSubtitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+
+        <!-- Body Text Style -->
+        <Style x:Key="BodyText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="24"/>
+        </Style>
+
+        <!-- Status Label Style -->
+        <Style x:Key="StatusLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Margin" Value="0,4,0,4"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Step indicator bar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Page content -->
+            <RowDefinition Height="*"/>
+            <!-- Navigation buttons -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Step Indicator -->
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" Padding="30,14">
+            <StackPanel x:Name="StepIndicator" Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock x:Name="StepLabel1" Text="1. ようこそ" FontSize="13" Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold" Margin="0,0,30,0"/>
+                <TextBlock x:Name="StepLabel2" Text="2. エンジン検出" FontSize="13" Foreground="{StaticResource MutedBrush}" Margin="0,0,30,0"/>
+                <TextBlock x:Name="StepLabel3" Text="3. 話者設定" FontSize="13" Foreground="{StaticResource MutedBrush}" Margin="0,0,30,0"/>
+                <TextBlock x:Name="StepLabel4" Text="4. 完了" FontSize="13" Foreground="{StaticResource MutedBrush}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- TabControl with hidden tabs -->
+        <TabControl x:Name="WizardPages" Grid.Row="1"
+                    SelectedIndex="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0">
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Style>
+            </TabControl.ItemContainerStyle>
+
+            <!-- Page 1: Welcome -->
+            <TabItem>
+                <Border Padding="50,40">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="InsightMovie へようこそ" Style="{StaticResource PageTitle}"/>
+                        <TextBlock Text="初回セットアップを開始します" Style="{StaticResource PageSubtitle}"/>
+
+                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="24,20" Margin="0,10,0,0">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,16">
+                                    InsightMovie は、VOICEVOX エンジンを使用してナレーション付き動画を自動生成するツールです。
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,8">
+                                    このセットアップでは以下の設定を行います:
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource BodyText}" Margin="16,0,0,4" Text="1. VOICEVOX エンジンの検出と接続"/>
+                                <TextBlock Style="{StaticResource BodyText}" Margin="16,0,0,4" Text="2. デフォルト話者（ボイス）の選択"/>
+                                <TextBlock Style="{StaticResource BodyText}" Margin="0,16,0,0" Foreground="{StaticResource MutedBrush}" FontSize="13">
+                                    ※ VOICEVOX エンジンがインストール済みであることを確認してください。
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+
+            <!-- Page 2: Engine Detection -->
+            <TabItem>
+                <Border Padding="50,40">
+                    <StackPanel VerticalAlignment="Top">
+                        <TextBlock Text="VOICEVOXエンジンの検出" Style="{StaticResource PageTitle}"/>
+                        <TextBlock Text="ローカルで実行中のエンジンを検索しています" Style="{StaticResource PageSubtitle}"/>
+
+                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="24,20" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock x:Name="EngineStatusLabel" Text="エンジンを検索中..." Style="{StaticResource StatusLabel}" FontSize="15"/>
+                                <ProgressBar x:Name="EngineProgressBar"
+                                             IsIndeterminate="True"
+                                             Height="6"
+                                             Margin="0,12,0,12"
+                                             Background="#3F3F5A"
+                                             Foreground="{StaticResource PrimaryBrush}"
+                                             BorderThickness="0"/>
+                                <TextBlock x:Name="EnginePathLabel" Text="" Style="{StaticResource StatusLabel}" FontSize="13"/>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <Button x:Name="LaunchEngineButton"
+                                    Content="エンジンを起動"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Click="LaunchEngineButton_Click"
+                                    Margin="0,0,10,0"
+                                    Visibility="Collapsed"/>
+                            <Button x:Name="RetryDetectionButton"
+                                    Content="再検索"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Click="RetryDetectionButton_Click"
+                                    Margin="0,0,10,0"
+                                    Visibility="Collapsed"/>
+                            <Button x:Name="ManualSetupButton"
+                                    Content="手動設定"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Click="ManualSetupButton_Click"
+                                    Visibility="Collapsed"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+
+            <!-- Page 3: Speaker Selection -->
+            <TabItem>
+                <Border Padding="50,40">
+                    <StackPanel VerticalAlignment="Top">
+                        <TextBlock Text="デフォルト話者の設定" Style="{StaticResource PageTitle}"/>
+                        <TextBlock Text="ナレーションに使用するデフォルトのボイスを検出します" Style="{StaticResource PageSubtitle}"/>
+
+                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="24,20" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock x:Name="SpeakerStatusLabel" Text="話者情報を取得中..." Style="{StaticResource StatusLabel}" FontSize="15"/>
+                                <ProgressBar x:Name="SpeakerProgressBar"
+                                             IsIndeterminate="True"
+                                             Height="6"
+                                             Margin="0,12,0,12"
+                                             Background="#3F3F5A"
+                                             Foreground="{StaticResource PrimaryBrush}"
+                                             BorderThickness="0"/>
+
+                                <Border x:Name="SpeakerResultPanel"
+                                        Background="#232336"
+                                        CornerRadius="6"
+                                        Padding="20,16"
+                                        Margin="0,8,0,0"
+                                        Visibility="Collapsed">
+                                    <StackPanel>
+                                        <TextBlock Text="検出された話者:" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,0,0,6"/>
+                                        <TextBlock x:Name="SpeakerNameLabel"
+                                                   Text=""
+                                                   Foreground="{StaticResource ForegroundBrush}"
+                                                   FontSize="18"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="SpeakerIdLabel"
+                                                   Text=""
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   FontSize="13"
+                                                   Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+
+            <!-- Page 4: Completion -->
+            <TabItem>
+                <Border Padding="50,40">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="セットアップ完了" Style="{StaticResource PageTitle}" HorizontalAlignment="Center"/>
+
+                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="40,32" Margin="0,16,0,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Ellipse Width="64" Height="64" Fill="{StaticResource SuccessBrush}" HorizontalAlignment="Center" Margin="0,0,0,16">
+                                </Ellipse>
+                                <TextBlock Text="すべての設定が完了しました"
+                                           Foreground="{StaticResource ForegroundBrush}"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,12"/>
+                                <TextBlock Text="InsightMovie を使い始める準備ができました。"
+                                           Foreground="{StaticResource MutedBrush}"
+                                           FontSize="14"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="「完了」ボタンを押してメイン画面に進みます。"
+                                           Foreground="{StaticResource MutedBrush}"
+                                           FontSize="14"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <!-- Navigation Buttons -->
+        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" Padding="30,14">
+            <Grid>
+                <Button x:Name="CancelButton"
+                        Content="キャンセル"
+                        Style="{StaticResource SecondaryButton}"
+                        Click="CancelButton_Click"
+                        HorizontalAlignment="Left"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="BackButton"
+                            Content="戻る"
+                            Style="{StaticResource SecondaryButton}"
+                            Click="BackButton_Click"
+                            Margin="0,0,10,0"
+                            Visibility="Collapsed"/>
+                    <Button x:Name="NextButton"
+                            Content="次へ"
+                            Style="{StaticResource WizardButton}"
+                            Click="NextButton_Click"/>
+                    <Button x:Name="FinishButton"
+                            Content="完了"
+                            Style="{StaticResource WizardButton}"
+                            Click="FinishButton_Click"
+                            Visibility="Collapsed"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
