@@ -251,9 +251,12 @@ public class FFmpegWrapper
                 return false;
             }
 
+            // Read stderr asynchronously to prevent deadlock
+            // (FFmpeg writes large amounts of progress data to stderr)
+            var stderrTask = process.StandardError.ReadToEndAsync();
             string stdout = process.StandardOutput.ReadToEnd();
-            string stderr = process.StandardError.ReadToEnd();
             process.WaitForExit();
+            string stderr = stderrTask.GetAwaiter().GetResult();
 
             if (showOutput)
             {
@@ -265,6 +268,11 @@ public class FFmpegWrapper
                 {
                     Console.Error.WriteLine(stderr);
                 }
+            }
+
+            if (process.ExitCode != 0)
+            {
+                Debug.WriteLine($"FFmpeg failed (exit {process.ExitCode}): {stderr}");
             }
 
             return process.ExitCode == 0;

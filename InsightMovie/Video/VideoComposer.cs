@@ -312,9 +312,10 @@ public class VideoComposer
             using var process = System.Diagnostics.Process.Start(psi);
             if (process != null)
             {
+                var stderrTask = process.StandardError.ReadToEndAsync();
                 string output = process.StandardOutput.ReadToEnd();
-                process.StandardError.ReadToEnd();
                 process.WaitForExit();
+                stderrTask.GetAwaiter().GetResult();
 
                 if (process.ExitCode == 0 &&
                     double.TryParse(output.Trim(), NumberStyles.Float,
