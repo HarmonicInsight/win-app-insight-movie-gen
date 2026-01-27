@@ -55,6 +55,11 @@ namespace InsightMovie.Views
         }
 
         /// <summary>
+        /// Gets the selected text style (convenience property).
+        /// </summary>
+        public TextStyle SelectedStyle => CloneStyle(_currentStyle);
+
+        /// <summary>
         /// Returns the selected text style.
         /// </summary>
         public TextStyle GetSelectedStyle()

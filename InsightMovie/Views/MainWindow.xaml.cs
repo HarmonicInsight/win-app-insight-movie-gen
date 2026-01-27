@@ -739,7 +739,7 @@ namespace InsightMovie.Views
 
                 double duration = scene.DurationMode == DurationMode.Fixed
                     ? scene.FixedSeconds
-                    : (audioPath != null ? _audioCache.GetDuration(scene.NarrationText!, scene.SpeakerId ?? speakerId) + 2.0 : 3.0);
+                    : (audioPath != null ? (_audioCache.GetDuration(scene.NarrationText!, scene.SpeakerId ?? speakerId) ?? 1.0) + 2.0 : 3.0);
 
                 var scenePath = Path.Combine(tempDir, $"scene_{i:D4}.mp4");
                 var style = GetStyleForScene(scene);
