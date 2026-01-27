@@ -213,6 +213,41 @@ namespace InsightMovie.Views
 
         #endregion
 
+        #region Custom Title Bar
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void Window_StateChanged(object? sender, EventArgs e)
+        {
+            // Update maximize button icon: restore ↔ maximize
+            if (MaximizeButton != null)
+            {
+                MaximizeButton.Content = WindowState == WindowState.Maximized
+                    ? "\uE923"   // RestoreDown
+                    : "\uE739";  // Maximize
+                MaximizeButton.ToolTip = WindowState == WindowState.Maximized
+                    ? "元に戻す"
+                    : "最大化";
+            }
+        }
+
+        #endregion
+
         #region Window Lifecycle
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
