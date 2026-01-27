@@ -842,6 +842,14 @@ namespace InsightMovie.ViewModels
 
             if (outputPath == null) return;
 
+            if (_ffmpegWrapper == null || !_ffmpegWrapper.CheckAvailable())
+            {
+                _dialogService.ShowError(
+                    "ffmpegが検出されていません。\n動画の書き出しにはffmpegが必要です。",
+                    "書き出しエラー");
+                return;
+            }
+
             int fps = 30;
             if (int.TryParse(_fpsText, out var parsedFps))
                 fps = Math.Clamp(parsedFps, 15, 60);
@@ -863,12 +871,31 @@ namespace InsightMovie.ViewModels
 
             _logger.Log($"書き出しを開始: {outputPath}");
 
+            // Snapshot project data to avoid race conditions with UI thread
+            var projectSnapshot = _project.Clone();
+            var styleSnapshot = new Dictionary<string, TextStyle>(_sceneSubtitleStyles);
+            var defaultStyle = _defaultSubtitleStyle;
+
+            TextStyle GetStyleSnapshot(Scene scene)
+            {
+                if (scene.SubtitleStyleId != null &&
+                    styleSnapshot.TryGetValue(scene.Id, out var style))
+                    return style;
+                if (scene.SubtitleStyleId != null)
+                {
+                    var preset = TextStyle.PRESET_STYLES.FirstOrDefault(s => s.Id == scene.SubtitleStyleId);
+                    if (preset != null) return preset;
+                }
+                return defaultStyle;
+            }
+
             try
             {
-                var exportService = new ExportService(_ffmpegWrapper!, _voiceVoxClient, _audioCache);
+                var ffmpeg = _ffmpegWrapper!; // null already checked above
+                var exportService = new ExportService(ffmpeg, _voiceVoxClient, _audioCache);
                 var success = await Task.Run(() =>
-                    exportService.Export(_project, outputPath, resolution, fps,
-                        exportSpeakerId, GetStyleForScene, progress, ct), ct);
+                    exportService.Export(projectSnapshot, outputPath, resolution, fps,
+                        exportSpeakerId, GetStyleSnapshot, progress, ct), ct);
 
                 OnExportFinished(success, outputPath);
             }

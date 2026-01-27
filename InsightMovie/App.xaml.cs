@@ -17,6 +17,29 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Global unhandled exception handlers to prevent silent crashes
+        DispatcherUnhandledException += (_, args) =>
+        {
+            MessageBox.Show(
+                $"予期しないエラーが発生しました。\n\n{args.Exception.Message}\n\n" +
+                "アプリケーションの動作が不安定になる可能性があります。",
+                "InsightMovie - エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            args.Handled = true;
+        };
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            if (args.ExceptionObject is Exception ex)
+            {
+                MessageBox.Show(
+                    $"致命的なエラーが発生しました。\n\n{ex.Message}",
+                    "InsightMovie - 致命的エラー",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        };
+
         // ── 1. Load configuration ──────────────────────────────────
         var config = new Config();
 

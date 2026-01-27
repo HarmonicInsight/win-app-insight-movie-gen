@@ -191,6 +191,17 @@ namespace InsightMovie.Models
             return Scenes[index];
         }
 
+        /// <summary>
+        /// Creates a deep copy of this project for thread-safe background processing.
+        /// </summary>
+        public Project Clone()
+        {
+            var json = JsonSerializer.Serialize(this, SerializerOptions);
+            var clone = JsonSerializer.Deserialize<Project>(json, SerializerOptions)!;
+            clone.ProjectPath = ProjectPath;
+            return clone;
+        }
+
         public void Save(string? path = null)
         {
             var savePath = path ?? ProjectPath;

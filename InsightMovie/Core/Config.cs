@@ -2,6 +2,7 @@ namespace InsightMovie.Core;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
@@ -43,11 +44,20 @@ public class Config
 
     public void Save()
     {
-        Directory.CreateDirectory(ConfigDir);
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        var json = JsonSerializer.Serialize(_data, options);
-        File.WriteAllText(ConfigPath, json);
-        _dirty = false;
+        try
+        {
+            Directory.CreateDirectory(ConfigDir);
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var json = JsonSerializer.Serialize(_data, options);
+            File.WriteAllText(ConfigPath, json);
+            _dirty = false;
+        }
+        catch (Exception ex)
+        {
+            // Prevent I/O errors (disk full, permissions) from crashing the app
+            // when Save is called implicitly from property setters.
+            Debug.WriteLine($"Config.Save failed: {ex.Message}");
+        }
     }
 
     /// <summary>

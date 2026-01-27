@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -37,6 +38,13 @@ namespace InsightMovie.Infrastructure
             try
             {
                 await _execute(parameter);
+            }
+            catch (Exception ex)
+            {
+                // Prevent async void exceptions from crashing the application.
+                // Individual commands should handle their own errors, but this
+                // catch-all ensures no unhandled exception escapes async void.
+                Debug.WriteLine($"AsyncRelayCommand unhandled error: {ex}");
             }
             finally
             {
