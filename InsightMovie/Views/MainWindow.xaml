@@ -103,8 +103,9 @@
                                 Command="{Binding ShowLicenseManagerCommand}"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                           VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <Path Data="M6,0 L12,3 V7 L6,12 L0,7 V3 Z"
+                                      Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
+                                      VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <TextBlock Text="ライセンス管理" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
@@ -125,8 +126,9 @@
                                 Command="{Binding NewProjectCommand}"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="13"
-                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Path Data="M2,0 H8 L11,3 V13 H2 Z M8,0 V3 H11"
+                                      Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
+                                      VerticalAlignment="Center" Margin="0,0,5,0"/>
                                 <TextBlock Text="新規" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
@@ -136,8 +138,9 @@
                                 Command="{Binding OpenProjectCommand}"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
-                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Path Data="M0,3 H3 L5,1 H8 V3 H12 L10,10 H0 Z"
+                                      Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
+                                      VerticalAlignment="Center" Margin="0,0,5,0"/>
                                 <TextBlock Text="設定ファイルを開く" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
@@ -147,8 +150,9 @@
                                 Command="{Binding SaveProjectCommand}"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="13"
-                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Path Data="M0,0 H7 L10,3 V10 H0 Z M3,0 V3 H6 V0 M2,6 H8 V10 H2 Z"
+                                      Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
+                                      VerticalAlignment="Center" Margin="0,0,5,0"/>
                                 <TextBlock Text="設定を上書き保存" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
@@ -158,8 +162,9 @@
                                 Command="{Binding SaveProjectAsCommand}"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE792;" FontFamily="Segoe MDL2 Assets" FontSize="13"
-                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Path Data="M0,0 H7 L10,3 V10 H0 Z M3,0 V3 H6 V0"
+                                      Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
+                                      VerticalAlignment="Center" Margin="0,0,5,0"/>
                                 <TextBlock Text="設定を別名で保存" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
@@ -169,8 +174,9 @@
                                 IsEnabled="{Binding CanPptx}"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
-                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <Path Data="M5,0 V7 M2,5 L5,8 L8,5 M1,10 V12 H9 V10"
+                                      Stroke="#FFFFFF" StrokeThickness="1"
+                                      VerticalAlignment="Center" Margin="0,0,5,0"/>
                                 <TextBlock Text="PPTX取込" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
