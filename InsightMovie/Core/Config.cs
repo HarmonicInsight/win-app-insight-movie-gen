@@ -13,6 +13,8 @@ public class Config
     private static readonly string ConfigPath = Path.Combine(ConfigDir, "config.json");
 
     private Dictionary<string, JsonElement> _data = new();
+    private int _batchDepth;
+    private bool _dirty;
 
     public Config()
     {
@@ -45,6 +47,25 @@ public class Config
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(_data, options);
         File.WriteAllText(ConfigPath, json);
+        _dirty = false;
+    }
+
+    /// <summary>
+    /// Begin a batch update. Calls to Set will not auto-save until EndUpdate is called.
+    /// </summary>
+    public void BeginUpdate()
+    {
+        _batchDepth++;
+    }
+
+    /// <summary>
+    /// End a batch update. If any values were changed, saves once.
+    /// </summary>
+    public void EndUpdate()
+    {
+        if (_batchDepth > 0) _batchDepth--;
+        if (_batchDepth == 0 && _dirty)
+            Save();
     }
 
     public T? Get<T>(string key, T? defaultValue = default)
@@ -66,7 +87,10 @@ public class Config
     {
         var element = JsonSerializer.SerializeToElement(value);
         _data[key] = element;
-        Save();
+        _dirty = true;
+
+        if (_batchDepth == 0)
+            Save();
     }
 
     public bool IsFirstRun
@@ -101,7 +125,9 @@ public class Config
 
     public void MarkSetupCompleted()
     {
+        BeginUpdate();
         IsFirstRun = false;
+        EndUpdate();
     }
 
     public void ClearLicense()

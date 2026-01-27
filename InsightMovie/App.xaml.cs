@@ -36,17 +36,13 @@ public partial class App : Application
                 wizardClient = wizard.GetClient();
                 var wizardSpeakerId = wizard.GetSpeakerId();
 
+                config.BeginUpdate();
                 if (wizardClient != null)
-                {
                     config.EngineUrl = wizardClient.BaseUrl;
-                }
-
                 if (wizardSpeakerId >= 0)
-                {
                     config.DefaultSpeakerId = wizardSpeakerId;
-                }
-
-                config.MarkSetupCompleted();
+                config.IsFirstRun = false;
+                config.EndUpdate();
             }
             else
             {
