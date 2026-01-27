@@ -235,11 +235,12 @@ namespace InsightMovie.Views
         private void Window_StateChanged(object? sender, EventArgs e)
         {
             // Update maximize button icon: restore ↔ maximize
-            if (MaximizeButton != null)
+            if (MaximizeIcon != null)
             {
-                MaximizeButton.Content = WindowState == WindowState.Maximized
-                    ? "\uE923"   // ChromeRestore
-                    : "\uE922";  // ChromeMaximize
+                MaximizeIcon.Data = Geometry.Parse(
+                    WindowState == WindowState.Maximized
+                        ? "M0,2 H8 V10 H0 Z M2,2 V0 H10 V8 H8"   // Restore (two overlapping squares)
+                        : "M0,0 H10 V10 H0 Z");                     // Maximize (single square)
                 MaximizeButton.ToolTip = WindowState == WindowState.Maximized
                     ? "元に戻す"
                     : "最大化";
