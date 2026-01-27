@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 public enum PlanCode
 {
     Free,
+    Trial,
     Std,
     Pro,
     Ent
@@ -31,15 +32,15 @@ public static class License
     public const string SECRET_KEY = "insight-series-license-secret-2026";
 
     private static readonly Regex LICENSE_KEY_REGEX = new(
-        @"^(INSS|INSP|INPY|FGIN|INMV)-(STD|PRO|ENT)-(\d{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})$",
+        @"^(INSS|INSP|INPY|FGIN|INMV)-(TRIAL|STD|PRO|ENT)-(\d{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})$",
         RegexOptions.Compiled);
 
     private static readonly Dictionary<string, PlanCode[]> FEATURE_MATRIX = new()
     {
-        { "subtitle", new[] { PlanCode.Pro, PlanCode.Ent } },
-        { "subtitle_style", new[] { PlanCode.Pro, PlanCode.Ent } },
-        { "transition", new[] { PlanCode.Pro, PlanCode.Ent } },
-        { "pptx_import", new[] { PlanCode.Pro, PlanCode.Ent } },
+        { "subtitle", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
+        { "subtitle_style", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
+        { "transition", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
+        { "pptx_import", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
     };
 
     public static string GenerateSignature(string product, string plan, string yymm)
@@ -107,7 +108,8 @@ public static class License
 
         var plan = ParsePlanCode(planStr);
 
-        // Parse expiry: yymm represents the issue date; license expires 12 months later
+        // Parse expiry: yymm represents the issue date
+        // TRIAL expires after 1 month, other paid plans after 12 months
         DateTime? expiresAt = null;
         if (yymm.Length == 4
             && int.TryParse(yymm[..2], out var yy)
@@ -116,7 +118,7 @@ public static class License
         {
             var issueYear = 2000 + yy;
             var issueDate = new DateTime(issueYear, mm, 1);
-            expiresAt = issueDate.AddMonths(12);
+            expiresAt = issueDate.AddMonths(GetExpirationMonths(plan));
 
             if (DateTime.UtcNow >= expiresAt.Value)
             {
@@ -154,11 +156,12 @@ public static class License
     {
         return plan switch
         {
-            PlanCode.Free => "\u30D5\u30EA\u30FC",          // フリー
-            PlanCode.Std  => "\u30B9\u30BF\u30F3\u30C0\u30FC\u30C9", // スタンダード
-            PlanCode.Pro  => "\u30D7\u30ED",                // プロ
-            PlanCode.Ent  => "\u30A8\u30F3\u30BF\u30FC\u30D7\u30E9\u30A4\u30BA", // エンタープライズ
-            _             => plan.ToString(),
+            PlanCode.Free  => "\u30D5\u30EA\u30FC",          // フリー
+            PlanCode.Trial => "\u30C8\u30E9\u30A4\u30A2\u30EB", // トライアル
+            PlanCode.Std   => "\u30B9\u30BF\u30F3\u30C0\u30FC\u30C9", // スタンダード
+            PlanCode.Pro   => "\u30D7\u30ED",                // プロ
+            PlanCode.Ent   => "\u30A8\u30F3\u30BF\u30FC\u30D7\u30E9\u30A4\u30BA", // エンタープライズ
+            _              => plan.ToString(),
         };
     }
 
@@ -166,9 +169,10 @@ public static class License
     {
         var planStr = plan switch
         {
-            PlanCode.Std => "STD",
-            PlanCode.Pro => "PRO",
-            PlanCode.Ent => "ENT",
+            PlanCode.Trial => "TRIAL",
+            PlanCode.Std   => "STD",
+            PlanCode.Pro   => "PRO",
+            PlanCode.Ent   => "ENT",
             _ => throw new ArgumentException($"Cannot generate license key for plan: {plan}")
         };
 
@@ -184,10 +188,19 @@ public static class License
     {
         return planStr.ToUpperInvariant() switch
         {
-            "STD" => PlanCode.Std,
-            "PRO" => PlanCode.Pro,
-            "ENT" => PlanCode.Ent,
-            _     => PlanCode.Free,
+            "TRIAL" => PlanCode.Trial,
+            "STD"   => PlanCode.Std,
+            "PRO"   => PlanCode.Pro,
+            "ENT"   => PlanCode.Ent,
+            _       => PlanCode.Free,
         };
+    }
+
+    /// <summary>
+    /// TRIAL は1ヶ月、その他の有料プランは12ヶ月の有効期限を返す。
+    /// </summary>
+    private static int GetExpirationMonths(PlanCode plan)
+    {
+        return plan == PlanCode.Trial ? 1 : 12;
     }
 }

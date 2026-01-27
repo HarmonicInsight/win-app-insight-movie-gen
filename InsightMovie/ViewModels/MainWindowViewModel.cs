@@ -1043,7 +1043,7 @@ namespace InsightMovie.ViewModels
             if (!License.CanUseFeature(_currentPlan, "pptx_import"))
             {
                 _dialogService.ShowInfo(
-                    "PPTX取込機能はProプラン以上でご利用いただけます。\nライセンスをアップグレードしてください。",
+                    "PPTX取込機能はTrial・Proプラン以上でご利用いただけます。\nライセンスをアップグレードしてください。",
                     "機能制限");
                 return;
             }
@@ -1138,7 +1138,7 @@ namespace InsightMovie.ViewModels
 
             SubtitlePlaceholder = _canSubtitle
                 ? "画面下部に表示される字幕"
-                : "字幕機能はProプラン以上で利用可能です";
+                : "字幕機能はTrial・Proプラン以上で利用可能です";
         }
 
         #endregion
