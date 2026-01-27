@@ -5,19 +5,19 @@
         MinWidth="500" MinHeight="600"
         Width="560" Height="620"
         WindowStartupLocation="CenterOwner"
-        Background="#FF2D2D30"
-        Foreground="White"
         ResizeMode="CanResizeWithGrip">
 
     <Window.Resources>
         <Style x:Key="SectionHeader" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#FFD0D0D0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Margin" Value="0,10,0,6"/>
         </Style>
         <Style x:Key="SectionBorder" TargetType="Border">
-            <Setter Property="Background" Value="#FF383838"/>
+            <Setter Property="Background" Value="{DynamicResource BgCard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderDefault}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="16"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
@@ -28,18 +28,14 @@
             <Setter Property="Margin" Value="6,0"/>
             <Setter Property="Padding" Value="16,4"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Background" Value="#FF5A5A5A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF999999"/>
-            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style x:Key="FeatureAvailable" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#FF4CAF50"/>
+            <Setter Property="Foreground" Value="#FF059669"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Margin" Value="0,2"/>
         </Style>
         <Style x:Key="FeatureUnavailable" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#FF888888"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextTertiary}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Margin" Value="0,2"/>
         </Style>
@@ -56,15 +52,15 @@
             <!-- Current Plan -->
             <Border Style="{StaticResource SectionBorder}">
                 <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="現在のプラン" Foreground="#FFB0B0B0"
+                    <TextBlock Text="現在のプラン" Foreground="{DynamicResource TextSecondary}"
                                HorizontalAlignment="Center" FontSize="12" Margin="0,0,0,4"/>
                     <TextBlock x:Name="PlanLabel" Text="フリー"
                                FontSize="28" FontWeight="Bold"
-                               Foreground="#FF00BFFF"
+                               Foreground="{DynamicResource BrandPrimary}"
                                HorizontalAlignment="Center"
                                Margin="0,0,0,4"/>
                     <TextBlock x:Name="StatusLabel" Text=""
-                               Foreground="#FFB0B0B0" FontSize="12"
+                               Foreground="{DynamicResource TextSecondary}" FontSize="12"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
@@ -85,28 +81,28 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="字幕機能"
-                               Foreground="#FFD0D0D0" FontSize="13" Margin="0,2"
+                               FontSize="13" Margin="0,2"
                                VerticalAlignment="Center"/>
                     <TextBlock x:Name="FeatureSubtitle" Grid.Row="0" Grid.Column="1"
                                Style="{StaticResource FeatureUnavailable}"
                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="字幕スタイル選択"
-                               Foreground="#FFD0D0D0" FontSize="13" Margin="0,2"
+                               FontSize="13" Margin="0,2"
                                VerticalAlignment="Center"/>
                     <TextBlock x:Name="FeatureSubtitleStyle" Grid.Row="1" Grid.Column="1"
                                Style="{StaticResource FeatureUnavailable}"
                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="トランジション効果"
-                               Foreground="#FFD0D0D0" FontSize="13" Margin="0,2"
+                               FontSize="13" Margin="0,2"
                                VerticalAlignment="Center"/>
                     <TextBlock x:Name="FeatureTransition" Grid.Row="2" Grid.Column="1"
                                Style="{StaticResource FeatureUnavailable}"
                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="PPTX取込"
-                               Foreground="#FFD0D0D0" FontSize="13" Margin="0,2"
+                               FontSize="13" Margin="0,2"
                                VerticalAlignment="Center"/>
                     <TextBlock x:Name="FeaturePptx" Grid.Row="3" Grid.Column="1"
                                Style="{StaticResource FeatureUnavailable}"
@@ -124,14 +120,11 @@
                              FontFamily="Consolas"
                              VerticalContentAlignment="Center"
                              Padding="6,0"
-                             Background="#FF4A4A4A"
-                             Foreground="White"
-                             BorderBrush="#FF666666"
                              Tag="INMV-PRO-2601-XXXX-XXXX-XXXX"/>
                     <!-- Placeholder watermark via Tag, applied in code-behind -->
 
                     <TextBlock x:Name="ValidationMessage" Text=""
-                               Foreground="#FFFF6B6B" FontSize="12"
+                               Foreground="{DynamicResource Error}" FontSize="12"
                                Margin="0,6,0,0" TextWrapping="Wrap"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">

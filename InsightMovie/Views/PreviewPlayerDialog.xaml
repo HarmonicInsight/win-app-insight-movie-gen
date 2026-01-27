@@ -5,8 +5,6 @@
         MinWidth="800" MinHeight="600"
         Width="960" Height="720"
         WindowStartupLocation="CenterOwner"
-        Background="#FF1E1E1E"
-        Foreground="White"
         ResizeMode="CanResizeWithGrip"
         Closing="Window_Closing">
 
@@ -17,16 +15,13 @@
             <Setter Property="Margin" Value="3,0"/>
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Background" Value="#FF3C3C3C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF555555"/>
-            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style x:Key="PlayButton" TargetType="Button" BasedOn="{StaticResource TransportButton}">
             <Setter Property="MinWidth" Value="70"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Background" Value="#FF0078D4"/>
-            <Setter Property="BorderBrush" Value="#FF005FA3"/>
+            <Setter Property="Background" Value="{DynamicResource BrandPrimary}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BrandPrimary}"/>
         </Style>
         <Style x:Key="DialogButton" TargetType="Button">
             <Setter Property="MinWidth" Value="80"/>
@@ -34,10 +29,6 @@
             <Setter Property="Margin" Value="6,0"/>
             <Setter Property="Padding" Value="12,4"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Background" Value="#FF3C3C3C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF666666"/>
-            <Setter Property="BorderThickness" Value="1"/>
         </Style>
     </Window.Resources>
 
@@ -47,7 +38,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Video Area -->
+        <!-- Video Area (keep dark for video content) -->
         <Border Grid.Row="0" Background="Black">
             <MediaElement x:Name="MediaPlayer"
                           LoadedBehavior="Manual"
@@ -59,7 +50,9 @@
         </Border>
 
         <!-- Control Panel -->
-        <Border Grid.Row="1" Background="#FF2B2B2B" Padding="12,8">
+        <Border Grid.Row="1" Background="{DynamicResource BgSecondary}"
+                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="0,1,0,0"
+                Padding="12,8">
             <StackPanel>
 
                 <!-- Seek Bar Row -->
@@ -71,7 +64,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock x:Name="CurrentTimeLabel" Grid.Column="0"
-                               Text="00:00" Foreground="#FFB0B0B0"
+                               Text="00:00" Foreground="{DynamicResource TextSecondary}"
                                FontSize="12" FontFamily="Consolas"
                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
 
@@ -84,7 +77,7 @@
                             ValueChanged="SeekSlider_ValueChanged"/>
 
                     <TextBlock x:Name="TotalTimeLabel" Grid.Column="2"
-                               Text="00:00" Foreground="#FFB0B0B0"
+                               Text="00:00" Foreground="{DynamicResource TextSecondary}"
                                FontSize="12" FontFamily="Consolas"
                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Grid>
@@ -125,7 +118,7 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal"
                                 HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock x:Name="SceneLabel" Text="シーン: 1/1"
-                                   Foreground="#FFB0B0B0" FontSize="13"
+                                   Foreground="{DynamicResource TextSecondary}" FontSize="13"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
 
@@ -133,7 +126,7 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- Volume -->
                         <TextBlock Text="&#x1F50A;" FontSize="14"
-                                   Foreground="#FFB0B0B0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"
                                    Margin="0,0,4,0"/>
                         <Slider x:Name="VolumeSlider" Width="80"
                                 Minimum="0" Maximum="1" Value="0.8"
@@ -141,11 +134,10 @@
                                 ValueChanged="VolumeSlider_ValueChanged"/>
 
                         <!-- Speed -->
-                        <TextBlock Text="速度:" Foreground="#FFB0B0B0"
+                        <TextBlock Text="速度:" Foreground="{DynamicResource TextSecondary}"
                                    FontSize="12" VerticalAlignment="Center"
                                    Margin="12,0,4,0"/>
                         <ComboBox x:Name="SpeedComboBox" Width="65" Height="28"
-                                  Background="#FF3C3C3C" Foreground="Black"
                                   VerticalContentAlignment="Center"
                                   SelectionChanged="SpeedComboBox_SelectionChanged">
                             <ComboBoxItem Content="0.5x" Tag="0.5"/>

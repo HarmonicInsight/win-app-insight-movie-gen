@@ -40,12 +40,13 @@
         <!-- ================================================================ -->
         <!-- A) Header Bar                                                    -->
         <!-- ================================================================ -->
-        <Border Grid.Row="0" Background="#F0F0F0" Padding="10,6" BorderBrush="#D0D0D0" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Background="{DynamicResource TitlebarBg}" Padding="10,6" BorderBrush="#3D3529" BorderThickness="0,0,0,1">
             <DockPanel>
                 <!-- Left: App title -->
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="InsightMovie" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <TextBlock Text="v1.0.0" Foreground="#888888" FontSize="11"
+                    <TextBlock Text="InsightMovie" FontSize="18" FontWeight="Bold"
+                               Foreground="{DynamicResource TitlebarFg}" VerticalAlignment="Center"/>
+                    <TextBlock Text="v1.0.0" Foreground="{DynamicResource TitlebarSecondary}" FontSize="11"
                                VerticalAlignment="Bottom" Margin="8,0,0,4"/>
                 </StackPanel>
 
@@ -54,11 +55,13 @@
                     <Button Content="ライセンス管理"
                             Padding="6,3" Margin="2"
                             FontSize="11"
+                            Background="#3D3529" Foreground="{DynamicResource TitlebarFg}"
+                            BorderBrush="#5A4F3C"
                             Command="{Binding ShowLicenseManagerCommand}"/>
-                    <Border Background="#E8E8E8" CornerRadius="3"
+                    <Border Background="#3D3529" CornerRadius="3"
                             Padding="8,3" Margin="4,0,0,0" VerticalAlignment="Center">
                         <TextBlock Text="{Binding StatusText}"
-                                   Foreground="#555555" FontSize="11"/>
+                                   Foreground="{DynamicResource TitlebarSecondary}" FontSize="11"/>
                     </Border>
                 </StackPanel>
 
@@ -67,19 +70,27 @@
                             VerticalAlignment="Center" Margin="8,0">
                     <Button Content="新規"
                             Padding="10,4" Margin="2"
+                            Background="#3D3529" Foreground="{DynamicResource TitlebarFg}"
+                            BorderBrush="#5A4F3C"
                             Command="{Binding NewProjectCommand}"/>
                     <Button Content="設定ファイルを開く"
                             Padding="10,4" Margin="2"
+                            Background="#3D3529" Foreground="{DynamicResource TitlebarFg}"
+                            BorderBrush="#5A4F3C"
                             Command="{Binding OpenProjectCommand}"/>
                     <Button Content="設定を上書き保存"
                             Padding="10,4" Margin="2"
+                            Background="#3D3529" Foreground="{DynamicResource TitlebarFg}"
+                            BorderBrush="#5A4F3C"
                             Command="{Binding SaveProjectCommand}"/>
                     <Button Content="設定を別名で保存"
                             Padding="10,4" Margin="2"
+                            Background="#3D3529" Foreground="{DynamicResource TitlebarFg}"
+                            BorderBrush="#5A4F3C"
                             Command="{Binding SaveProjectAsCommand}"/>
                     <Button Content="PPTX取込"
                             Padding="10,4" Margin="2"
-                            Background="#4CAF50" Foreground="White"
+                            Style="{DynamicResource PrimaryButton}"
                             Command="{Binding ImportPptxCommand}"
                             IsEnabled="{Binding CanPptx}"/>
                 </StackPanel>
@@ -187,7 +198,7 @@
             <GridSplitter Grid.Column="1" Width="5"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          Background="#D0D0D0"/>
+                          Background="{DynamicResource BorderDefault}"/>
 
             <!-- Right Panel: Scene Editor -->
             <GroupBox Grid.Column="2" Header="シーン編集" Padding="4">
@@ -200,7 +211,7 @@
                             <TextBlock Text="素材:" VerticalAlignment="Center"
                                        Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding MediaName}"
-                                       VerticalAlignment="Center" Foreground="#666666"
+                                       VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}"
                                        MinWidth="120" Margin="0,0,8,0"/>
                             <Button Content="選択"
                                     Padding="10,3" Margin="2"
@@ -247,7 +258,7 @@
                                          VerticalContentAlignment="Top"
                                          Padding="4"/>
                                 <TextBlock Text="ここに話をさせる内容を入力してください。"
-                                           Foreground="#999999" FontStyle="Italic"
+                                           Foreground="{DynamicResource TextPlaceholder}" FontStyle="Italic"
                                            IsHitTestVisible="False"
                                            Margin="8,6,0,0"
                                            VerticalAlignment="Top"
@@ -294,7 +305,7 @@
                                          VerticalContentAlignment="Center"
                                          IsEnabled="{Binding CanSubtitle}"/>
                                 <TextBlock Text="{Binding SubtitlePlaceholder}"
-                                           Foreground="#999999" FontStyle="Italic"
+                                           Foreground="{DynamicResource TextPlaceholder}" FontStyle="Italic"
                                            IsHitTestVisible="False"
                                            Margin="8,0,0,0"
                                            VerticalAlignment="Center"
@@ -306,7 +317,7 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                             <TextBlock Text="字幕スタイル:" VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
-                            <Border BorderBrush="#CCCCCC" BorderThickness="1"
+                            <Border BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
                                     CornerRadius="2" Padding="8,2" Margin="0,0,8,0"
                                     Background="#1a1a2e" MinWidth="40"
                                     VerticalAlignment="Center">
@@ -339,7 +350,7 @@
                                          TextAlignment="Center" Margin="0,0,4,0"
                                          IsEnabled="{Binding IsFixedDuration}"/>
                                 <TextBlock Text="秒 (0.1～60)" VerticalAlignment="Center"
-                                           Foreground="#888888" FontSize="11"/>
+                                           Foreground="{DynamicResource TextTertiary}" FontSize="11"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -360,12 +371,12 @@
                                      TextAlignment="Center" Margin="0,0,4,0"
                                      IsEnabled="{Binding CanTransition}"/>
                             <TextBlock Text="秒 (0.2～2.0)" VerticalAlignment="Center"
-                                       Foreground="#888888" FontSize="11"/>
+                                       Foreground="{DynamicResource TextTertiary}" FontSize="11"/>
                         </StackPanel>
 
                         <!-- Row 8: Info label -->
                         <TextBlock Text="「自動」の場合、ナレーション音声の長さに応じてシーンの長さが自動的に決まります。素材がない場合は黒背景が使用されます。"
-                                   TextWrapping="Wrap" Foreground="#888888"
+                                   TextWrapping="Wrap" Foreground="{DynamicResource TextTertiary}"
                                    FontSize="11" Margin="0,0,0,0"/>
                     </StackPanel>
                 </ScrollViewer>
@@ -411,7 +422,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,2,12,2">
                         <TextBlock Text="{Binding BgmStatusText}"
                                    VerticalAlignment="Center"
-                                   Foreground="#888888"
+                                   Foreground="{DynamicResource TextTertiary}"
                                    Margin="0,0,6,0"/>
                         <Button Content="BGM設定..."
                                 Padding="8,3"
@@ -424,7 +435,7 @@
                         Content="動画を書き出し"
                         Width="150" Height="44"
                         FontSize="12" FontWeight="Bold"
-                        Background="#4CAF50" Foreground="White"
+                        Style="{DynamicResource PrimaryButton}"
                         Command="{Binding ExportVideoCommand}"
                         ToolTip="プロジェクトを動画ファイルとして書き出します"/>
             </Grid>
@@ -443,13 +454,13 @@
         <!-- ================================================================ -->
         <DockPanel Grid.Row="5" Height="120" Margin="4,0,4,4">
             <TextBlock Text="ログ:" DockPanel.Dock="Top" FontSize="11"
-                       Foreground="#666666" Margin="0,0,0,2"/>
+                       Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,2"/>
             <TextBox x:Name="LogTextBox" IsReadOnly="True"
                      VerticalScrollBarVisibility="Auto"
                      HorizontalScrollBarVisibility="Auto"
                      TextWrapping="NoWrap" FontSize="11"
                      FontFamily="Consolas, MS Gothic"
-                     Background="#FAFAFA"/>
+                     Background="{DynamicResource BgSecondary}"/>
         </DockPanel>
 
         <!-- Hidden MediaElement for audio preview playback -->

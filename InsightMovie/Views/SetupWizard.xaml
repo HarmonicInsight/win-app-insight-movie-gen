@@ -5,24 +5,12 @@
         MinWidth="700" MinHeight="500"
         Width="750" Height="530"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
-        Background="#1E1E2E">
+        ResizeMode="NoResize">
 
     <Window.Resources>
-        <!-- Color Palette -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#7C3AED"/>
-        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#6D28D9"/>
-        <SolidColorBrush x:Key="SurfaceBrush" Color="#2A2A3D"/>
-        <SolidColorBrush x:Key="BackgroundBrush" Color="#1E1E2E"/>
-        <SolidColorBrush x:Key="ForegroundBrush" Color="#E2E8F0"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#94A3B8"/>
-        <SolidColorBrush x:Key="SuccessBrush" Color="#22C55E"/>
-        <SolidColorBrush x:Key="WarningBrush" Color="#F59E0B"/>
-        <SolidColorBrush x:Key="BorderBrush" Color="#3F3F5A"/>
-
-        <!-- Button Style -->
+        <!-- Button Style (Gold Primary) -->
         <Style x:Key="WizardButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource BrandPrimary}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -40,7 +28,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource BrandHover}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="border" Property="Opacity" Value="0.5"/>
@@ -53,12 +41,12 @@
 
         <!-- Secondary Button Style -->
         <Style x:Key="SecondaryButton" TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource BgCard}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Padding" Value="20,8"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SecondaryBorder}"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -73,7 +61,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#3A3A50"/>
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource SecondaryHover}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="border" Property="Opacity" Value="0.5"/>
@@ -88,21 +76,21 @@
         <Style x:Key="PageTitle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="26"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
 
         <!-- Subtitle Text Style -->
         <Style x:Key="PageSubtitle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="15"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="Margin" Value="0,0,0,20"/>
         </Style>
 
         <!-- Body Text Style -->
         <Style x:Key="BodyText" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="LineHeight" Value="24"/>
         </Style>
@@ -110,7 +98,7 @@
         <!-- Status Label Style -->
         <Style x:Key="StatusLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="Margin" Value="0,4,0,4"/>
         </Style>
     </Window.Resources>
@@ -126,12 +114,14 @@
         </Grid.RowDefinitions>
 
         <!-- Step Indicator -->
-        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" Padding="30,14">
+        <Border Grid.Row="0" Background="{DynamicResource BgSecondary}"
+                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="0,0,0,1"
+                Padding="30,14">
             <StackPanel x:Name="StepIndicator" Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock x:Name="StepLabel1" Text="1. ようこそ" FontSize="13" Foreground="{StaticResource PrimaryBrush}" FontWeight="SemiBold" Margin="0,0,30,0"/>
-                <TextBlock x:Name="StepLabel2" Text="2. エンジン検出" FontSize="13" Foreground="{StaticResource MutedBrush}" Margin="0,0,30,0"/>
-                <TextBlock x:Name="StepLabel3" Text="3. 話者設定" FontSize="13" Foreground="{StaticResource MutedBrush}" Margin="0,0,30,0"/>
-                <TextBlock x:Name="StepLabel4" Text="4. 完了" FontSize="13" Foreground="{StaticResource MutedBrush}"/>
+                <TextBlock x:Name="StepLabel1" Text="1. ようこそ" FontSize="13" Foreground="{DynamicResource BrandPrimary}" FontWeight="SemiBold" Margin="0,0,30,0"/>
+                <TextBlock x:Name="StepLabel2" Text="2. エンジン検出" FontSize="13" Foreground="{DynamicResource TextTertiary}" Margin="0,0,30,0"/>
+                <TextBlock x:Name="StepLabel3" Text="3. 話者設定" FontSize="13" Foreground="{DynamicResource TextTertiary}" Margin="0,0,30,0"/>
+                <TextBlock x:Name="StepLabel4" Text="4. 完了" FontSize="13" Foreground="{DynamicResource TextTertiary}"/>
             </StackPanel>
         </Border>
 
@@ -154,7 +144,9 @@
                         <TextBlock Text="InsightMovie へようこそ" Style="{StaticResource PageTitle}"/>
                         <TextBlock Text="初回セットアップを開始します" Style="{StaticResource PageSubtitle}"/>
 
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="24,20" Margin="0,10,0,0">
+                        <Border Background="{DynamicResource BgCard}"
+                                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
+                                CornerRadius="8" Padding="24,20" Margin="0,10,0,0">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,16">
                                     InsightMovie は、VOICEVOX エンジンを使用してナレーション付き動画を自動生成するツールです。
@@ -164,7 +156,7 @@
                                 </TextBlock>
                                 <TextBlock Style="{StaticResource BodyText}" Margin="16,0,0,4" Text="1. VOICEVOX エンジンの検出と接続"/>
                                 <TextBlock Style="{StaticResource BodyText}" Margin="16,0,0,4" Text="2. デフォルト話者（ボイス）の選択"/>
-                                <TextBlock Style="{StaticResource BodyText}" Margin="0,16,0,0" Foreground="{StaticResource MutedBrush}" FontSize="13">
+                                <TextBlock Style="{StaticResource BodyText}" Margin="0,16,0,0" Foreground="{DynamicResource TextTertiary}" FontSize="13">
                                     ※ VOICEVOX エンジンがインストール済みであることを確認してください。
                                 </TextBlock>
                             </StackPanel>
@@ -180,15 +172,15 @@
                         <TextBlock Text="VOICEVOXエンジンの検出" Style="{StaticResource PageTitle}"/>
                         <TextBlock Text="ローカルで実行中のエンジンを検索しています" Style="{StaticResource PageSubtitle}"/>
 
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="24,20" Margin="0,0,0,16">
+                        <Border Background="{DynamicResource BgCard}"
+                                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
+                                CornerRadius="8" Padding="24,20" Margin="0,0,0,16">
                             <StackPanel>
                                 <TextBlock x:Name="EngineStatusLabel" Text="エンジンを検索中..." Style="{StaticResource StatusLabel}" FontSize="15"/>
                                 <ProgressBar x:Name="EngineProgressBar"
                                              IsIndeterminate="True"
                                              Height="6"
                                              Margin="0,12,0,12"
-                                             Background="#3F3F5A"
-                                             Foreground="{StaticResource PrimaryBrush}"
                                              BorderThickness="0"/>
                                 <TextBlock x:Name="EnginePathLabel" Text="" Style="{StaticResource StatusLabel}" FontSize="13"/>
                             </StackPanel>
@@ -224,33 +216,34 @@
                         <TextBlock Text="デフォルト話者の設定" Style="{StaticResource PageTitle}"/>
                         <TextBlock Text="ナレーションに使用するデフォルトのボイスを検出します" Style="{StaticResource PageSubtitle}"/>
 
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="24,20" Margin="0,0,0,16">
+                        <Border Background="{DynamicResource BgCard}"
+                                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
+                                CornerRadius="8" Padding="24,20" Margin="0,0,0,16">
                             <StackPanel>
                                 <TextBlock x:Name="SpeakerStatusLabel" Text="話者情報を取得中..." Style="{StaticResource StatusLabel}" FontSize="15"/>
                                 <ProgressBar x:Name="SpeakerProgressBar"
                                              IsIndeterminate="True"
                                              Height="6"
                                              Margin="0,12,0,12"
-                                             Background="#3F3F5A"
-                                             Foreground="{StaticResource PrimaryBrush}"
                                              BorderThickness="0"/>
 
                                 <Border x:Name="SpeakerResultPanel"
-                                        Background="#232336"
+                                        Background="{DynamicResource BgSecondary}"
+                                        BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
                                         CornerRadius="6"
                                         Padding="20,16"
                                         Margin="0,8,0,0"
                                         Visibility="Collapsed">
                                     <StackPanel>
-                                        <TextBlock Text="検出された話者:" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,0,0,6"/>
+                                        <TextBlock Text="検出された話者:" Foreground="{DynamicResource TextTertiary}" FontSize="12" Margin="0,0,0,6"/>
                                         <TextBlock x:Name="SpeakerNameLabel"
                                                    Text=""
-                                                   Foreground="{StaticResource ForegroundBrush}"
+                                                   Foreground="{DynamicResource TextPrimary}"
                                                    FontSize="18"
                                                    FontWeight="SemiBold"/>
                                         <TextBlock x:Name="SpeakerIdLabel"
                                                    Text=""
-                                                   Foreground="{StaticResource MutedBrush}"
+                                                   Foreground="{DynamicResource TextTertiary}"
                                                    FontSize="13"
                                                    Margin="0,4,0,0"/>
                                     </StackPanel>
@@ -267,23 +260,25 @@
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock Text="セットアップ完了" Style="{StaticResource PageTitle}" HorizontalAlignment="Center"/>
 
-                        <Border Background="{StaticResource SurfaceBrush}" CornerRadius="8" Padding="40,32" Margin="0,16,0,0">
+                        <Border Background="{DynamicResource BgCard}"
+                                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
+                                CornerRadius="8" Padding="40,32" Margin="0,16,0,0">
                             <StackPanel HorizontalAlignment="Center">
-                                <Ellipse Width="64" Height="64" Fill="{StaticResource SuccessBrush}" HorizontalAlignment="Center" Margin="0,0,0,16">
+                                <Ellipse Width="64" Height="64" Fill="{DynamicResource Success}" HorizontalAlignment="Center" Margin="0,0,0,16">
                                 </Ellipse>
                                 <TextBlock Text="すべての設定が完了しました"
-                                           Foreground="{StaticResource ForegroundBrush}"
+                                           Foreground="{DynamicResource TextPrimary}"
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            HorizontalAlignment="Center"
                                            Margin="0,0,0,12"/>
                                 <TextBlock Text="InsightMovie を使い始める準備ができました。"
-                                           Foreground="{StaticResource MutedBrush}"
+                                           Foreground="{DynamicResource TextSecondary}"
                                            FontSize="14"
                                            HorizontalAlignment="Center"
                                            Margin="0,0,0,4"/>
                                 <TextBlock Text="「完了」ボタンを押してメイン画面に進みます。"
-                                           Foreground="{StaticResource MutedBrush}"
+                                           Foreground="{DynamicResource TextSecondary}"
                                            FontSize="14"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -294,7 +289,9 @@
         </TabControl>
 
         <!-- Navigation Buttons -->
-        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" Padding="30,14">
+        <Border Grid.Row="2" Background="{DynamicResource BgSecondary}"
+                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="0,1,0,0"
+                Padding="30,14">
             <Grid>
                 <Button x:Name="CancelButton"
                         Content="キャンセル"

@@ -2,37 +2,37 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ===================================================================
-         InsightMovie Theme — Notion / Linear inspired modern B2B SaaS
+         HARMONIC insight Design System — Ivory & Gold Theme v1.0
          =================================================================== -->
 
     <!-- ─────────────────────── Fonts ─────────────────────── -->
-    <FontFamily x:Key="AppFontFamily">Segoe UI, Meiryo UI</FontFamily>
+    <FontFamily x:Key="AppFontFamily">Segoe UI, Noto Sans JP, Meiryo UI</FontFamily>
 
     <!-- ─────────────────── Background Colors ─────────────────── -->
-    <SolidColorBrush x:Key="BgPrimary"   Color="#FFFFFF" />
-    <SolidColorBrush x:Key="BgSecondary" Color="#F8FAFC" />
-    <SolidColorBrush x:Key="BgElevated"  Color="#F1F5F9" />
-    <SolidColorBrush x:Key="BgSidebar"   Color="#FAFBFC" />
+    <SolidColorBrush x:Key="BgPrimary"   Color="#FAF8F5" />
+    <SolidColorBrush x:Key="BgSecondary" Color="#F5F1EB" />
+    <SolidColorBrush x:Key="BgElevated"  Color="#F5F1EB" />
+    <SolidColorBrush x:Key="BgSidebar"   Color="#FAF8F5" />
     <SolidColorBrush x:Key="BgCard"      Color="#FFFFFF" />
     <SolidColorBrush x:Key="BgInput"     Color="#FFFFFF" />
 
     <!-- ─────────────────── Text Colors ─────────────────── -->
-    <SolidColorBrush x:Key="TextPrimary"     Color="#1E293B" />
-    <SolidColorBrush x:Key="TextSecondary"   Color="#64748B" />
-    <SolidColorBrush x:Key="TextTertiary"    Color="#6B7280" />
-    <SolidColorBrush x:Key="TextMuted"       Color="#94A3B8" />
-    <SolidColorBrush x:Key="TextPlaceholder" Color="#D1D5DB" />
+    <SolidColorBrush x:Key="TextPrimary"     Color="#1C1917" />
+    <SolidColorBrush x:Key="TextSecondary"   Color="#57534E" />
+    <SolidColorBrush x:Key="TextTertiary"    Color="#A8A29E" />
+    <SolidColorBrush x:Key="TextMuted"       Color="#A8A29E" />
+    <SolidColorBrush x:Key="TextPlaceholder" Color="#D6D0C6" />
 
-    <!-- ─────────────────── Brand Colors ─────────────────── -->
-    <SolidColorBrush x:Key="BrandPrimary" Color="#3B82F6" />
-    <SolidColorBrush x:Key="BrandHover"   Color="#2563EB" />
-    <SolidColorBrush x:Key="BrandLight"   Color="#DBEAFE" />
-    <SolidColorBrush x:Key="BrandMuted"   Color="#93C5FD" />
+    <!-- ─────────────────── Brand Colors (Gold) ─────────────────── -->
+    <SolidColorBrush x:Key="BrandPrimary" Color="#B8942F" />
+    <SolidColorBrush x:Key="BrandHover"   Color="#C9A84C" />
+    <SolidColorBrush x:Key="BrandLight"   Color="#F5F0E1" />
+    <SolidColorBrush x:Key="BrandMuted"   Color="#D4BC6A" />
 
     <!-- ─────────────────── Secondary / Neutral ─────────────────── -->
-    <SolidColorBrush x:Key="SecondaryDefault" Color="#F3F4F6" />
-    <SolidColorBrush x:Key="SecondaryHover"   Color="#E5E7EB" />
-    <SolidColorBrush x:Key="SecondaryBorder"  Color="#D1D5DB" />
+    <SolidColorBrush x:Key="SecondaryDefault" Color="#F5F1EB" />
+    <SolidColorBrush x:Key="SecondaryHover"   Color="#EDE7DD" />
+    <SolidColorBrush x:Key="SecondaryBorder"  Color="#D6D0C6" />
 
     <!-- ─────────────────── Action Colors ─────────────────── -->
     <SolidColorBrush x:Key="ActionUpdate" Color="#059669" />
@@ -42,13 +42,18 @@
     <SolidColorBrush x:Key="Success" Color="#10B981" />
     <SolidColorBrush x:Key="Warning" Color="#F59E0B" />
     <SolidColorBrush x:Key="Error"   Color="#EF4444" />
-    <SolidColorBrush x:Key="Info"    Color="#3B82F6" />
+    <SolidColorBrush x:Key="Info"    Color="#B8942F" />
 
     <!-- ─────────────────── Border / Divider ─────────────────── -->
-    <SolidColorBrush x:Key="BorderLight"   Color="#E5E7EB" />
-    <SolidColorBrush x:Key="BorderDefault" Color="#E2E8F0" />
-    <SolidColorBrush x:Key="BorderDark"    Color="#9CA3AF" />
-    <SolidColorBrush x:Key="Divider"       Color="#F3F4F6" />
+    <SolidColorBrush x:Key="BorderLight"   Color="#E7E2DA" />
+    <SolidColorBrush x:Key="BorderDefault" Color="#E7E2DA" />
+    <SolidColorBrush x:Key="BorderDark"    Color="#D6D0C6" />
+    <SolidColorBrush x:Key="Divider"       Color="#F5F1EB" />
+
+    <!-- ─────────────────── Titlebar (dark) ─────────────────── -->
+    <SolidColorBrush x:Key="TitlebarBg"         Color="#2C2820" />
+    <SolidColorBrush x:Key="TitlebarFg"         Color="#FAF8F5" />
+    <SolidColorBrush x:Key="TitlebarSecondary"  Color="#A8A29E" />
 
     <!-- ===================================================================
          Default Window Style
@@ -63,7 +68,6 @@
     <!-- ===================================================================
          TextBlock Styles
          =================================================================== -->
-    <!-- Implicit default -->
     <Style TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
         <Setter Property="FontSize"   Value="11pt" />
@@ -135,7 +139,7 @@
         </Setter>
     </Style>
 
-    <!-- Primary Button (Brand Blue, white text) -->
+    <!-- Primary Button (Gold accent, white text) -->
     <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
         <Setter Property="Background"  Value="{StaticResource BrandPrimary}" />
         <Setter Property="Foreground"  Value="#FFFFFF" />
@@ -148,9 +152,9 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Secondary Button -->
+    <!-- Secondary Button (White bg, border) -->
     <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
-        <Setter Property="Background"  Value="{StaticResource SecondaryDefault}" />
+        <Setter Property="Background"  Value="{StaticResource BgCard}" />
         <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
         <Setter Property="BorderBrush" Value="{StaticResource SecondaryBorder}" />
         <Style.Triggers>
@@ -206,7 +210,7 @@
     <Style x:Key="SmallButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
         <Setter Property="FontSize"    Value="10pt" />
         <Setter Property="Padding"     Value="10,4" />
-        <Setter Property="Background"  Value="{StaticResource SecondaryDefault}" />
+        <Setter Property="Background"  Value="{StaticResource BgCard}" />
         <Setter Property="Foreground"  Value="{StaticResource TextPrimary}" />
         <Setter Property="BorderBrush" Value="{StaticResource SecondaryBorder}" />
         <Style.Triggers>

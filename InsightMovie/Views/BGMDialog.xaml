@@ -5,25 +5,25 @@
         MinWidth="500" MinHeight="600"
         Width="540" Height="640"
         WindowStartupLocation="CenterOwner"
-        Background="#FF2D2D30"
-        Foreground="White"
         ResizeMode="CanResizeWithGrip">
 
     <Window.Resources>
         <Style x:Key="SectionHeader" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#FFD0D0D0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Margin" Value="0,10,0,6"/>
         </Style>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#FFB0B0B0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,8,0"/>
             <Setter Property="MinWidth" Value="100"/>
         </Style>
         <Style x:Key="SectionBorder" TargetType="Border">
-            <Setter Property="Background" Value="#FF383838"/>
+            <Setter Property="Background" Value="{DynamicResource BgCard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderDefault}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="12"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
@@ -34,17 +34,10 @@
             <Setter Property="Margin" Value="6,0"/>
             <Setter Property="Padding" Value="16,4"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Background" Value="#FF5A5A5A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF999999"/>
-            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style x:Key="SmallSpinButton" TargetType="Button">
             <Setter Property="Width" Value="24"/>
             <Setter Property="Height" Value="24"/>
-            <Setter Property="Background" Value="#FF5A5A5A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF999999"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
@@ -72,7 +65,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="FilePathLabel" Grid.Column="0"
                                        Text="（未選択）"
-                                       Foreground="#FF999999"
+                                       Foreground="{DynamicResource TextTertiary}"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
                                        Margin="0,0,8,0"/>
@@ -104,14 +97,14 @@
                                     ValueChanged="MainVolumeSlider_ValueChanged"/>
                             <TextBlock x:Name="MainVolumeLabel" Grid.Column="2"
                                        Text="80%"
-                                       Foreground="#FFB0B0B0"
+                                       Foreground="{DynamicResource TextSecondary}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Grid>
 
                         <!-- Ducking -->
                         <CheckBox x:Name="DuckingCheckBox" Content="ナレーション時にダッキング"
-                                  Foreground="#FFB0B0B0" Margin="0,0,0,6"
+                                  Margin="0,0,0,6"
                                   Checked="DuckingCheckBox_Changed"
                                   Unchecked="DuckingCheckBox_Changed"/>
 
@@ -130,7 +123,7 @@
                                         ValueChanged="DuckingVolumeSlider_ValueChanged"/>
                                 <TextBlock x:Name="DuckingVolumeLabel" Grid.Column="2"
                                            Text="20%"
-                                           Foreground="#FFB0B0B0"
+                                           Foreground="{DynamicResource TextSecondary}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
                             </Grid>
@@ -148,11 +141,10 @@
                                             Click="AttackDown_Click"/>
                                     <TextBox x:Name="AttackTextBox" Width="50" Height="24"
                                              TextAlignment="Center" VerticalContentAlignment="Center"
-                                             Background="#FF4A4A4A" Foreground="White"
-                                             BorderBrush="#FF666666" Text="200"/>
+                                             Text="200"/>
                                     <Button Content="+" Style="{StaticResource SmallSpinButton}"
                                             Click="AttackUp_Click"/>
-                                    <TextBlock Text="ms" Foreground="#FFB0B0B0"
+                                    <TextBlock Text="ms" Foreground="{DynamicResource TextSecondary}"
                                                VerticalAlignment="Center" Margin="4,0,0,0"/>
                                 </StackPanel>
                             </Grid>
@@ -170,11 +162,10 @@
                                             Click="ReleaseDown_Click"/>
                                     <TextBox x:Name="ReleaseTextBox" Width="50" Height="24"
                                              TextAlignment="Center" VerticalContentAlignment="Center"
-                                             Background="#FF4A4A4A" Foreground="White"
-                                             BorderBrush="#FF666666" Text="500"/>
+                                             Text="500"/>
                                     <Button Content="+" Style="{StaticResource SmallSpinButton}"
                                             Click="ReleaseUp_Click"/>
-                                    <TextBlock Text="ms" Foreground="#FFB0B0B0"
+                                    <TextBlock Text="ms" Foreground="{DynamicResource TextSecondary}"
                                                VerticalAlignment="Center" Margin="4,0,0,0"/>
                                 </StackPanel>
                             </Grid>
@@ -187,11 +178,11 @@
                 <Border Style="{StaticResource SectionBorder}">
                     <StackPanel>
                         <!-- Fade In -->
-                        <TextBlock Text="フェードイン" Foreground="#FFB0B0B0" FontWeight="SemiBold"
+                        <TextBlock Text="フェードイン" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"
                                    Margin="0,0,0,4"/>
                         <StackPanel Margin="12,0,0,10">
                             <CheckBox x:Name="FadeInCheckBox" Content="有効"
-                                      Foreground="#FFB0B0B0" Margin="0,0,0,4"
+                                      Margin="0,0,0,4"
                                       Checked="FadeInCheckBox_Changed"
                                       Unchecked="FadeInCheckBox_Changed"/>
                             <StackPanel x:Name="FadeInPanel" Visibility="Collapsed">
@@ -208,11 +199,10 @@
                                                 Click="FadeInDurationDown_Click"/>
                                         <TextBox x:Name="FadeInDurationTextBox" Width="50" Height="24"
                                                  TextAlignment="Center" VerticalContentAlignment="Center"
-                                                 Background="#FF4A4A4A" Foreground="White"
-                                                 BorderBrush="#FF666666" Text="2.0"/>
+                                                 Text="2.0"/>
                                         <Button Content="+" Style="{StaticResource SmallSpinButton}"
                                                 Click="FadeInDurationUp_Click"/>
-                                        <TextBlock Text="秒" Foreground="#FFB0B0B0"
+                                        <TextBlock Text="秒" Foreground="{DynamicResource TextSecondary}"
                                                    VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </StackPanel>
                                 </Grid>
@@ -224,8 +214,7 @@
                                     <TextBlock Grid.Column="0" Text="タイプ:" Style="{StaticResource FieldLabel}"
                                                MinWidth="60"/>
                                     <ComboBox x:Name="FadeInTypeCombo" Grid.Column="1"
-                                              Width="140" HorizontalAlignment="Left"
-                                              Background="#FF3C3C3C" Foreground="Black">
+                                              Width="140" HorizontalAlignment="Left">
                                         <ComboBoxItem Content="Linear" IsSelected="True"/>
                                         <ComboBoxItem Content="Exponential"/>
                                     </ComboBox>
@@ -234,11 +223,11 @@
                         </StackPanel>
 
                         <!-- Fade Out -->
-                        <TextBlock Text="フェードアウト" Foreground="#FFB0B0B0" FontWeight="SemiBold"
+                        <TextBlock Text="フェードアウト" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"
                                    Margin="0,0,0,4"/>
                         <StackPanel Margin="12,0,0,4">
                             <CheckBox x:Name="FadeOutCheckBox" Content="有効"
-                                      Foreground="#FFB0B0B0" Margin="0,0,0,4"
+                                      Margin="0,0,0,4"
                                       Checked="FadeOutCheckBox_Changed"
                                       Unchecked="FadeOutCheckBox_Changed"/>
                             <StackPanel x:Name="FadeOutPanel" Visibility="Collapsed">
@@ -255,11 +244,10 @@
                                                 Click="FadeOutDurationDown_Click"/>
                                         <TextBox x:Name="FadeOutDurationTextBox" Width="50" Height="24"
                                                  TextAlignment="Center" VerticalContentAlignment="Center"
-                                                 Background="#FF4A4A4A" Foreground="White"
-                                                 BorderBrush="#FF666666" Text="3.0"/>
+                                                 Text="3.0"/>
                                         <Button Content="+" Style="{StaticResource SmallSpinButton}"
                                                 Click="FadeOutDurationUp_Click"/>
-                                        <TextBlock Text="秒" Foreground="#FFB0B0B0"
+                                        <TextBlock Text="秒" Foreground="{DynamicResource TextSecondary}"
                                                    VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </StackPanel>
                                 </Grid>
@@ -271,8 +259,7 @@
                                     <TextBlock Grid.Column="0" Text="タイプ:" Style="{StaticResource FieldLabel}"
                                                MinWidth="60"/>
                                     <ComboBox x:Name="FadeOutTypeCombo" Grid.Column="1"
-                                              Width="140" HorizontalAlignment="Left"
-                                              Background="#FF3C3C3C" Foreground="Black">
+                                              Width="140" HorizontalAlignment="Left">
                                         <ComboBoxItem Content="Linear" IsSelected="True"/>
                                         <ComboBoxItem Content="Exponential"/>
                                     </ComboBox>
@@ -284,7 +271,7 @@
 
                 <!-- Loop Setting -->
                 <Border Style="{StaticResource SectionBorder}">
-                    <CheckBox x:Name="LoopCheckBox" Content="ループ再生" Foreground="#FFB0B0B0"
+                    <CheckBox x:Name="LoopCheckBox" Content="ループ再生"
                               IsChecked="True"/>
                 </Border>
 

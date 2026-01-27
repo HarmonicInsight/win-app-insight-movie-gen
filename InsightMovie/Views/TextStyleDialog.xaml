@@ -5,19 +5,17 @@
         MinWidth="600" MinHeight="700"
         Width="650" Height="780"
         WindowStartupLocation="CenterOwner"
-        Background="#FF2D2D30"
-        Foreground="White"
         ResizeMode="CanResizeWithGrip">
 
     <Window.Resources>
         <Style x:Key="SectionHeader" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#FFD0D0D0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Margin" Value="0,8,0,4"/>
         </Style>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#FFB0B0B0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,8,0"/>
         </Style>
@@ -27,8 +25,8 @@
             <Setter Property="Margin" Value="4"/>
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="BorderBrush" Value="#FF555555"/>
-            <Setter Property="Background" Value="#FF3C3C3C"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderDefault}"/>
+            <Setter Property="Background" Value="{DynamicResource BgSecondary}"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
         <Style x:Key="ColorButton" TargetType="Border">
@@ -37,7 +35,7 @@
             <Setter Property="Margin" Value="2"/>
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="BorderBrush" Value="#FF555555"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderDefault}"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
         <Style x:Key="DialogButton" TargetType="Button">
@@ -46,10 +44,6 @@
             <Setter Property="Margin" Value="6,0"/>
             <Setter Property="Padding" Value="16,4"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Background" Value="#FF3C3C3C"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF666666"/>
-            <Setter Property="BorderThickness" Value="1"/>
         </Style>
     </Window.Resources>
 
@@ -113,7 +107,10 @@
                 <!-- Custom Settings -->
                 <TextBlock Text="カスタム設定" Style="{StaticResource SectionHeader}" Margin="0,12,0,4"/>
 
-                <Border Background="#FF383838" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                <Border Background="{DynamicResource BgCard}"
+                        BorderBrush="{DynamicResource BorderDefault}"
+                        BorderThickness="1"
+                        CornerRadius="6" Padding="12" Margin="0,0,0,8">
                     <StackPanel>
                         <!-- Font Family -->
                         <Grid Margin="0,0,0,8">
@@ -123,8 +120,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="フォント:" Style="{StaticResource FieldLabel}"/>
                             <ComboBox x:Name="FontComboBox" Grid.Column="1"
-                                      SelectionChanged="FontComboBox_SelectionChanged"
-                                      Background="#FF3C3C3C" Foreground="Black"/>
+                                      SelectionChanged="FontComboBox_SelectionChanged"/>
                         </Grid>
 
                         <!-- Font Size -->
@@ -137,15 +133,12 @@
                             <TextBlock Grid.Column="0" Text="サイズ:" Style="{StaticResource FieldLabel}"/>
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                 <Button x:Name="SizeDownBtn" Content="-" Width="28" Height="28"
-                                        Click="SizeDown_Click" Background="#FF3C3C3C" Foreground="White"
-                                        BorderBrush="#FF666666"/>
+                                        Click="SizeDown_Click"/>
                                 <TextBox x:Name="SizeTextBox" Width="50" Height="28"
                                          TextAlignment="Center" VerticalContentAlignment="Center"
-                                         Background="#FF4A4A4A" Foreground="White" BorderBrush="#FF666666"
                                          TextChanged="SizeTextBox_TextChanged"/>
                                 <Button x:Name="SizeUpBtn" Content="+" Width="28" Height="28"
-                                        Click="SizeUp_Click" Background="#FF3C3C3C" Foreground="White"
-                                        BorderBrush="#FF666666"/>
+                                        Click="SizeUp_Click"/>
                             </StackPanel>
                             <TextBlock Grid.Column="2" Text="pt" Style="{StaticResource FieldLabel}" Margin="4,0,0,0"/>
                         </Grid>
@@ -183,7 +176,7 @@
                                     VerticalAlignment="Center"
                                     ValueChanged="StrokeWidthSlider_ValueChanged"/>
                             <TextBlock x:Name="StrokeWidthLabel" Grid.Column="2"
-                                       Text="3" Foreground="#FFB0B0B0"
+                                       Text="3" Foreground="{DynamicResource TextSecondary}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                     </StackPanel>

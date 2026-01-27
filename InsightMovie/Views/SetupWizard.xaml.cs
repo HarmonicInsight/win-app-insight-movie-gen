@@ -63,17 +63,17 @@ public partial class SetupWizard : Window
         {
             if (i < _currentPage)
             {
-                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("SuccessBrush");
+                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("Success");
                 _stepLabels[i].FontWeight = FontWeights.Normal;
             }
             else if (i == _currentPage)
             {
-                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("PrimaryBrush");
+                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("BrandPrimary");
                 _stepLabels[i].FontWeight = FontWeights.SemiBold;
             }
             else
             {
-                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("MutedBrush");
+                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
                 _stepLabels[i].FontWeight = FontWeights.Normal;
             }
         }
@@ -235,7 +235,7 @@ public partial class SetupWizard : Window
         Dispatcher.Invoke(() =>
         {
             EngineStatusLabel.Text = "VOICEVOXエンジンが見つかりました";
-            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("SuccessBrush");
+            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Success");
             EngineProgressBar.IsIndeterminate = false;
             EngineProgressBar.Visibility = Visibility.Collapsed;
             EnginePathLabel.Text = $"接続先: {baseUrl}";
@@ -251,7 +251,7 @@ public partial class SetupWizard : Window
         Dispatcher.Invoke(() =>
         {
             EngineStatusLabel.Text = "VOICEVOXエンジンが見つかりませんでした";
-            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
             EngineProgressBar.IsIndeterminate = false;
             EngineProgressBar.Visibility = Visibility.Collapsed;
             EnginePathLabel.Text = "エンジンを起動するか、手動でパスを指定してください。";
@@ -267,7 +267,7 @@ public partial class SetupWizard : Window
         Dispatcher.Invoke(() =>
         {
             EngineStatusLabel.Text = "エンジンを起動中...";
-            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("MutedBrush");
+            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
             EngineProgressBar.IsIndeterminate = true;
             EngineProgressBar.Visibility = Visibility.Visible;
             EnginePathLabel.Text = "";
@@ -302,7 +302,7 @@ public partial class SetupWizard : Window
                 Dispatcher.Invoke(() =>
                 {
                     EngineStatusLabel.Text = "エンジンの起動に失敗しました";
-                    EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+                    EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
                     EngineProgressBar.IsIndeterminate = false;
                     EngineProgressBar.Visibility = Visibility.Collapsed;
                     LaunchEngineButton.IsEnabled = true;
@@ -317,7 +317,7 @@ public partial class SetupWizard : Window
             Dispatcher.Invoke(() =>
             {
                 EngineStatusLabel.Text = $"起動エラー: {ex.Message}";
-                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
                 EngineProgressBar.IsIndeterminate = false;
                 EngineProgressBar.Visibility = Visibility.Collapsed;
                 LaunchEngineButton.IsEnabled = true;
@@ -344,7 +344,7 @@ public partial class SetupWizard : Window
             Dispatcher.Invoke(() =>
             {
                 EngineStatusLabel.Text = "選択されたエンジンで接続を試行中...";
-                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("MutedBrush");
+                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
                 EngineProgressBar.IsIndeterminate = true;
                 EngineProgressBar.Visibility = Visibility.Visible;
                 EnginePathLabel.Text = $"パス: {selectedPath}";
@@ -390,7 +390,7 @@ public partial class SetupWizard : Window
             Dispatcher.Invoke(() =>
             {
                 EngineStatusLabel.Text = $"起動エラー: {ex.Message}";
-                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
                 EngineProgressBar.IsIndeterminate = false;
                 EngineProgressBar.Visibility = Visibility.Collapsed;
                 LaunchEngineButton.Visibility = Visibility.Visible;
@@ -407,7 +407,7 @@ public partial class SetupWizard : Window
         Dispatcher.Invoke(() =>
         {
             SpeakerStatusLabel.Text = "話者情報を取得中...";
-            SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("MutedBrush");
+            SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
             SpeakerProgressBar.IsIndeterminate = true;
             SpeakerProgressBar.Visibility = Visibility.Visible;
             SpeakerResultPanel.Visibility = Visibility.Collapsed;
@@ -421,7 +421,7 @@ public partial class SetupWizard : Window
                 Dispatcher.Invoke(() =>
                 {
                     SpeakerStatusLabel.Text = "エンジンに接続されていません。前のステップに戻ってください。";
-                    SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+                    SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
                     SpeakerProgressBar.IsIndeterminate = false;
                     SpeakerProgressBar.Visibility = Visibility.Collapsed;
                 });
@@ -443,7 +443,7 @@ public partial class SetupWizard : Window
                 Dispatcher.Invoke(() =>
                 {
                     SpeakerStatusLabel.Text = "デフォルト話者が見つかりました";
-                    SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("SuccessBrush");
+                    SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Success");
                     SpeakerProgressBar.IsIndeterminate = false;
                     SpeakerProgressBar.Visibility = Visibility.Collapsed;
                     SpeakerNameLabel.Text = speakerName;
@@ -457,7 +457,7 @@ public partial class SetupWizard : Window
                 Dispatcher.Invoke(() =>
                 {
                     SpeakerStatusLabel.Text = "話者が見つかりませんでした。エンジンに話者が登録されていない可能性があります。";
-                    SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+                    SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
                     SpeakerProgressBar.IsIndeterminate = false;
                     SpeakerProgressBar.Visibility = Visibility.Collapsed;
                 });
@@ -468,7 +468,7 @@ public partial class SetupWizard : Window
             Dispatcher.Invoke(() =>
             {
                 SpeakerStatusLabel.Text = $"話者取得エラー: {ex.Message}";
-                SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("WarningBrush");
+                SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
                 SpeakerProgressBar.IsIndeterminate = false;
                 SpeakerProgressBar.Visibility = Visibility.Collapsed;
             });
