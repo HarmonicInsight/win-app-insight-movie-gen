@@ -141,7 +141,7 @@
                                 <Path Data="M0,3 H3 L5,1 H8 V3 H12 L10,10 H0 Z"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="設定ファイルを開く" VerticalAlignment="Center"/>
+                                <TextBlock Text="ファイルを開く" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Padding="10,4" Margin="2"
@@ -153,7 +153,7 @@
                                 <Path Data="M0,0 H7 L10,3 V10 H0 Z M3,0 V3 H6 V0 M2,6 H8 V10 H2 Z"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="設定を上書き保存" VerticalAlignment="Center"/>
+                                <TextBlock Text="上書き保存" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Padding="10,4" Margin="2"
@@ -165,7 +165,7 @@
                                 <Path Data="M0,0 H7 L10,3 V10 H0 Z M3,0 V3 H6 V0"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="設定を別名で保存" VerticalAlignment="Center"/>
+                                <TextBlock Text="別名で保存" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Padding="10,4" Margin="2"
