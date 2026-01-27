@@ -238,8 +238,8 @@ namespace InsightMovie.Views
             if (MaximizeButton != null)
             {
                 MaximizeButton.Content = WindowState == WindowState.Maximized
-                    ? "\uE923"   // RestoreDown
-                    : "\uE739";  // Maximize
+                    ? "\uE923"   // ChromeRestore
+                    : "\uE922";  // ChromeMaximize
                 MaximizeButton.ToolTip = WindowState == WindowState.Maximized
                     ? "元に戻す"
                     : "最大化";

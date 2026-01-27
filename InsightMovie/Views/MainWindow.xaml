@@ -55,20 +55,20 @@
             <DockPanel>
                 <!-- Right: Window control buttons (min/max/close) -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
-                    <Button x:Name="MinimizeButton" Content="&#xE949;" Click="MinimizeButton_Click"
-                            FontFamily="Segoe MDL2 Assets" FontSize="10"
+                    <Button x:Name="MinimizeButton" Content="&#xE921;" Click="MinimizeButton_Click"
+                            FontFamily="Segoe MDL2 Assets" FontSize="11"
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent" Foreground="{DynamicResource TextPrimary}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             ToolTip="最小化"/>
-                    <Button x:Name="MaximizeButton" Content="&#xE739;" Click="MaximizeButton_Click"
-                            FontFamily="Segoe MDL2 Assets" FontSize="10"
+                    <Button x:Name="MaximizeButton" Content="&#xE922;" Click="MaximizeButton_Click"
+                            FontFamily="Segoe MDL2 Assets" FontSize="11"
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent" Foreground="{DynamicResource TextPrimary}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             ToolTip="最大化"/>
-                    <Button x:Name="CloseButton" Content="&#xE106;" Click="CloseButton_Click"
-                            FontFamily="Segoe MDL2 Assets" FontSize="10"
+                    <Button x:Name="CloseButton" Content="&#xE8BB;" Click="CloseButton_Click"
+                            FontFamily="Segoe MDL2 Assets" FontSize="11"
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent" Foreground="{DynamicResource TextPrimary}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
@@ -87,13 +87,18 @@
 
                     <!-- Right-inner: License + Status -->
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Content="ライセンス管理"
-                                Padding="6,3" Margin="2"
+                        <Button Padding="6,3" Margin="2"
                                 FontSize="11"
                                 Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
                                 BorderBrush="#D6D0C6"
                                 Command="{Binding ShowLicenseManagerCommand}"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8D7;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                           VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="ライセンス管理" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                         <Border Background="{DynamicResource BgSecondary}" CornerRadius="3"
                                 Padding="8,3" Margin="4,0,0,0" VerticalAlignment="Center"
                                 BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1">
@@ -105,36 +110,61 @@
                     <!-- Center/Right: Action buttons -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                                 VerticalAlignment="Center" Margin="8,0">
-                        <Button Content="新規"
-                                Padding="10,4" Margin="2"
+                        <Button Padding="10,4" Margin="2"
                                 Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
                                 BorderBrush="#D6D0C6"
                                 Command="{Binding NewProjectCommand}"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
-                        <Button Content="設定ファイルを開く"
-                                Padding="10,4" Margin="2"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="新規" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="10,4" Margin="2"
                                 Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
                                 BorderBrush="#D6D0C6"
                                 Command="{Binding OpenProjectCommand}"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
-                        <Button Content="設定を上書き保存"
-                                Padding="10,4" Margin="2"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8E5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="設定ファイルを開く" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="10,4" Margin="2"
                                 Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
                                 BorderBrush="#D6D0C6"
                                 Command="{Binding SaveProjectCommand}"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
-                        <Button Content="設定を別名で保存"
-                                Padding="10,4" Margin="2"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE74E;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="設定を上書き保存" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="10,4" Margin="2"
                                 Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
                                 BorderBrush="#D6D0C6"
                                 Command="{Binding SaveProjectAsCommand}"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
-                        <Button Content="PPTX取込"
-                                Padding="10,4" Margin="2"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE792;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="設定を別名で保存" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="10,4" Margin="2"
                                 Style="{DynamicResource PrimaryButton}"
                                 Command="{Binding ImportPptxCommand}"
                                 IsEnabled="{Binding CanPptx}"
-                                shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8B5;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                                           VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="PPTX取込" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </DockPanel>
             </DockPanel>
