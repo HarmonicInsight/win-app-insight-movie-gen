@@ -379,8 +379,14 @@ namespace InsightMovie.ViewModels
             LoadLicense();
             RefreshSceneList();
 
+            // Force initial scene selection after _isLoadingScene is cleared.
+            // RefreshSceneList sets SelectedSceneIndex=0 while _isLoadingScene=true,
+            // so OnSceneSelected() is skipped. Reset and re-set to trigger it.
             if (SceneItems.Count > 0)
+            {
+                _selectedSceneIndex = -1;
                 SelectedSceneIndex = 0;
+            }
         }
 
         /// <summary>Raised when window should close.</summary>
