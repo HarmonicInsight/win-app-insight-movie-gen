@@ -55,8 +55,8 @@
                     <Button Content="ライセンス管理"
                             Padding="6,3" Margin="2"
                             FontSize="11"
-                            Background="#5A4F3C" Foreground="{DynamicResource TitlebarFg}"
-                            BorderBrush="#8A7D64"
+                            Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
+                            BorderBrush="#D6D0C6"
                             Command="{Binding ShowLicenseManagerCommand}"/>
                     <Border Background="#3D3529" CornerRadius="3"
                             Padding="8,3" Margin="4,0,0,0" VerticalAlignment="Center">
@@ -70,23 +70,23 @@
                             VerticalAlignment="Center" Margin="8,0">
                     <Button Content="新規"
                             Padding="10,4" Margin="2"
-                            Background="#5A4F3C" Foreground="{DynamicResource TitlebarFg}"
-                            BorderBrush="#8A7D64"
+                            Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
+                            BorderBrush="#D6D0C6"
                             Command="{Binding NewProjectCommand}"/>
                     <Button Content="設定ファイルを開く"
                             Padding="10,4" Margin="2"
-                            Background="#5A4F3C" Foreground="{DynamicResource TitlebarFg}"
-                            BorderBrush="#8A7D64"
+                            Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
+                            BorderBrush="#D6D0C6"
                             Command="{Binding OpenProjectCommand}"/>
                     <Button Content="設定を上書き保存"
                             Padding="10,4" Margin="2"
-                            Background="#5A4F3C" Foreground="{DynamicResource TitlebarFg}"
-                            BorderBrush="#8A7D64"
+                            Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
+                            BorderBrush="#D6D0C6"
                             Command="{Binding SaveProjectCommand}"/>
                     <Button Content="設定を別名で保存"
                             Padding="10,4" Margin="2"
-                            Background="#5A4F3C" Foreground="{DynamicResource TitlebarFg}"
-                            BorderBrush="#8A7D64"
+                            Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
+                            BorderBrush="#D6D0C6"
                             Command="{Binding SaveProjectAsCommand}"/>
                     <Button Content="PPTX取込"
                             Padding="10,4" Margin="2"
