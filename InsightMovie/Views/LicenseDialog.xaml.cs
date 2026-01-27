@@ -40,7 +40,7 @@ namespace InsightMovie.Views
                     && brush.Color == Color.FromRgb(0x88, 0x88, 0x88))
                 {
                     LicenseKeyTextBox.Text = "";
-                    LicenseKeyTextBox.Foreground = new SolidColorBrush(Colors.White);
+                    LicenseKeyTextBox.Foreground = new SolidColorBrush(Color.FromRgb(0x1C, 0x19, 0x17));
                 }
             };
 
@@ -82,7 +82,7 @@ namespace InsightMovie.Views
             if (!string.IsNullOrEmpty(key))
             {
                 LicenseKeyTextBox.Text = key;
-                LicenseKeyTextBox.Foreground = new SolidColorBrush(Colors.White);
+                LicenseKeyTextBox.Foreground = new SolidColorBrush(Color.FromRgb(0x1C, 0x19, 0x17));
             }
         }
 
