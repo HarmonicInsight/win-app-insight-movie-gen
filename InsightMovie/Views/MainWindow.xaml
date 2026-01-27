@@ -58,10 +58,11 @@
                             Background="#FAF8F5" Foreground="{DynamicResource TextPrimary}"
                             BorderBrush="#D6D0C6"
                             Command="{Binding ShowLicenseManagerCommand}"/>
-                    <Border Background="#3D3529" CornerRadius="3"
-                            Padding="8,3" Margin="4,0,0,0" VerticalAlignment="Center">
+                    <Border Background="{DynamicResource BgSecondary}" CornerRadius="3"
+                            Padding="8,3" Margin="4,0,0,0" VerticalAlignment="Center"
+                            BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1">
                         <TextBlock Text="{Binding StatusText}"
-                                   Foreground="{DynamicResource TitlebarSecondary}" FontSize="11"/>
+                                   Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                     </Border>
                 </StackPanel>
 

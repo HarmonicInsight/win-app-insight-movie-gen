@@ -101,17 +101,42 @@ public class FFmpegWrapper
             // "where" command not available or failed; continue searching.
         }
 
-        // --- 2. Application-relative paths ---
+        // --- 2. Application-relative and working-directory-relative paths ---
         string appDir = AppDomain.CurrentDomain.BaseDirectory;
-        string[] relativePaths =
+        string cwd = Environment.CurrentDirectory;
+
+        var relativePaths = new List<string>
         {
+            // From application base directory (works in published builds)
             Path.Combine(appDir, "tools", "ffmpeg", "bin", "ffmpeg.exe"),
             Path.Combine(appDir, "tools", "ffmpeg", "ffmpeg.exe"),
             Path.Combine(appDir, "ffmpeg", "bin", "ffmpeg.exe"),
             Path.Combine(appDir, "ffmpeg", "ffmpeg.exe"),
             Path.Combine(appDir, "ffmpeg.exe"),
             Path.Combine(appDir, "..", "tools", "ffmpeg", "bin", "ffmpeg.exe"),
+            // From current working directory (works with "dotnet run")
+            Path.Combine(cwd, "tools", "ffmpeg", "bin", "ffmpeg.exe"),
+            Path.Combine(cwd, "tools", "ffmpeg", "ffmpeg.exe"),
+            Path.Combine(cwd, "ffmpeg", "bin", "ffmpeg.exe"),
+            Path.Combine(cwd, "ffmpeg", "ffmpeg.exe"),
+            Path.Combine(cwd, "ffmpeg.exe"),
+            // build.ps1 publish output (from project directory)
+            Path.Combine(cwd, "publish", "tools", "ffmpeg", "bin", "ffmpeg.exe"),
+            // build.ps1 publish output (from solution root)
+            Path.Combine(cwd, "..", "publish", "tools", "ffmpeg", "bin", "ffmpeg.exe"),
         };
+
+        // Walk up from appDir to find project/solution root with tools/ directory
+        string? dir = appDir;
+        for (int i = 0; i < 6 && dir != null; i++)
+        {
+            dir = Path.GetDirectoryName(dir);
+            if (dir != null)
+            {
+                relativePaths.Add(Path.Combine(dir, "tools", "ffmpeg", "bin", "ffmpeg.exe"));
+                relativePaths.Add(Path.Combine(dir, "publish", "tools", "ffmpeg", "bin", "ffmpeg.exe"));
+            }
+        }
 
         foreach (string path in relativePaths)
         {

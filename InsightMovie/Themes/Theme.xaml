@@ -50,10 +50,10 @@
     <SolidColorBrush x:Key="BorderDark"    Color="#D6D0C6" />
     <SolidColorBrush x:Key="Divider"       Color="#F5F1EB" />
 
-    <!-- ─────────────────── Titlebar (dark) ─────────────────── -->
-    <SolidColorBrush x:Key="TitlebarBg"         Color="#2C2820" />
-    <SolidColorBrush x:Key="TitlebarFg"         Color="#FAF8F5" />
-    <SolidColorBrush x:Key="TitlebarSecondary"  Color="#A8A29E" />
+    <!-- ─────────────────── Titlebar (warm light) ─────────────────── -->
+    <SolidColorBrush x:Key="TitlebarBg"         Color="#F0EBE3" />
+    <SolidColorBrush x:Key="TitlebarFg"         Color="#1C1917" />
+    <SolidColorBrush x:Key="TitlebarSecondary"  Color="#78716C" />
 
     <!-- ===================================================================
          Default Window Style

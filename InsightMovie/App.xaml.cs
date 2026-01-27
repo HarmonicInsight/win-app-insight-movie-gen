@@ -102,7 +102,11 @@ public partial class App : Application
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"FFmpeg の初期化に失敗しました。\n動画生成機能は使用できません。\n\n{ex.Message}",
+                $"FFmpeg の初期化に失敗しました。\n動画生成機能は使用できません。\n\n{ex.Message}\n\n" +
+                "以下のいずれかの方法でFFmpegを配置してください:\n" +
+                "• PATH環境変数にffmpeg.exeのあるフォルダを追加\n" +
+                "• アプリフォルダ内に tools\\ffmpeg\\bin\\ffmpeg.exe を配置\n" +
+                "• build.ps1 を実行して自動ダウンロード",
                 "InsightMovie",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
