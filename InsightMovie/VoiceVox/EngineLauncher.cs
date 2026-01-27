@@ -71,7 +71,13 @@ public class EngineLauncher : IDisposable
     /// <returns>The full path to the engine executable, or null if not found.</returns>
     public static string? FindDefaultEnginePath()
     {
-        // 1. LOCALAPPDATA\InsightMovie\voicevox\run.exe
+        // 1. Application directory: voicevox\run.exe
+        var appDir = AppDomain.CurrentDomain.BaseDirectory;
+        var appRelative = Path.Combine(appDir, "voicevox", "run.exe");
+        if (File.Exists(appRelative))
+            return appRelative;
+
+        // 2. LOCALAPPDATA\InsightMovie\voicevox\run.exe
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         if (!string.IsNullOrEmpty(localAppData))
         {
@@ -80,19 +86,23 @@ public class EngineLauncher : IDisposable
                 return localPath;
         }
 
-        // 2. Relative path from application directory
-        var appDir = AppDomain.CurrentDomain.BaseDirectory;
-        var relativePath = Path.Combine(appDir, "voicevox", "run.exe");
-        if (File.Exists(relativePath))
-            return relativePath;
-
-        // 3. Program Files
-        var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-        if (!string.IsNullOrEmpty(programFiles))
+        // 3. Standard VOICEVOX installation paths
+        string[] searchPaths =
         {
-            var pfPath = Path.Combine(programFiles, "VOICEVOX", "run.exe");
-            if (File.Exists(pfPath))
-                return pfPath;
+            Path.Combine(localAppData ?? "", "Programs", "VOICEVOX", "vv-engine", "run.exe"),
+            Path.Combine(localAppData ?? "", "Programs", "VOICEVOX ENGINE", "run.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                         "VOICEVOX", "vv-engine", "run.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                         "VOICEVOX ENGINE", "run.exe"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                         "VOICEVOX", "run.exe"),
+        };
+
+        foreach (var path in searchPaths)
+        {
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                return path;
         }
 
         return null;
