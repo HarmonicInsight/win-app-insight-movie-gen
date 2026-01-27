@@ -94,10 +94,11 @@ namespace InsightMovie.Views
             // Plan label color based on plan level
             PlanLabel.Foreground = _licenseInfo.Plan switch
             {
-                PlanCode.Ent => new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00)), // Gold
-                PlanCode.Pro => new SolidColorBrush(Color.FromRgb(0x00, 0xBF, 0xFF)), // Blue
-                PlanCode.Std => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)), // Green
-                _ => new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0))             // Gray
+                PlanCode.Ent   => new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00)), // Gold
+                PlanCode.Pro   => new SolidColorBrush(Color.FromRgb(0x00, 0xBF, 0xFF)), // Blue
+                PlanCode.Trial => new SolidColorBrush(Color.FromRgb(0xFF, 0x9F, 0x00)), // Orange
+                PlanCode.Std   => new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)), // Green
+                _ => new SolidColorBrush(Color.FromRgb(0xB0, 0xB0, 0xB0))               // Gray
             };
 
             // Status label
@@ -136,7 +137,7 @@ namespace InsightMovie.Views
             }
             else
             {
-                label.Text = "\u00D7PRO\u4EE5\u4E0A\u304C\u5FC5\u8981"; // ×PRO以上が必要
+                label.Text = "\u00D7Trial\u30FBPRO\u4EE5\u4E0A\u304C\u5FC5\u8981"; // ×Trial・PRO以上が必要
                 label.Foreground = new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88));
             }
         }
