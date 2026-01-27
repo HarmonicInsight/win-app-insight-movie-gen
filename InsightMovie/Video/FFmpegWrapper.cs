@@ -120,13 +120,13 @@ public class FFmpegWrapper
             Path.Combine(cwd, "ffmpeg", "bin", "ffmpeg.exe"),
             Path.Combine(cwd, "ffmpeg", "ffmpeg.exe"),
             Path.Combine(cwd, "ffmpeg.exe"),
-            // build.ps1 publish output (from project directory)
-            Path.Combine(cwd, "publish", "tools", "ffmpeg", "bin", "ffmpeg.exe"),
-            // build.ps1 publish output (from solution root)
-            Path.Combine(cwd, "..", "publish", "tools", "ffmpeg", "bin", "ffmpeg.exe"),
+            // build.ps1 publish output: publish/ffmpeg/bin/ffmpeg.exe
+            Path.Combine(cwd, "publish", "ffmpeg", "bin", "ffmpeg.exe"),
+            // build.ps1 publish output (from solution root when CWD is project dir)
+            Path.Combine(cwd, "..", "publish", "ffmpeg", "bin", "ffmpeg.exe"),
         };
 
-        // Walk up from appDir to find project/solution root with tools/ directory
+        // Walk up from appDir to find project/solution root
         string? dir = appDir;
         for (int i = 0; i < 6 && dir != null; i++)
         {
@@ -134,7 +134,8 @@ public class FFmpegWrapper
             if (dir != null)
             {
                 relativePaths.Add(Path.Combine(dir, "tools", "ffmpeg", "bin", "ffmpeg.exe"));
-                relativePaths.Add(Path.Combine(dir, "publish", "tools", "ffmpeg", "bin", "ffmpeg.exe"));
+                relativePaths.Add(Path.Combine(dir, "ffmpeg", "bin", "ffmpeg.exe"));
+                relativePaths.Add(Path.Combine(dir, "publish", "ffmpeg", "bin", "ffmpeg.exe"));
             }
         }
 
