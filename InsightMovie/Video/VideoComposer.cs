@@ -107,7 +107,7 @@ public class VideoComposer
         // Filter out None transitions, defaulting to Fade
         var effectiveTransitions = transitions
             .Select(t => t.Type == TransitionType.None
-                ? (TransitionType.Fade, t.Duration)
+                ? (Type: TransitionType.Fade, Duration: t.Duration)
                 : t)
             .ToList();
 
