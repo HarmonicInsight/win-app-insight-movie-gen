@@ -404,7 +404,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,2,12,2">
                         <TextBlock Text="FPS:" VerticalAlignment="Center" Margin="0,0,4,0"/>
                         <TextBox Text="{Binding FpsText, UpdateSourceTrigger=PropertyChanged}"
-                                 Width="45"
+                                 Width="50"
                                  VerticalContentAlignment="Center" TextAlignment="Center"/>
                     </StackPanel>
 
