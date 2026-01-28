@@ -133,6 +133,12 @@ public class Config
         set => Set("license_key", value);
     }
 
+    public string? LicenseEmail
+    {
+        get => Get<string?>("license_email", null);
+        set => Set("license_email", value);
+    }
+
     public void MarkSetupCompleted()
     {
         BeginUpdate();
@@ -142,6 +148,9 @@ public class Config
 
     public void ClearLicense()
     {
+        BeginUpdate();
         LicenseKey = null;
+        LicenseEmail = null;
+        EndUpdate();
     }
 }

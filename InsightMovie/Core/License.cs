@@ -24,15 +24,17 @@ public class LicenseInfo
     public bool IsValid { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public string? ErrorMessage { get; set; }
+    public string? Email { get; set; }
 }
 
 public static class License
 {
     public const string PRODUCT_CODE = "INMV";
-    public const string SECRET_KEY = "insight-series-license-secret-2026";
+    private const string SECRET_KEY = "insight-series-license-secret-2026";
 
+    // 標準フォーマット: PPPP-PLAN-YYMM-HASH-SIG1-SIG2 (TRIAL|STD|PRO のみ)
     private static readonly Regex LICENSE_KEY_REGEX = new(
-        @"^(INSS|INSP|INPY|FGIN|INMV)-(TRIAL|STD|PRO|ENT)-(\d{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})$",
+        @"^(INSS|INSP|INPY|FGIN|INMV)-(TRIAL|STD|PRO)-(\d{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})$",
         RegexOptions.Compiled);
 
     private static readonly Dictionary<string, PlanCode[]> FEATURE_MATRIX = new()
@@ -43,15 +45,68 @@ public static class License
         { "pptx_import", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
     };
 
-    public static string GenerateSignature(string product, string plan, string yymm)
+    // ── Base32 エンコード (RFC 4648, Python/TypeScript 標準と同一) ──
+
+    private static string ToBase32(byte[] bytes)
     {
-        var raw = $"{product}-{plan}-{yymm}-{SECRET_KEY}";
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
-        var hexString = Convert.ToHexString(hashBytes);
-        return hexString[..12].ToUpperInvariant();
+        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+        var result = new StringBuilder();
+        int bits = 0;
+        int value = 0;
+
+        foreach (var b in bytes)
+        {
+            value = (value << 8) | b;
+            bits += 8;
+            while (bits >= 5)
+            {
+                result.Append(alphabet[(value >> (bits - 5)) & 31]);
+                bits -= 5;
+            }
+        }
+
+        if (bits > 0)
+        {
+            result.Append(alphabet[(value << (5 - bits)) & 31]);
+        }
+
+        return result.ToString();
     }
 
-    public static LicenseInfo ValidateLicenseKey(string? key)
+    // ── メールハッシュ: SHA256 → Base32 → 先頭4文字 ──
+
+    private static string ComputeEmailHash(string email)
+    {
+        var normalized = email.Trim().ToLowerInvariant();
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(normalized));
+        return ToBase32(hashBytes)[..4].ToUpperInvariant();
+    }
+
+    // ── 署名: HMAC-SHA256 → Base32 → 先頭8文字 ──
+
+    private static string GenerateSignature(string data)
+    {
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(SECRET_KEY));
+        var sig = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+        return ToBase32(sig)[..8].ToUpperInvariant();
+    }
+
+    private static bool VerifySignature(string data, string signature)
+    {
+        try
+        {
+            var expected = GenerateSignature(data);
+            return string.Equals(expected, signature, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // ── ライセンスキー検証 ──
+
+    public static LicenseInfo ValidateLicenseKey(string? key, string? email = null)
     {
         if (string.IsNullOrWhiteSpace(key))
         {
@@ -59,28 +114,30 @@ public static class License
             {
                 IsValid = false,
                 Plan = PlanCode.Free,
-                ErrorMessage = "License key is empty."
+                ErrorMessage = "ライセンスキーが入力されていません。"
             };
         }
 
-        var match = LICENSE_KEY_REGEX.Match(key.Trim());
+        key = key.Trim().ToUpperInvariant();
+        var match = LICENSE_KEY_REGEX.Match(key);
         if (!match.Success)
         {
             return new LicenseInfo
             {
                 IsValid = false,
                 Plan = PlanCode.Free,
-                ErrorMessage = "Invalid license key format."
+                ErrorMessage = "ライセンスキーの形式が正しくありません。"
             };
         }
 
         var productCode = match.Groups[1].Value;
         var planStr = match.Groups[2].Value;
         var yymm = match.Groups[3].Value;
-        var sigPart1 = match.Groups[4].Value;
-        var sigPart2 = match.Groups[5].Value;
-        var sigPart3 = match.Groups[6].Value;
+        var emailHash = match.Groups[4].Value;
+        var sig1 = match.Groups[5].Value;
+        var sig2 = match.Groups[6].Value;
 
+        // 製品コードチェック
         if (productCode != PRODUCT_CODE)
         {
             return new LicenseInfo
@@ -88,39 +145,57 @@ public static class License
                 IsValid = false,
                 ProductCode = productCode,
                 Plan = PlanCode.Free,
-                ErrorMessage = $"Invalid product code: {productCode}. Expected: {PRODUCT_CODE}."
+                ErrorMessage = $"このキーは {productCode} 用です。{PRODUCT_CODE} 用のキーを入力してください。"
             };
         }
 
-        var expectedSignature = GenerateSignature(productCode, planStr, yymm);
-        var actualSignature = $"{sigPart1}{sigPart2}{sigPart3}";
-
-        if (!string.Equals(expectedSignature, actualSignature, StringComparison.OrdinalIgnoreCase))
+        // 署名検証: HMAC-SHA256(secret, "{product}-{plan}-{yymm}-{emailHash}")
+        var signature = sig1 + sig2;
+        var signData = $"{productCode}-{planStr}-{yymm}-{emailHash}";
+        if (!VerifySignature(signData, signature))
         {
             return new LicenseInfo
             {
                 IsValid = false,
                 ProductCode = productCode,
                 Plan = PlanCode.Free,
-                ErrorMessage = "Invalid license key signature."
+                ErrorMessage = "ライセンスキーが無効です。"
             };
+        }
+
+        // メールハッシュ照合
+        if (!string.IsNullOrEmpty(email))
+        {
+            var computedHash = ComputeEmailHash(email);
+            if (!string.Equals(emailHash, computedHash, StringComparison.OrdinalIgnoreCase))
+            {
+                return new LicenseInfo
+                {
+                    IsValid = false,
+                    ProductCode = productCode,
+                    Plan = PlanCode.Free,
+                    ErrorMessage = "メールアドレスが一致しません。"
+                };
+            }
         }
 
         var plan = ParsePlanCode(planStr);
 
-        // Parse expiry: yymm represents the issue date
-        // TRIAL expires after 1 month, other paid plans after 12 months
+        // 有効期限チェック: YYMM は有効期限月（月末まで有効）
         DateTime? expiresAt = null;
         if (yymm.Length == 4
             && int.TryParse(yymm[..2], out var yy)
             && int.TryParse(yymm[2..], out var mm)
             && mm >= 1 && mm <= 12)
         {
-            var issueYear = 2000 + yy;
-            var issueDate = new DateTime(issueYear, mm, 1);
-            expiresAt = issueDate.AddMonths(GetExpirationMonths(plan));
+            var year = 2000 + yy;
+            expiresAt = mm == 12
+                ? new DateTime(year + 1, 1, 1).AddDays(-1)
+                : new DateTime(year, mm + 1, 1).AddDays(-1);
+            // 月末 23:59:59 まで有効
+            expiresAt = expiresAt.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59);
 
-            if (DateTime.UtcNow >= expiresAt.Value)
+            if (DateTime.Now > expiresAt.Value)
             {
                 return new LicenseInfo
                 {
@@ -129,7 +204,8 @@ public static class License
                     Plan = plan,
                     YearMonth = yymm,
                     ExpiresAt = expiresAt,
-                    ErrorMessage = $"License expired on {expiresAt.Value:yyyy-MM-dd}."
+                    Email = email,
+                    ErrorMessage = $"ライセンスの有効期限が切れています（{expiresAt.Value:yyyy年MM月dd日}）。"
                 };
             }
         }
@@ -141,8 +217,32 @@ public static class License
             Plan = plan,
             YearMonth = yymm,
             ExpiresAt = expiresAt,
+            Email = email,
         };
     }
+
+    // ── ライセンスキー生成（開発・テスト用） ──
+
+    public static string GenerateLicenseKey(PlanCode plan, string email, string yymm)
+    {
+        var planStr = plan switch
+        {
+            PlanCode.Trial => "TRIAL",
+            PlanCode.Std   => "STD",
+            PlanCode.Pro   => "PRO",
+            _ => throw new ArgumentException($"Cannot generate license key for plan: {plan}")
+        };
+
+        var emailHash = ComputeEmailHash(email);
+        var signData = $"{PRODUCT_CODE}-{planStr}-{yymm}-{emailHash}";
+        var signature = GenerateSignature(signData);
+        var sig1 = signature[..4];
+        var sig2 = signature[4..8];
+
+        return $"{PRODUCT_CODE}-{planStr}-{yymm}-{emailHash}-{sig1}-{sig2}";
+    }
+
+    // ── 機能チェック ──
 
     public static bool CanUseFeature(PlanCode plan, string feature)
     {
@@ -156,32 +256,13 @@ public static class License
     {
         return plan switch
         {
-            PlanCode.Free  => "\u30D5\u30EA\u30FC",          // フリー
-            PlanCode.Trial => "\u30C8\u30E9\u30A4\u30A2\u30EB", // トライアル
-            PlanCode.Std   => "\u30B9\u30BF\u30F3\u30C0\u30FC\u30C9", // スタンダード
-            PlanCode.Pro   => "\u30D7\u30ED",                // プロ
-            PlanCode.Ent   => "\u30A8\u30F3\u30BF\u30FC\u30D7\u30E9\u30A4\u30BA", // エンタープライズ
+            PlanCode.Free  => "フリー",
+            PlanCode.Trial => "トライアル",
+            PlanCode.Std   => "スタンダード",
+            PlanCode.Pro   => "プロ",
+            PlanCode.Ent   => "エンタープライズ",
             _              => plan.ToString(),
         };
-    }
-
-    public static string GenerateLicenseKey(PlanCode plan, string yymm)
-    {
-        var planStr = plan switch
-        {
-            PlanCode.Trial => "TRIAL",
-            PlanCode.Std   => "STD",
-            PlanCode.Pro   => "PRO",
-            PlanCode.Ent   => "ENT",
-            _ => throw new ArgumentException($"Cannot generate license key for plan: {plan}")
-        };
-
-        var signature = GenerateSignature(PRODUCT_CODE, planStr, yymm);
-        var part1 = signature[..4];
-        var part2 = signature[4..8];
-        var part3 = signature[8..12];
-
-        return $"{PRODUCT_CODE}-{planStr}-{yymm}-{part1}-{part2}-{part3}";
     }
 
     private static PlanCode ParsePlanCode(string planStr)
@@ -194,13 +275,5 @@ public static class License
             "ENT"   => PlanCode.Ent,
             _       => PlanCode.Free,
         };
-    }
-
-    /// <summary>
-    /// TRIAL は1ヶ月、その他の有料プランは12ヶ月の有効期限を返す。
-    /// </summary>
-    private static int GetExpirationMonths(PlanCode plan)
-    {
-        return plan == PlanCode.Trial ? 1 : 12;
     }
 }

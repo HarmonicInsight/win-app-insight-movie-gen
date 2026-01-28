@@ -1124,7 +1124,8 @@ namespace InsightMovie.ViewModels
         public void LoadLicense()
         {
             var key = _config.LicenseKey;
-            _licenseInfo = License.ValidateLicenseKey(key);
+            var email = _config.LicenseEmail;
+            _licenseInfo = License.ValidateLicenseKey(key, email);
             _currentPlan = _licenseInfo?.IsValid == true ? _licenseInfo.Plan : PlanCode.Free;
             UpdateFeatureAccess();
         }
