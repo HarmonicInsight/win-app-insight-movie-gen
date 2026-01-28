@@ -34,7 +34,7 @@ public static class License
 
     // 標準フォーマット: PPPP-PLAN-YYMM-HASH-SIG1-SIG2 (TRIAL|STD|PRO のみ)
     private static readonly Regex LICENSE_KEY_REGEX = new(
-        @"^(INSS|INSP|INPY|FGIN|INMV)-(TRIAL|STD|PRO)-(\d{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})$",
+        @"^(INSS|INSP|INPY|FGIN|INMV|INBT)-(TRIAL|STD|PRO)-(\d{4})-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})$",
         RegexOptions.Compiled);
 
     private static readonly Dictionary<string, PlanCode[]> FEATURE_MATRIX = new()
@@ -256,12 +256,12 @@ public static class License
     {
         return plan switch
         {
-            PlanCode.Free  => "フリー",
-            PlanCode.Trial => "トライアル",
-            PlanCode.Std   => "スタンダード",
-            PlanCode.Pro   => "プロ",
-            PlanCode.Ent   => "エンタープライズ",
-            _              => plan.ToString(),
+            PlanCode.Free  => "FREE",
+            PlanCode.Trial => "TRIAL",
+            PlanCode.Std   => "STD",
+            PlanCode.Pro   => "PRO",
+            PlanCode.Ent   => "ENT",
+            _              => plan.ToString().ToUpperInvariant(),
         };
     }
 
