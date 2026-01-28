@@ -1,6 +1,9 @@
+using System.Collections.Generic;
 using System.Windows;
 using Microsoft.Win32;
-using InsightMovie.Core;
+using InsightCommon.License;
+using InsightCommon.Theme;
+using InsightCommon.UI;
 using InsightMovie.Models;
 using InsightMovie.Views;
 
@@ -69,10 +72,50 @@ namespace InsightMovie.Services
             return dlg.ShowDialog() == true ? dlg.GetSelectedStyle() : null;
         }
 
-        public void ShowLicenseDialog(Config config)
+        public InsightLicenseManager ShowLicenseDialog()
         {
-            var dlg = new LicenseDialog(config) { Owner = _owner };
-            dlg.ShowDialog();
+            var commonLicenseManager = new InsightLicenseManager("INMV", "InsightMovie");
+            var dialog = new InsightLicenseDialog(new LicenseDialogOptions
+            {
+                ProductCode = "INMV",
+                ProductName = "InsightMovie",
+                ThemeMode = InsightThemeMode.Light,
+                Locale = "ja",
+                LicenseManager = commonLicenseManager,
+                Features = new[]
+                {
+                    new FeatureDefinition("subtitle", "字幕機能"),
+                    new FeatureDefinition("subtitle_style", "字幕スタイル選択"),
+                    new FeatureDefinition("transition", "トランジション効果"),
+                    new FeatureDefinition("pptx_import", "PPTX取込"),
+                },
+                FeatureMatrix = new Dictionary<string, InsightCommon.License.PlanCode[]>
+                {
+                    ["subtitle"] = new[] {
+                        InsightCommon.License.PlanCode.Trial,
+                        InsightCommon.License.PlanCode.Pro,
+                        InsightCommon.License.PlanCode.Ent,
+                    },
+                    ["subtitle_style"] = new[] {
+                        InsightCommon.License.PlanCode.Trial,
+                        InsightCommon.License.PlanCode.Pro,
+                        InsightCommon.License.PlanCode.Ent,
+                    },
+                    ["transition"] = new[] {
+                        InsightCommon.License.PlanCode.Trial,
+                        InsightCommon.License.PlanCode.Pro,
+                        InsightCommon.License.PlanCode.Ent,
+                    },
+                    ["pptx_import"] = new[] {
+                        InsightCommon.License.PlanCode.Trial,
+                        InsightCommon.License.PlanCode.Pro,
+                        InsightCommon.License.PlanCode.Ent,
+                    },
+                },
+            });
+            dialog.Owner = _owner;
+            dialog.ShowDialog();
+            return commonLicenseManager;
         }
     }
 }

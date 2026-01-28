@@ -1174,7 +1174,25 @@ namespace InsightMovie.ViewModels
 
         private void ShowLicenseManager()
         {
-            _dialogService?.ShowLicenseDialog(_config);
+            if (_dialogService == null) return;
+
+            var commonManager = _dialogService.ShowLicenseDialog();
+
+            // 共通マネージャーの結果をアプリのConfigに反映
+            var result = commonManager.CurrentLicense;
+            if (result.IsValid && !string.IsNullOrEmpty(result.Key) && !string.IsNullOrEmpty(result.Email))
+            {
+                _config.BeginUpdate();
+                _config.LicenseEmail = result.Email;
+                _config.LicenseKey = result.Key;
+                _config.EndUpdate();
+            }
+            else if (string.IsNullOrEmpty(result.Key))
+            {
+                // クリアされた場合
+                _config.ClearLicense();
+            }
+
             LoadLicense();
         }
 

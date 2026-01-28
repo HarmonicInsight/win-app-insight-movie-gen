@@ -22,4 +22,8 @@
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\insight-common\csharp\InsightCommon\InsightCommon.csproj" />
+  </ItemGroup>
+
 </Project>

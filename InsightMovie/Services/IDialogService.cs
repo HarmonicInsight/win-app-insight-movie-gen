@@ -1,3 +1,4 @@
+using InsightCommon.License;
 using InsightMovie.Models;
 
 namespace InsightMovie.Services
@@ -13,6 +14,6 @@ namespace InsightMovie.Services
         bool ShowYesNo(string message, string title);
         BGMSettings? ShowBgmDialog(BGMSettings? currentSettings);
         TextStyle? ShowTextStyleDialog(TextStyle? currentStyle);
-        void ShowLicenseDialog(Core.Config config);
+        InsightLicenseManager ShowLicenseDialog();
     }
 }
