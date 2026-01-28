@@ -81,6 +81,7 @@ namespace InsightMovie.Services
                 ProductCode = "INMV",
                 ProductName = "InsightMovie",
                 ThemeMode = InsightThemeMode.Light,
+                Locale = "ja",
                 LicenseManager = licenseManager,
                 Features = new[]
                 {
