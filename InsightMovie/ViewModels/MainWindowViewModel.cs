@@ -356,7 +356,7 @@ namespace InsightMovie.ViewModels
             OpenProjectCommand = new RelayCommand(OpenProject);
             SaveProjectCommand = new RelayCommand(SaveProject);
             SaveProjectAsCommand = new RelayCommand(SaveProjectAs);
-            ImportPptxCommand = new RelayCommand(ImportPptx);
+            ImportPptxCommand = new AsyncRelayCommand(ImportPptxAsync);
             AddSceneCommand = new RelayCommand(AddScene);
             RemoveSceneCommand = new RelayCommand(RemoveScene);
             MoveSceneUpCommand = new RelayCommand(MoveSceneUp);
@@ -456,7 +456,7 @@ namespace InsightMovie.ViewModels
 
             if (_currentScene.HasMedia)
             {
-                MediaName = Path.GetFileName(_currentScene.MediaPath);
+                MediaName = Path.GetFileName(_currentScene.MediaPath) ?? string.Empty;
                 ThumbnailUpdateRequested?.Invoke(_currentScene.MediaPath);
             }
             else
@@ -1036,7 +1036,7 @@ namespace InsightMovie.ViewModels
             }
         }
 
-        private void ImportPptx()
+        private async Task ImportPptxAsync()
         {
             if (_dialogService == null) return;
 
@@ -1057,8 +1057,18 @@ namespace InsightMovie.ViewModels
 
             try
             {
-                var importer = new Utils.PptxImporter();
-                var slides = importer.ExtractNotes(path);
+                _logger.Log($"PPTX取込を開始: {path}");
+
+                var outputDir = Path.Combine(
+                    Path.GetTempPath(),
+                    "insightmovie_cache",
+                    "pptx_slides",
+                    $"import_{Guid.NewGuid():N}");
+
+                var importer = new Utils.PptxImporter(
+                    (current, total, msg) => _logger.Log(msg));
+
+                var slides = await Task.Run(() => importer.ImportPptx(path, outputDir));
 
                 if (slides.Count == 0)
                 {
@@ -1068,8 +1078,12 @@ namespace InsightMovie.ViewModels
 
                 foreach (var slide in slides)
                 {
-                    var scene = new Scene { NarrationText = slide.Notes };
-                    if (!string.IsNullOrEmpty(slide.ImagePath))
+                    var scene = new Scene
+                    {
+                        NarrationText = slide.Notes,
+                        SubtitleText = string.IsNullOrWhiteSpace(slide.SlideText) ? null : slide.SlideText
+                    };
+                    if (!string.IsNullOrEmpty(slide.ImagePath) && File.Exists(slide.ImagePath))
                     {
                         scene.MediaPath = slide.ImagePath;
                         scene.MediaType = MediaType.Image;
@@ -1078,7 +1092,17 @@ namespace InsightMovie.ViewModels
                 }
 
                 RefreshSceneList();
-                _logger.Log($"PPTXからシーンを取り込みました ({slides.Count} スライド): {path}");
+
+                int imageCount = slides.Count(s => !string.IsNullOrEmpty(s.ImagePath) && File.Exists(s.ImagePath));
+                _logger.Log($"PPTXからシーンを取り込みました ({slides.Count} スライド, {imageCount} 画像): {path}");
+
+                if (imageCount == 0)
+                {
+                    _dialogService.ShowInfo(
+                        $"{slides.Count} 件のスライドのノートを取り込みました。\n" +
+                        "スライド画像の取込にはPowerPointのインストールが必要です。",
+                        "取込結果");
+                }
             }
             catch (Exception ex)
             {

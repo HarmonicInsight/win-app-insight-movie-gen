@@ -21,6 +21,9 @@ public class SlideData
 
     /// <summary>Speaker notes text for this slide.</summary>
     public string Notes { get; set; } = string.Empty;
+
+    /// <summary>Text content extracted from the slide body (titles, bullet points, text boxes).</summary>
+    public string SlideText { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -100,6 +103,7 @@ public class PptxImporter
                 $"Extracting notes from slide {slideNumber}/{slideIdList.Count}...");
 
             string notes = string.Empty;
+            string slideText = string.Empty;
 
             try
             {
@@ -109,8 +113,12 @@ public class PptxImporter
                 if (relId != null)
                 {
                     var slidePart = (SlidePart)presentationPart.GetPartById(relId);
-                    var notesSlidePart = slidePart.NotesSlidePart;
 
+                    // Extract visible text from the slide body
+                    slideText = ExtractTextFromSlidePart(slidePart);
+
+                    // Extract speaker notes
+                    var notesSlidePart = slidePart.NotesSlidePart;
                     if (notesSlidePart != null)
                     {
                         notes = ExtractTextFromNotesSlidePart(notesSlidePart);
@@ -120,14 +128,15 @@ public class PptxImporter
             catch (Exception ex)
             {
                 Console.Error.WriteLine(
-                    $"Warning: Failed to extract notes from slide {slideNumber}: {ex.Message}");
+                    $"Warning: Failed to extract data from slide {slideNumber}: {ex.Message}");
             }
 
             slides.Add(new SlideData
             {
                 SlideNumber = slideNumber,
                 ImagePath = null,
-                Notes = notes
+                Notes = notes,
+                SlideText = slideText
             });
         }
 
@@ -316,7 +325,8 @@ public class PptxImporter
             {
                 slideNumber = s.SlideNumber,
                 imagePath = s.ImagePath,
-                notes = s.Notes
+                notes = s.Notes,
+                slideText = s.SlideText
             }).ToArray()
         };
 
@@ -341,6 +351,65 @@ public class PptxImporter
     // -----------------------------------------------------------------------
     // Private helpers
     // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Extracts visible text content from a slide (titles, subtitles, body text, text boxes).
+    /// </summary>
+    private static string ExtractTextFromSlidePart(SlidePart slidePart)
+    {
+        var slide = slidePart.Slide;
+        if (slide == null)
+        {
+            return string.Empty;
+        }
+
+        var commonSlideData = slide.CommonSlideData;
+        if (commonSlideData?.ShapeTree == null)
+        {
+            return string.Empty;
+        }
+
+        var textParts = new List<string>();
+
+        foreach (var shape in commonSlideData.ShapeTree.Elements<Shape>())
+        {
+            var textBody = shape.TextBody;
+            if (textBody == null)
+            {
+                continue;
+            }
+
+            // Extract text from all text-bearing shapes on the slide
+            // (titles, subtitles, body, and general text boxes)
+            var shapeTexts = new List<string>();
+
+            foreach (var paragraph in textBody.Elements<DocumentFormat.OpenXml.Drawing.Paragraph>())
+            {
+                var paragraphTexts = new List<string>();
+
+                foreach (var run in paragraph.Elements<DocumentFormat.OpenXml.Drawing.Run>())
+                {
+                    var textElement = run.GetFirstChild<DocumentFormat.OpenXml.Drawing.Text>();
+                    if (textElement?.Text != null)
+                    {
+                        paragraphTexts.Add(textElement.Text);
+                    }
+                }
+
+                if (paragraphTexts.Count > 0)
+                {
+                    shapeTexts.Add(string.Join("", paragraphTexts));
+                }
+            }
+
+            if (shapeTexts.Count > 0)
+            {
+                textParts.Add(string.Join("\n", shapeTexts));
+            }
+        }
+
+        return string.Join("\n", textParts).Trim();
+    }
 
     /// <summary>
     /// Extracts the text content from a NotesSlidePart.
