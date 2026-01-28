@@ -46,3 +46,6 @@ nuget.config
 .DS_Store
 Thumbs.db
 desktop.ini
+.claude/
+_build_tools/
+publish/
