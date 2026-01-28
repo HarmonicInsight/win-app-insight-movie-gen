@@ -3,6 +3,9 @@ using Microsoft.Win32;
 using InsightMovie.Core;
 using InsightMovie.Models;
 using InsightMovie.Views;
+using InsightCommon.License;
+using InsightCommon.UI;
+using InsightCommon.Theme;
 
 namespace InsightMovie.Services
 {
@@ -71,8 +74,41 @@ namespace InsightMovie.Services
 
         public void ShowLicenseDialog(Config config)
         {
-            var dlg = new LicenseDialog(config) { Owner = _owner };
-            dlg.ShowDialog();
+            // InsightCommon 共通ライセンスダイアログを使用
+            var licenseManager = new InsightLicenseManager("INMV", "InsightMovie");
+            var dialog = new InsightLicenseDialog(new LicenseDialogOptions
+            {
+                ProductCode = "INMV",
+                ProductName = "InsightMovie",
+                ThemeMode = InsightThemeMode.Light,
+                LicenseManager = licenseManager,
+                Features = new[]
+                {
+                    new FeatureDefinition("subtitle", "字幕機能"),
+                    new FeatureDefinition("subtitle_style", "字幕スタイル選択"),
+                    new FeatureDefinition("transition", "トランジション効果"),
+                    new FeatureDefinition("pptx_import", "PPTX取込"),
+                },
+                FeatureMatrix = new Dictionary<string, InsightCommon.License.PlanCode[]>
+                {
+                    ["subtitle"]       = new[] { InsightCommon.License.PlanCode.Trial, InsightCommon.License.PlanCode.Pro, InsightCommon.License.PlanCode.Ent },
+                    ["subtitle_style"] = new[] { InsightCommon.License.PlanCode.Trial, InsightCommon.License.PlanCode.Pro, InsightCommon.License.PlanCode.Ent },
+                    ["transition"]     = new[] { InsightCommon.License.PlanCode.Trial, InsightCommon.License.PlanCode.Pro, InsightCommon.License.PlanCode.Ent },
+                    ["pptx_import"]    = new[] { InsightCommon.License.PlanCode.Trial, InsightCommon.License.PlanCode.Pro, InsightCommon.License.PlanCode.Ent },
+                },
+            });
+            dialog.Owner = _owner;
+            dialog.ShowDialog();
+
+            // 共通ライセンスマネージャーの結果をアプリConfigに同期
+            var license = licenseManager.CurrentLicense;
+            if (license.IsValid && !string.IsNullOrEmpty(license.Key))
+            {
+                config.BeginUpdate();
+                config.LicenseKey = license.Key;
+                config.LicenseEmail = license.Email ?? "";
+                config.EndUpdate();
+            }
         }
     }
 }

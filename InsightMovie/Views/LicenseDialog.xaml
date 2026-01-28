@@ -110,10 +110,20 @@
                 </Grid>
             </Border>
 
-            <!-- License Key Input -->
-            <TextBlock Text="ライセンスキー" Style="{StaticResource SectionHeader}"/>
+            <!-- License Activation -->
+            <TextBlock Text="ライセンス認証" Style="{StaticResource SectionHeader}"/>
             <Border Style="{StaticResource SectionBorder}">
                 <StackPanel>
+                    <TextBlock Text="メールアドレス" FontSize="12"
+                               Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                    <TextBox x:Name="EmailTextBox"
+                             Height="32"
+                             FontSize="14"
+                             VerticalContentAlignment="Center"
+                             Padding="6,0"/>
+
+                    <TextBlock Text="ライセンスキー" FontSize="12"
+                               Foreground="{DynamicResource TextSecondary}" Margin="0,8,0,4"/>
                     <TextBox x:Name="LicenseKeyTextBox"
                              Height="32"
                              FontSize="14"

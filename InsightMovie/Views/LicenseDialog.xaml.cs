@@ -76,8 +76,14 @@ namespace InsightMovie.Views
         private void LoadCurrentLicense()
         {
             var key = _config.LicenseKey;
-            _licenseInfo = License.ValidateLicenseKey(key);
+            var email = _config.LicenseEmail;
+            _licenseInfo = License.ValidateLicenseKey(key, email);
             UpdateUI();
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                EmailTextBox.Text = email;
+            }
 
             if (!string.IsNullOrEmpty(key))
             {
@@ -146,7 +152,16 @@ namespace InsightMovie.Views
 
         private void ActivateButton_Click(object sender, RoutedEventArgs e)
         {
+            var email = EmailTextBox.Text?.Trim() ?? string.Empty;
             var key = GetLicenseKeyText();
+
+            if (string.IsNullOrEmpty(email))
+            {
+                ValidationMessage.Text = "メールアドレスを入力してください。";
+                ValidationMessage.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B));
+                return;
+            }
+
             if (string.IsNullOrEmpty(key))
             {
                 ValidationMessage.Text = "ライセンスキーを入力してください。";
@@ -154,11 +169,14 @@ namespace InsightMovie.Views
                 return;
             }
 
-            _licenseInfo = License.ValidateLicenseKey(key);
+            _licenseInfo = License.ValidateLicenseKey(key, email);
 
             if (_licenseInfo.IsValid)
             {
+                _config.BeginUpdate();
                 _config.LicenseKey = key;
+                _config.LicenseEmail = email;
+                _config.EndUpdate();
                 ValidationMessage.Text = "ライセンスが正常にアクティベートされました。";
                 ValidationMessage.Foreground = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50));
             }
@@ -186,6 +204,7 @@ namespace InsightMovie.Views
         {
             _config.ClearLicense();
             _licenseInfo = new LicenseInfo { Plan = PlanCode.Free, IsValid = false };
+            EmailTextBox.Text = "";
             ShowPlaceholder();
             UpdateUI();
             ValidationMessage.Text = "ライセンスがクリアされました。";
