@@ -1,0 +1,29 @@
+{
+  "scenes": [
+    {
+      "mediaPath": "C:\\Users\\yourname\\Pictures\\scene1.png",
+      "narrationText": "こんにちは。今日は新しい製品のご紹介です。",
+      "subtitleText": "新製品のご紹介",
+      "durationMode": "auto",
+      "transitionType": "fade",
+      "transitionDuration": 0.5
+    },
+    {
+      "mediaPath": "C:\\Users\\yourname\\Pictures\\scene2.png",
+      "narrationText": "この製品は、AIを活用した動画生成ツールです。",
+      "subtitleText": "AI動画生成ツール",
+      "durationMode": "auto",
+      "transitionType": "dissolve",
+      "transitionDuration": 0.5
+    },
+    {
+      "mediaPath": null,
+      "narrationText": "ご清聴ありがとうございました。",
+      "subtitleText": "ありがとうございました",
+      "durationMode": "fixed",
+      "fixedSeconds": 5.0,
+      "transitionType": "fade",
+      "transitionDuration": 1.0
+    }
+  ]
+}

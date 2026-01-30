@@ -315,6 +315,7 @@ namespace InsightMovie.ViewModels
         public ICommand SaveProjectCommand { get; }
         public ICommand SaveProjectAsCommand { get; }
         public ICommand ImportPptxCommand { get; }
+        public ICommand ImportJsonCommand { get; }
         public ICommand AddSceneCommand { get; }
         public ICommand RemoveSceneCommand { get; }
         public ICommand MoveSceneUpCommand { get; }
@@ -357,6 +358,7 @@ namespace InsightMovie.ViewModels
             SaveProjectCommand = new RelayCommand(SaveProject);
             SaveProjectAsCommand = new RelayCommand(SaveProjectAs);
             ImportPptxCommand = new RelayCommand(ImportPptx);
+            ImportJsonCommand = new RelayCommand(ImportJson);
             AddSceneCommand = new RelayCommand(AddScene);
             RemoveSceneCommand = new RelayCommand(RemoveScene);
             MoveSceneUpCommand = new RelayCommand(MoveSceneUp);
@@ -1083,6 +1085,74 @@ namespace InsightMovie.ViewModels
             catch (Exception ex)
             {
                 _dialogService.ShowError($"PPTX取込に失敗しました:\n{ex.Message}", "取込エラー");
+            }
+        }
+
+        private void ImportJson()
+        {
+            if (_dialogService == null) return;
+
+            var path = _dialogService.ShowOpenFileDialog(
+                "JSONファイルを選択",
+                "JSONファイル|*.json|すべてのファイル|*.*",
+                ".json");
+
+            if (path == null) return;
+
+            try
+            {
+                var jsonText = System.IO.File.ReadAllText(path);
+                var options = new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase) }
+                };
+
+                using var doc = System.Text.Json.JsonDocument.Parse(jsonText);
+                var root = doc.RootElement;
+
+                if (!root.TryGetProperty("scenes", out var scenesElement) ||
+                    scenesElement.ValueKind != System.Text.Json.JsonValueKind.Array)
+                {
+                    _dialogService.ShowError("JSONに \"scenes\" 配列が見つかりません。", "取込エラー");
+                    return;
+                }
+
+                int count = 0;
+                foreach (var sceneElement in scenesElement.EnumerateArray())
+                {
+                    var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(
+                        sceneElement.GetRawText(), options);
+                    if (dict == null) continue;
+
+                    var scene = Scene.FromDict(dict);
+
+                    // Detect mediaType from file extension if mediaPath is set
+                    if (!string.IsNullOrEmpty(scene.MediaPath) && scene.MediaType == MediaType.None)
+                    {
+                        var ext = System.IO.Path.GetExtension(scene.MediaPath).ToLowerInvariant();
+                        if (ext is ".mp4" or ".avi" or ".mov" or ".wmv" or ".mkv")
+                            scene.MediaType = MediaType.Video;
+                        else if (ext is ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".webp")
+                            scene.MediaType = MediaType.Image;
+                    }
+
+                    _project.Scenes.Add(scene);
+                    count++;
+                }
+
+                if (count == 0)
+                {
+                    _dialogService.ShowInfo("取り込めるシーンがありませんでした。", "取込結果");
+                    return;
+                }
+
+                RefreshSceneList();
+                _logger.Log($"JSONからシーンを取り込みました ({count} シーン): {path}");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"JSON取込に失敗しました:\n{ex.Message}", "取込エラー");
             }
         }
 

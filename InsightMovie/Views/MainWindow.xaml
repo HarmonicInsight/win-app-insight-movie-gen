@@ -180,6 +180,17 @@
                                 <TextBlock Text="PPTX取込" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
+                        <Button Padding="10,4" Margin="2"
+                                Style="{DynamicResource PrimaryButton}"
+                                Command="{Binding ImportJsonCommand}"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M1,0 H9 V4 H5 V12 H1 Z M6,4 L9,4 V10 H6 Z"
+                                      Stroke="#FFFFFF" StrokeThickness="1"
+                                      VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                <TextBlock Text="JSON取込" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </DockPanel>
             </DockPanel>
@@ -203,6 +214,9 @@
                           Command="{Binding SaveProjectCommand}"/>
                 <MenuItem Header="別名保存(_A)" InputGestureText="Ctrl+Shift+S"
                           Command="{Binding SaveProjectAsCommand}"/>
+                <Separator/>
+                <MenuItem Header="JSON取込(_J)"
+                          Command="{Binding ImportJsonCommand}"/>
                 <Separator/>
                 <MenuItem Header="終了(_X)" InputGestureText="Alt+F4"
                           Command="{Binding ExitCommand}"/>
