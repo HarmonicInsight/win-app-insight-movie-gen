@@ -147,6 +147,7 @@ if ($SkipInstaller) {
         # Try to find Inno Setup compiler
         $iscc = $null
         $isccPaths = @(
+            "${env:LOCALAPPDATA}\Programs\Inno Setup 6\ISCC.exe",
             "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
             "${env:ProgramFiles}\Inno Setup 6\ISCC.exe",
             "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
