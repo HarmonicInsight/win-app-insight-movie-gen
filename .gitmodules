@@ -1,3 +1,3 @@
 [submodule "insight-common"]
 	path = insight-common
-	url = https://github.com/HarmonicInsight/lib-insight-common.git
+	url = https://github.com/HarmonicInsight/cross-lib-insight-common.git
