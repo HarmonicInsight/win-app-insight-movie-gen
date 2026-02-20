@@ -44,6 +44,14 @@ namespace InsightMovie.Views
             };
         }
 
+        /// <summary>
+        /// Loads an externally-created project (e.g. from QuickMode) into the editor.
+        /// </summary>
+        public void LoadProject(Project project)
+        {
+            _vm.LoadProject(project);
+        }
+
         #region ViewModel Event Handlers (UI-specific)
 
         private void OnPlayAudioRequested(string path, double speed)
