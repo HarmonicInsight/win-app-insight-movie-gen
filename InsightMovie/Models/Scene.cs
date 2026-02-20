@@ -65,8 +65,14 @@ namespace InsightMovie.Models
         [JsonPropertyName("videoCachePath")]
         public string? VideoCachePath { get; set; }
 
+        [JsonPropertyName("textOverlays")]
+        public List<TextOverlay> TextOverlays { get; set; } = new();
+
         [JsonIgnore]
         public bool HasMedia => !string.IsNullOrEmpty(MediaPath);
+
+        [JsonIgnore]
+        public bool HasTextOverlays => TextOverlays.Count > 0 && TextOverlays.Any(o => o.HasText);
 
         [JsonIgnore]
         public bool HasNarration => !string.IsNullOrEmpty(NarrationText);
@@ -95,7 +101,8 @@ namespace InsightMovie.Models
                 { "durationMode", DurationMode.ToString() },
                 { "fixedSeconds", FixedSeconds },
                 { "audioCachePath", AudioCachePath },
-                { "videoCachePath", VideoCachePath }
+                { "videoCachePath", VideoCachePath },
+                { "textOverlays", TextOverlays.Select(o => o.ToDict()).ToList() }
             };
         }
 
@@ -174,6 +181,19 @@ namespace InsightMovie.Models
 
             if (dict.TryGetValue("videoCachePath", out var videoCache) && videoCache != null)
                 scene.VideoCachePath = videoCache.ToString();
+
+            if (dict.TryGetValue("textOverlays", out var overlays) && overlays != null)
+            {
+                if (overlays is JsonElement jsonArr && jsonArr.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var elem in jsonArr.EnumerateArray())
+                    {
+                        var overlayDict = JsonSerializer.Deserialize<Dictionary<string, object?>>(elem.GetRawText());
+                        if (overlayDict != null)
+                            scene.TextOverlays.Add(TextOverlay.FromDict(overlayDict));
+                    }
+                }
+            }
 
             return scene;
         }

@@ -80,6 +80,16 @@ namespace InsightMovie.ViewModels
         private readonly Dictionary<string, TextStyle> _sceneSubtitleStyles = new();
         private Dictionary<int, string> _speakerStyles = new();
 
+        // Overlay
+        private int _selectedOverlayIndex = -1;
+        private string _overlayText = string.Empty;
+        private string _overlayXPercent = "50.0";
+        private string _overlayYPercent = "50.0";
+        private string _overlayFontSize = "64";
+        private int _selectedAlignmentIndex;
+        private int _selectedOverlayColorIndex;
+        private bool _isLoadingOverlay;
+
         #endregion
 
         #region Collections
@@ -87,6 +97,7 @@ namespace InsightMovie.ViewModels
         public ObservableCollection<SceneListItem> SceneItems { get; } = new();
         public ObservableCollection<SpeakerItem> ExportSpeakers { get; } = new();
         public ObservableCollection<SpeakerItem> SceneSpeakers { get; } = new();
+        public ObservableCollection<OverlayListItem> OverlayItems { get; } = new();
 
         #endregion
 
@@ -283,6 +294,99 @@ namespace InsightMovie.ViewModels
             set => SetProperty(ref _canPptx, value);
         }
 
+        // Overlay properties
+        public int SelectedOverlayIndex
+        {
+            get => _selectedOverlayIndex;
+            set
+            {
+                if (SetProperty(ref _selectedOverlayIndex, value))
+                    OnOverlaySelected();
+            }
+        }
+
+        public string OverlayText
+        {
+            get => _overlayText;
+            set
+            {
+                if (SetProperty(ref _overlayText, value))
+                    OnOverlayTextChanged();
+            }
+        }
+
+        public string OverlayXPercent
+        {
+            get => _overlayXPercent;
+            set
+            {
+                if (SetProperty(ref _overlayXPercent, value))
+                    OnOverlayPositionChanged();
+            }
+        }
+
+        public string OverlayYPercent
+        {
+            get => _overlayYPercent;
+            set
+            {
+                if (SetProperty(ref _overlayYPercent, value))
+                    OnOverlayPositionChanged();
+            }
+        }
+
+        public string OverlayFontSize
+        {
+            get => _overlayFontSize;
+            set
+            {
+                if (SetProperty(ref _overlayFontSize, value))
+                    OnOverlayFontSizeChanged();
+            }
+        }
+
+        public int SelectedAlignmentIndex
+        {
+            get => _selectedAlignmentIndex;
+            set
+            {
+                if (SetProperty(ref _selectedAlignmentIndex, value))
+                    OnOverlayAlignmentChanged();
+            }
+        }
+
+        public int SelectedOverlayColorIndex
+        {
+            get => _selectedOverlayColorIndex;
+            set
+            {
+                if (SetProperty(ref _selectedOverlayColorIndex, value))
+                    OnOverlayColorChanged();
+            }
+        }
+
+        public bool OverlayListVisible => OverlayItems.Count > 0;
+        public bool OverlayEditorVisible => _selectedOverlayIndex >= 0 && _selectedOverlayIndex < OverlayItems.Count;
+
+        public List<string> AlignmentOptions { get; } = new() { "中央", "左", "右" };
+
+        public List<string> OverlayColorOptions { get; } = new()
+        {
+            "白", "黒", "赤", "青", "黄", "金", "ピンク", "水色"
+        };
+
+        private static readonly int[][] OverlayColorValues =
+        {
+            new[] { 255, 255, 255 }, // 白
+            new[] { 0, 0, 0 },       // 黒
+            new[] { 255, 0, 0 },     // 赤
+            new[] { 0, 0, 255 },     // 青
+            new[] { 255, 255, 0 },   // 黄
+            new[] { 212, 175, 55 },  // 金
+            new[] { 255, 105, 180 }, // ピンク
+            new[] { 0, 191, 255 },   // 水色
+        };
+
         // Current scene for UI binding
         public Scene? CurrentScene => _currentScene;
         public Project Project => _project;
@@ -325,6 +429,9 @@ namespace InsightMovie.ViewModels
         public ICommand PreviewAudioCommand { get; }
         public ICommand StopPreviewCommand { get; }
         public ICommand ExportVideoCommand { get; }
+        public ICommand AddOverlayCommand { get; }
+        public ICommand RemoveOverlayCommand { get; }
+        public ICommand AddCoverTemplateCommand { get; }
         public ICommand BgmSettingsCommand { get; }
         public ICommand ShowTutorialCommand { get; }
         public ICommand ShowFaqCommand { get; }
@@ -367,6 +474,9 @@ namespace InsightMovie.ViewModels
             PreviewAudioCommand = new AsyncRelayCommand(PreviewCurrentScene);
             StopPreviewCommand = new RelayCommand(() => StopAudioRequested?.Invoke());
             ExportVideoCommand = new AsyncRelayCommand(ExportVideo);
+            AddOverlayCommand = new RelayCommand(AddOverlay);
+            RemoveOverlayCommand = new RelayCommand(RemoveOverlay);
+            AddCoverTemplateCommand = new RelayCommand(AddCoverTemplate);
             BgmSettingsCommand = new RelayCommand(OpenBgmSettings);
             ShowTutorialCommand = new RelayCommand(ShowTutorial);
             ShowFaqCommand = new RelayCommand(ShowFaq);
@@ -490,6 +600,12 @@ namespace InsightMovie.ViewModels
 
             SelectTransition(_currentScene.TransitionType);
             TransitionDuration = _currentScene.TransitionDuration.ToString("F1", CultureInfo.InvariantCulture);
+
+            RefreshOverlayList();
+            if (_currentScene.TextOverlays.Count > 0)
+                SelectedOverlayIndex = 0;
+            else
+                SelectedOverlayIndex = -1;
 
             _isLoadingScene = false;
         }
@@ -781,6 +897,174 @@ namespace InsightMovie.ViewModels
             if (_currentScene == null) return;
             var style = GetStyleForScene(_currentScene);
             StylePreviewUpdateRequested?.Invoke(style);
+        }
+
+        #endregion
+
+        #region Text Overlays
+
+        private void RefreshOverlayList()
+        {
+            OverlayItems.Clear();
+            if (_currentScene == null) return;
+
+            for (int i = 0; i < _currentScene.TextOverlays.Count; i++)
+            {
+                OverlayItems.Add(new OverlayListItem(_currentScene.TextOverlays[i], i));
+            }
+
+            OnPropertyChanged(nameof(OverlayListVisible));
+            OnPropertyChanged(nameof(OverlayEditorVisible));
+        }
+
+        private void AddOverlay()
+        {
+            if (_currentScene == null) return;
+
+            var overlay = new TextOverlay { Text = "テキスト" };
+            _currentScene.TextOverlays.Add(overlay);
+            RefreshOverlayList();
+            SelectedOverlayIndex = _currentScene.TextOverlays.Count - 1;
+            _logger.Log("テキストオーバーレイを追加しました。");
+        }
+
+        private void RemoveOverlay()
+        {
+            if (_currentScene == null || _selectedOverlayIndex < 0 ||
+                _selectedOverlayIndex >= _currentScene.TextOverlays.Count)
+                return;
+
+            _currentScene.TextOverlays.RemoveAt(_selectedOverlayIndex);
+            RefreshOverlayList();
+
+            if (_currentScene.TextOverlays.Count > 0)
+                SelectedOverlayIndex = Math.Min(_selectedOverlayIndex, _currentScene.TextOverlays.Count - 1);
+            else
+                SelectedOverlayIndex = -1;
+
+            _logger.Log("テキストオーバーレイを削除しました。");
+        }
+
+        private void AddCoverTemplate()
+        {
+            if (_currentScene == null) return;
+
+            _currentScene.TextOverlays.Clear();
+            _currentScene.TextOverlays.Add(TextOverlay.CreateTitle());
+            _currentScene.TextOverlays.Add(TextOverlay.CreateSubheading());
+
+            RefreshOverlayList();
+            SelectedOverlayIndex = 0;
+            _logger.Log("表紙テンプレートを適用しました。");
+        }
+
+        private void OnOverlaySelected()
+        {
+            OnPropertyChanged(nameof(OverlayEditorVisible));
+
+            if (_selectedOverlayIndex < 0 || _currentScene == null ||
+                _selectedOverlayIndex >= _currentScene.TextOverlays.Count)
+                return;
+
+            _isLoadingOverlay = true;
+            var overlay = _currentScene.TextOverlays[_selectedOverlayIndex];
+
+            OverlayText = overlay.Text;
+            OverlayXPercent = overlay.XPercent.ToString("F1", CultureInfo.InvariantCulture);
+            OverlayYPercent = overlay.YPercent.ToString("F1", CultureInfo.InvariantCulture);
+            OverlayFontSize = overlay.FontSize.ToString();
+
+            SelectedAlignmentIndex = overlay.Alignment switch
+            {
+                Models.TextAlignment.Left => 1,
+                Models.TextAlignment.Right => 2,
+                _ => 0
+            };
+
+            // Find matching color
+            SelectedOverlayColorIndex = FindColorIndex(overlay.TextColor);
+
+            _isLoadingOverlay = false;
+        }
+
+        private int FindColorIndex(int[] color)
+        {
+            for (int i = 0; i < OverlayColorValues.Length; i++)
+            {
+                if (OverlayColorValues[i][0] == color[0] &&
+                    OverlayColorValues[i][1] == color[1] &&
+                    OverlayColorValues[i][2] == color[2])
+                    return i;
+            }
+            return 0; // default to white
+        }
+
+        private TextOverlay? GetSelectedOverlay()
+        {
+            if (_currentScene == null || _selectedOverlayIndex < 0 ||
+                _selectedOverlayIndex >= _currentScene.TextOverlays.Count)
+                return null;
+            return _currentScene.TextOverlays[_selectedOverlayIndex];
+        }
+
+        private void OnOverlayTextChanged()
+        {
+            if (_isLoadingOverlay) return;
+            var overlay = GetSelectedOverlay();
+            if (overlay == null) return;
+            overlay.Text = _overlayText;
+
+            if (_selectedOverlayIndex >= 0 && _selectedOverlayIndex < OverlayItems.Count)
+                OverlayItems[_selectedOverlayIndex].UpdateLabel(_selectedOverlayIndex);
+        }
+
+        private void OnOverlayPositionChanged()
+        {
+            if (_isLoadingOverlay) return;
+            var overlay = GetSelectedOverlay();
+            if (overlay == null) return;
+
+            if (double.TryParse(_overlayXPercent, NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out var x))
+                overlay.XPercent = Math.Clamp(x, 0, 100);
+
+            if (double.TryParse(_overlayYPercent, NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out var y))
+                overlay.YPercent = Math.Clamp(y, 0, 100);
+        }
+
+        private void OnOverlayFontSizeChanged()
+        {
+            if (_isLoadingOverlay) return;
+            var overlay = GetSelectedOverlay();
+            if (overlay == null) return;
+
+            if (int.TryParse(_overlayFontSize, out var size))
+                overlay.FontSize = Math.Clamp(size, 8, 200);
+        }
+
+        private void OnOverlayAlignmentChanged()
+        {
+            if (_isLoadingOverlay) return;
+            var overlay = GetSelectedOverlay();
+            if (overlay == null) return;
+
+            overlay.Alignment = _selectedAlignmentIndex switch
+            {
+                1 => Models.TextAlignment.Left,
+                2 => Models.TextAlignment.Right,
+                _ => Models.TextAlignment.Center
+            };
+        }
+
+        private void OnOverlayColorChanged()
+        {
+            if (_isLoadingOverlay) return;
+            var overlay = GetSelectedOverlay();
+            if (overlay == null) return;
+
+            if (_selectedOverlayColorIndex >= 0 && _selectedOverlayColorIndex < OverlayColorValues.Length)
+                overlay.TextColor = (int[])OverlayColorValues[_selectedOverlayColorIndex].Clone();
         }
 
         #endregion

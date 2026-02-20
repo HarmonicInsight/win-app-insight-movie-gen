@@ -423,7 +423,101 @@
                                     IsEnabled="{Binding CanSubtitleStyle}"/>
                         </StackPanel>
 
-                        <!-- Row 6: Duration mode -->
+                        <!-- Row 6: Text Overlays -->
+                        <StackPanel Margin="0,4,0,4">
+                            <DockPanel Margin="0,0,0,4">
+                                <TextBlock Text="テキストオーバーレイ:" VerticalAlignment="Center"
+                                           DockPanel.Dock="Left"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="＋追加"
+                                            Padding="6,2" Margin="2"
+                                            Command="{Binding AddOverlayCommand}"
+                                            ToolTip="テキストオーバーレイを追加"/>
+                                    <Button Content="表紙テンプレ"
+                                            Padding="6,2" Margin="2"
+                                            Command="{Binding AddCoverTemplateCommand}"
+                                            ToolTip="表紙用のタイトル＋サブタイトルを追加"/>
+                                    <Button Content="－削除"
+                                            Padding="6,2" Margin="2"
+                                            Command="{Binding RemoveOverlayCommand}"
+                                            ToolTip="選択中のオーバーレイを削除"/>
+                                </StackPanel>
+                            </DockPanel>
+
+                            <!-- Overlay list -->
+                            <ListBox ItemsSource="{Binding OverlayItems}"
+                                     SelectedIndex="{Binding SelectedOverlayIndex}"
+                                     Height="60"
+                                     HorizontalContentAlignment="Stretch"
+                                     Visibility="{Binding OverlayListVisible, Converter={StaticResource BoolToVis}}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayLabel}" FontSize="11"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <!-- Selected overlay editor -->
+                            <Border BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
+                                    CornerRadius="3" Padding="8,6" Margin="0,4,0,0"
+                                    Visibility="{Binding OverlayEditorVisible, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="テキスト:" FontSize="11" Margin="0,0,0,2"/>
+                                    <TextBox Text="{Binding OverlayText, UpdateSourceTrigger=PropertyChanged}"
+                                             Padding="4" Height="28"
+                                             VerticalContentAlignment="Center"/>
+
+                                    <Grid Margin="0,6,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                            <TextBlock Text="X位置 (%):" FontSize="11" Margin="0,0,0,2"/>
+                                            <TextBox Text="{Binding OverlayXPercent, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="80" HorizontalAlignment="Left"
+                                                     VerticalContentAlignment="Center" TextAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="Y位置 (%):" FontSize="11" Margin="0,0,0,2"/>
+                                            <TextBox Text="{Binding OverlayYPercent, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="80" HorizontalAlignment="Left"
+                                                     VerticalContentAlignment="Center" TextAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <WrapPanel Margin="0,6,0,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                                            <TextBlock Text="サイズ:" FontSize="11" VerticalAlignment="Center"
+                                                       Margin="0,0,4,0"/>
+                                            <TextBox Text="{Binding OverlayFontSize, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="50"
+                                                     VerticalContentAlignment="Center" TextAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                                            <TextBlock Text="揃え:" FontSize="11" VerticalAlignment="Center"
+                                                       Margin="0,0,4,0"/>
+                                            <ComboBox Width="80"
+                                                      ItemsSource="{Binding AlignmentOptions}"
+                                                      SelectedIndex="{Binding SelectedAlignmentIndex}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                                            <TextBlock Text="色:" FontSize="11" VerticalAlignment="Center"
+                                                       Margin="0,0,4,0"/>
+                                            <ComboBox Width="80"
+                                                      ItemsSource="{Binding OverlayColorOptions}"
+                                                      SelectedIndex="{Binding SelectedOverlayColorIndex}"/>
+                                        </StackPanel>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Row 7: Duration mode -->
                         <StackPanel Margin="0,0,0,4">
                             <TextBlock Text="シーンの長さ:" Margin="0,0,0,4"/>
                             <StackPanel Orientation="Horizontal">
