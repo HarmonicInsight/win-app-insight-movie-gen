@@ -950,6 +950,19 @@ namespace InsightMovie.ViewModels
 
         #region Project Operations
 
+        /// <summary>
+        /// Loads a project created externally (e.g. from QuickMode).
+        /// </summary>
+        public void LoadProject(Project project)
+        {
+            _project = project;
+            _sceneSubtitleStyles.Clear();
+            WindowTitle = $"InsightMovie - 取込プロジェクト";
+            RefreshSceneList();
+            UpdateBgmStatus();
+            _logger.Log($"プロジェクトを読み込みました ({project.Scenes.Count} シーン)");
+        }
+
         private void NewProject()
         {
             if (_dialogService == null) return;
