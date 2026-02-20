@@ -51,6 +51,15 @@ namespace InsightMovie.ViewModels
         private bool _isDragOver;
         private CancellationTokenSource? _exportCts;
 
+        // Enhanced settings
+        private int _selectedTransitionIndex;
+        private string _bgmFilePath = string.Empty;
+        private double _bgmVolume = 0.3;
+        private double _speechSpeed = 1.0;
+        private bool _generateThumbnail = true;
+        private string _thumbnailPath = string.Empty;
+        private string _metadataPath = string.Empty;
+
         public QuickModeViewModel(VoiceVoxClient voiceVoxClient, int speakerId,
                                    FFmpegWrapper? ffmpegWrapper, Config config)
         {
@@ -69,6 +78,9 @@ namespace InsightMovie.ViewModels
             ResetAllCommand = new RelayCommand(ResetAll);
             CancelCommand = new RelayCommand(Cancel, () => _isGenerating);
             PreviewSpeakerCommand = new AsyncRelayCommand(PreviewSpeaker);
+            SelectBgmCommand = new RelayCommand(SelectBgm);
+            ClearBgmCommand = new RelayCommand(ClearBgm);
+            BatchImportCommand = new AsyncRelayCommand(BatchImport);
         }
 
         public void SetDialogService(IDialogService dialogService) => _dialogService = dialogService;
@@ -173,6 +185,79 @@ namespace InsightMovie.ViewModels
 
         public IAppLogger Logger => _logger;
 
+        // Enhanced settings properties
+        public int SelectedTransitionIndex
+        {
+            get => _selectedTransitionIndex;
+            set => SetProperty(ref _selectedTransitionIndex, value);
+        }
+
+        public string BgmFilePath
+        {
+            get => _bgmFilePath;
+            set => SetProperty(ref _bgmFilePath, value);
+        }
+
+        public double BgmVolume
+        {
+            get => _bgmVolume;
+            set => SetProperty(ref _bgmVolume, value);
+        }
+
+        public double SpeechSpeed
+        {
+            get => _speechSpeed;
+            set => SetProperty(ref _speechSpeed, value);
+        }
+
+        public bool GenerateThumbnailEnabled
+        {
+            get => _generateThumbnail;
+            set => SetProperty(ref _generateThumbnail, value);
+        }
+
+        public string ThumbnailPath
+        {
+            get => _thumbnailPath;
+            private set => SetProperty(ref _thumbnailPath, value);
+        }
+
+        public string MetadataPath
+        {
+            get => _metadataPath;
+            private set => SetProperty(ref _metadataPath, value);
+        }
+
+        public bool HasBgm => !string.IsNullOrEmpty(_bgmFilePath);
+        public string BgmFileName => string.IsNullOrEmpty(_bgmFilePath)
+            ? "（なし）"
+            : Path.GetFileName(_bgmFilePath);
+
+        public List<string> TransitionOptions { get; } = new()
+        {
+            "なし", "フェード", "ディゾルブ", "ワイプ左", "ワイプ右", "スライド左", "スライド右", "ズームイン"
+        };
+
+        public List<string> SpeedOptions { get; } = new()
+        {
+            "0.8x (ゆっくり)", "1.0x (標準)", "1.2x (やや速い)", "1.5x (速い)"
+        };
+
+        private static readonly double[] SpeedValues = { 0.8, 1.0, 1.2, 1.5 };
+
+        private int _selectedSpeedIndex = 1;
+        public int SelectedSpeedIndex
+        {
+            get => _selectedSpeedIndex;
+            set
+            {
+                if (SetProperty(ref _selectedSpeedIndex, value) && value >= 0 && value < SpeedValues.Length)
+                    SpeechSpeed = SpeedValues[value];
+            }
+        }
+
+        public bool HasExtraOutputs => !string.IsNullOrEmpty(_thumbnailPath) || !string.IsNullOrEmpty(_metadataPath);
+
         #endregion
 
         #region Commands
@@ -184,6 +269,9 @@ namespace InsightMovie.ViewModels
         public ICommand ResetAllCommand { get; }
         public ICommand CancelCommand { get; }
         public ICommand PreviewSpeakerCommand { get; }
+        public ICommand SelectBgmCommand { get; }
+        public ICommand ClearBgmCommand { get; }
+        public ICommand BatchImportCommand { get; }
 
         #endregion
 
@@ -470,6 +558,59 @@ namespace InsightMovie.ViewModels
 
         #endregion
 
+        #region BGM & Settings
+
+        private void SelectBgm()
+        {
+            if (_dialogService == null) return;
+            var path = _dialogService.ShowOpenFileDialog(
+                "BGMファイルを選択",
+                "音声ファイル|*.mp3;*.wav;*.ogg;*.flac;*.aac;*.m4a|すべてのファイル|*.*");
+            if (!string.IsNullOrEmpty(path))
+            {
+                BgmFilePath = path;
+                OnPropertyChanged(nameof(HasBgm));
+                OnPropertyChanged(nameof(BgmFileName));
+                _logger.Log($"BGM選択: {Path.GetFileName(path)}");
+            }
+        }
+
+        private void ClearBgm()
+        {
+            BgmFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasBgm));
+            OnPropertyChanged(nameof(BgmFileName));
+        }
+
+        private async Task BatchImport()
+        {
+            if (_dialogService == null) return;
+            var paths = _dialogService.ShowOpenFileDialogMultiple(
+                "ファイルを選択（複数可）",
+                "対応ファイル|*.pptx;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.mp4;*.avi;*.mov;*.txt;*.md|すべてのファイル|*.*");
+            if (paths != null && paths.Length > 0)
+            {
+                await HandleFileDropAsync(paths);
+            }
+        }
+
+        private TransitionType GetSelectedTransition()
+        {
+            return _selectedTransitionIndex switch
+            {
+                1 => TransitionType.Fade,
+                2 => TransitionType.Dissolve,
+                3 => TransitionType.WipeLeft,
+                4 => TransitionType.WipeRight,
+                5 => TransitionType.SlideLeft,
+                6 => TransitionType.SlideRight,
+                7 => TransitionType.ZoomIn,
+                _ => TransitionType.None
+            };
+        }
+
+        #endregion
+
         #region Video Generation
 
         private async Task GenerateVideo()
@@ -495,7 +636,6 @@ namespace InsightMovie.ViewModels
             }
             else
             {
-                // Fallback if DialogService not set (shouldn't happen)
                 var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 savePath = Path.Combine(desktopPath, defaultName);
             }
@@ -509,6 +649,34 @@ namespace InsightMovie.ViewModels
 
             string resolution = _selectedResolutionIndex == 1 ? "1920x1080" : "1080x1920";
 
+            // Apply QuickMode settings to project
+            var transition = GetSelectedTransition();
+            _project.DefaultTransition = transition;
+            _project.DefaultTransitionDuration = 0.5;
+
+            if (HasBgm)
+            {
+                _project.Bgm.FilePath = _bgmFilePath;
+                _project.Bgm.Volume = _bgmVolume;
+                _project.Bgm.DuckingEnabled = true;
+            }
+
+            _project.GenerateThumbnail = _generateThumbnail;
+            _project.GenerateChapters = true;
+
+            // Apply speech speed to all scenes
+            foreach (var scene in _project.Scenes)
+            {
+                scene.SpeechSpeed = _speechSpeed;
+
+                // Apply default transition to scenes that don't have one
+                if (scene.TransitionType == TransitionType.None && transition != TransitionType.None)
+                {
+                    scene.TransitionType = transition;
+                    scene.TransitionDuration = 0.5;
+                }
+            }
+
             IsGenerating = true;
             ProgressVisible = true;
             ProgressValue = 0;
@@ -520,21 +688,29 @@ namespace InsightMovie.ViewModels
                 ProgressText = msg;
                 _logger.Log(msg);
 
-                if (msg.StartsWith("シーン ") && msg.Contains('/'))
+                // Parse structured progress: [n/total] description
+                if (msg.StartsWith("[") && msg.Contains(']'))
                 {
-                    var parts = msg.Split('/');
-                    if (parts.Length >= 1)
+                    var bracket = msg.Substring(1, msg.IndexOf(']') - 1);
+                    var parts = bracket.Split('/');
+                    if (parts.Length == 2 &&
+                        int.TryParse(parts[0], out var current) &&
+                        int.TryParse(parts[1], out var total))
                     {
-                        var numStr = parts[0].Replace("シーン ", "").Trim();
-                        if (int.TryParse(numStr, out var current))
-                        {
-                            ProgressValue = (double)current / totalScenes * 100;
-                        }
+                        ProgressValue = (double)current / total * 100;
                     }
                 }
                 else if (msg.Contains("結合中"))
                 {
-                    ProgressValue = 90;
+                    ProgressValue = 85;
+                }
+                else if (msg.Contains("サムネイル"))
+                {
+                    ProgressValue = 92;
+                }
+                else if (msg.Contains("メタデータ"))
+                {
+                    ProgressValue = 96;
                 }
                 else if (msg.Contains("完了"))
                 {
@@ -563,36 +739,50 @@ namespace InsightMovie.ViewModels
 
                 var ffmpeg = _ffmpegWrapper!;
                 var exportService = new ExportService(ffmpeg, _voiceVoxClient, _audioCache);
-                var success = await Task.Run(() =>
-                    exportService.Export(projectSnapshot, savePath, resolution, 30,
+                var exportResult = await Task.Run(() =>
+                    exportService.ExportFull(projectSnapshot, savePath, resolution, 30,
                         speakerId, GetStyle, progress, ct), ct);
 
-                if (success)
+                if (exportResult.Success)
                 {
                     IsComplete = true;
                     OutputPath = savePath;
-                    StatusText = "動画が完成しました！";
+                    ThumbnailPath = exportResult.ThumbnailPath ?? string.Empty;
+                    MetadataPath = exportResult.MetadataFilePath ?? string.Empty;
+                    OnPropertyChanged(nameof(HasExtraOutputs));
+
+                    var extras = new List<string>();
+                    if (!string.IsNullOrEmpty(exportResult.ThumbnailPath))
+                        extras.Add("サムネイル");
+                    if (!string.IsNullOrEmpty(exportResult.ChapterFilePath))
+                        extras.Add("チャプター");
+                    if (!string.IsNullOrEmpty(exportResult.MetadataFilePath))
+                        extras.Add("メタデータ");
+
+                    var extrasText = extras.Count > 0 ? $" + {string.Join("・", extras)}" : "";
+                    StatusText = $"動画が完成しました！{extrasText}";
                     ProgressText = "完了";
                     ProgressValue = 100;
                     _logger.Log($"書き出し成功: {savePath}");
+                    if (!string.IsNullOrEmpty(exportResult.ThumbnailPath))
+                        _logger.Log($"サムネイル: {exportResult.ThumbnailPath}");
+                    if (!string.IsNullOrEmpty(exportResult.MetadataFilePath))
+                        _logger.Log($"メタデータ: {exportResult.MetadataFilePath}");
                 }
                 else
                 {
-                    // Fix 6: Clear progress on failure
                     ProgressVisible = false;
                     StatusText = "動画の生成に失敗しました。ログを確認してください。";
                 }
             }
             catch (OperationCanceledException)
             {
-                // Fix 6: Clear progress on cancel
                 ProgressVisible = false;
                 StatusText = "生成をキャンセルしました";
                 _logger.Log("生成キャンセル");
             }
             catch (Exception ex)
             {
-                // Fix 6: Clear progress on error
                 ProgressVisible = false;
                 StatusText = $"エラー: {ex.Message}";
                 _logger.LogError("動画生成エラー", ex);

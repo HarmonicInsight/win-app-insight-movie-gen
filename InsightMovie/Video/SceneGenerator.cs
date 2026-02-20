@@ -144,7 +144,8 @@ public class SceneGenerator
         string resolution = "1080x1920",
         int fps = 30,
         string? audioPath = null,
-        TextStyle? textStyle = null)
+        TextStyle? textStyle = null,
+        WatermarkSettings? watermark = null)
     {
         try
         {
@@ -229,6 +230,30 @@ public class SceneGenerator
                     // Subtitle failed; continue without it
                     CleanupTempFile(tempSubtitle);
                     tempSubtitle = null;
+                }
+            }
+
+            // Step 3.5: Add watermark if configured
+            string? tempWatermark = null;
+
+            if (watermark != null && watermark.HasWatermark)
+            {
+                tempWatermark = Path.Combine(
+                    Path.GetTempPath(),
+                    $"scene_wm_{Guid.NewGuid():N}.mp4");
+
+                bool wmSuccess = AddWatermark(
+                    currentFile, tempWatermark, watermark, width, height);
+
+                if (wmSuccess)
+                {
+                    CleanupTempFile(currentFile);
+                    currentFile = tempWatermark;
+                }
+                else
+                {
+                    CleanupTempFile(tempWatermark);
+                    tempWatermark = null;
                 }
             }
 
@@ -587,6 +612,73 @@ public class SceneGenerator
                 CleanupTempFile(tempAudioPadded);
             }
         }
+    }
+
+    /// <summary>
+    /// Overlays a watermark image onto the video at the specified position.
+    /// </summary>
+    private bool AddWatermark(
+        string inputPath, string outputPath, WatermarkSettings watermark,
+        int width, int height)
+    {
+        if (!File.Exists(watermark.ImagePath))
+            return false;
+
+        // Calculate watermark size
+        int wmWidth = (int)(width * watermark.Scale);
+
+        // Calculate position based on setting
+        int margin = (int)(width * watermark.MarginPercent / 100.0);
+        string overlayPos = watermark.Position switch
+        {
+            "top-left" => $"x={margin}:y={margin}",
+            "top-right" => $"x=W-w-{margin}:y={margin}",
+            "bottom-left" => $"x={margin}:y=H-h-{margin}",
+            "center" => "x=(W-w)/2:y=(H-h)/2",
+            _ => $"x=W-w-{margin}:y=H-h-{margin}" // bottom-right default
+        };
+
+        string opacityStr = watermark.Opacity.ToString("F2", CultureInfo.InvariantCulture);
+
+        // Scale watermark and apply opacity, then overlay
+        string filter =
+            $"[1:v]scale={wmWidth}:-1,format=rgba," +
+            $"colorchannelmixer=aa={opacityStr}[wm];" +
+            $"[0:v][wm]overlay={overlayPos}";
+
+        var args = new List<string>
+        {
+            "-y",
+            "-i", $"\"{inputPath}\"",
+            "-i", $"\"{watermark.ImagePath}\"",
+            "-filter_complex", $"\"{filter}\"",
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-c:a", "copy",
+            $"\"{outputPath}\""
+        };
+
+        return _ffmpeg.RunCommand(args);
+    }
+
+    /// <summary>
+    /// Extracts a single frame from a video as a thumbnail image.
+    /// </summary>
+    public bool ExtractThumbnail(string videoPath, string outputImagePath, double timeSeconds = 0.5)
+    {
+        string timeStr = timeSeconds.ToString("F2", CultureInfo.InvariantCulture);
+
+        var args = new List<string>
+        {
+            "-y",
+            "-ss", timeStr,
+            "-i", $"\"{videoPath}\"",
+            "-vframes", "1",
+            "-q:v", "2",
+            $"\"{outputImagePath}\""
+        };
+
+        return _ffmpeg.RunCommand(args);
     }
 
     // -----------------------------------------------------------------------

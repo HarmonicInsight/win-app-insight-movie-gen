@@ -340,11 +340,38 @@ public class VoiceVoxClient : IDisposable
     /// </summary>
     /// <param name="text">The text to convert to speech.</param>
     /// <param name="speakerId">The speaker/style ID to use.</param>
+    /// <param name="speedScale">Speech speed multiplier (0.5 = slow, 1.0 = normal, 2.0 = fast).</param>
     /// <returns>The synthesized audio data as a WAV byte array.</returns>
-    public async Task<byte[]> GenerateAudioAsync(string text, int speakerId)
+    public async Task<byte[]> GenerateAudioAsync(string text, int speakerId, double speedScale = 1.0)
     {
         var query = await CreateAudioQueryAsync(text, speakerId);
+
+        if (Math.Abs(speedScale - 1.0) > 0.01)
+        {
+            query = ModifyQuerySpeed(query, speedScale);
+        }
+
         return await SynthesizeAsync(query, speakerId);
+    }
+
+    /// <summary>
+    /// Modifies the speedScale property in an audio query JSON.
+    /// </summary>
+    private static JsonElement ModifyQuerySpeed(JsonElement query, double speedScale)
+    {
+        var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(query.GetRawText())!;
+        var modified = new Dictionary<string, object?>();
+
+        foreach (var kv in dict)
+        {
+            if (kv.Key == "speedScale")
+                modified[kv.Key] = speedScale;
+            else
+                modified[kv.Key] = kv.Value;
+        }
+
+        var json = JsonSerializer.Serialize(modified);
+        return JsonSerializer.Deserialize<JsonElement>(json);
     }
 
     /// <summary>

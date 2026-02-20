@@ -68,6 +68,9 @@ namespace InsightMovie.Models
         [JsonPropertyName("textOverlays")]
         public List<TextOverlay> TextOverlays { get; set; } = new();
 
+        [JsonPropertyName("speechSpeed")]
+        public double SpeechSpeed { get; set; } = 1.0;
+
         [JsonIgnore]
         public bool HasMedia => !string.IsNullOrEmpty(MediaPath);
 
@@ -102,7 +105,8 @@ namespace InsightMovie.Models
                 { "fixedSeconds", FixedSeconds },
                 { "audioCachePath", AudioCachePath },
                 { "videoCachePath", VideoCachePath },
-                { "textOverlays", TextOverlays.Select(o => o.ToDict()).ToList() }
+                { "textOverlays", TextOverlays.Select(o => o.ToDict()).ToList() },
+                { "speechSpeed", SpeechSpeed }
             };
         }
 
@@ -181,6 +185,12 @@ namespace InsightMovie.Models
 
             if (dict.TryGetValue("videoCachePath", out var videoCache) && videoCache != null)
                 scene.VideoCachePath = videoCache.ToString();
+
+            if (dict.TryGetValue("speechSpeed", out var speed) && speed != null)
+            {
+                if (speed is JsonElement spElem2) scene.SpeechSpeed = spElem2.GetDouble();
+                else if (double.TryParse(speed.ToString(), out var sp2)) scene.SpeechSpeed = sp2;
+            }
 
             if (dict.TryGetValue("textOverlays", out var overlays) && overlays != null)
             {

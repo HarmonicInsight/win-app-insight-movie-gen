@@ -227,47 +227,110 @@
                 </Grid>
             </Border>
 
-            <!-- ── Settings (speaker + resolution) ── -->
-            <Grid Grid.Row="1" Margin="0,0,0,12"
-                  Visibility="{Binding ShowSettings, Converter={StaticResource BoolToVis}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>  <!-- Fix 2: preview button -->
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <!-- ── Settings (speaker + resolution + extras) ── -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,12"
+                        Visibility="{Binding ShowSettings, Converter={StaticResource BoolToVis}}">
 
-                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                    <TextBlock Text="話者" FontSize="12" FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding Speakers}"
-                              SelectedIndex="{Binding SelectedSpeakerIndex}"
-                              DisplayMemberPath="DisplayName"
-                              shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
-                </StackPanel>
+                <!-- Row 1: Speaker + Resolution -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Fix 2: Speaker preview button -->
-                <Button Grid.Column="1" VerticalAlignment="Bottom"
-                        Width="36" Height="30"
-                        Margin="0,0,8,0"
-                        ToolTip="試聴"
-                        Command="{Binding PreviewSpeakerCommand}"
-                        shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Path Data="M8,5 V19 L19,12 Z"
-                          Fill="{DynamicResource TextPrimary}"
-                          Width="12" Height="12" Stretch="Uniform"
-                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Button>
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="話者" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding Speakers}"
+                                  SelectedIndex="{Binding SelectedSpeakerIndex}"
+                                  DisplayMemberPath="DisplayName"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
 
-                <StackPanel Grid.Column="2" Margin="0,0,0,0">
-                    <TextBlock Text="向き" FontSize="12" FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
-                    <ComboBox SelectedIndex="{Binding SelectedResolutionIndex}"
-                              shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                        <ComboBoxItem Content="縦動画 (9:16)" Tag="1080x1920"/>
-                        <ComboBoxItem Content="横動画 (16:9)" Tag="1920x1080"/>
-                    </ComboBox>
-                </StackPanel>
-            </Grid>
+                    <Button Grid.Column="1" VerticalAlignment="Bottom"
+                            Width="36" Height="30"
+                            Margin="0,0,8,0"
+                            ToolTip="試聴"
+                            Command="{Binding PreviewSpeakerCommand}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Path Data="M8,5 V19 L19,12 Z"
+                              Fill="{DynamicResource TextPrimary}"
+                              Width="12" Height="12" Stretch="Uniform"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+
+                    <StackPanel Grid.Column="2" Margin="0,0,0,0">
+                        <TextBlock Text="向き" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox SelectedIndex="{Binding SelectedResolutionIndex}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <ComboBoxItem Content="縦動画 (9:16)" Tag="1080x1920"/>
+                            <ComboBoxItem Content="横動画 (16:9)" Tag="1920x1080"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 2: Transition + Speech Speed -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="切り替え効果" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding TransitionOptions}"
+                                  SelectedIndex="{Binding SelectedTransitionIndex}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="話す速さ" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding SpeedOptions}"
+                                  SelectedIndex="{Binding SelectedSpeedIndex}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 3: BGM + Thumbnail -->
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="BGM" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="28" Height="28"
+                                    Margin="4,0,0,0"
+                                    ToolTip="BGMを解除"
+                                    Command="{Binding ClearBgmCommand}"
+                                    Visibility="{Binding HasBgm, Converter={StaticResource SysBoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding BgmFileName}"
+                                    Height="28" FontSize="11"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="8,0"
+                                    Command="{Binding SelectBgmCommand}"
+                                    ToolTip="BGMファイルを選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
+                        <CheckBox Content="サムネイル生成"
+                                  IsChecked="{Binding GenerateThumbnailEnabled}"
+                                  FontSize="11"
+                                  Foreground="{DynamicResource TextSecondary}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
 
             <!-- ── Action Buttons ── -->
             <StackPanel Grid.Row="2" Margin="0,0,0,8">

@@ -387,6 +387,32 @@ namespace InsightMovie.ViewModels
             new[] { 0, 191, 255 },   // 水色
         };
 
+        // Speech speed
+        public List<string> SpeechSpeedOptions { get; } = new()
+        {
+            "0.8x", "1.0x", "1.2x", "1.5x"
+        };
+
+        private static readonly double[] SpeechSpeedValues = { 0.8, 1.0, 1.2, 1.5 };
+
+        private int _selectedSpeechSpeedIndex = 1;
+        public int SelectedSpeechSpeedIndex
+        {
+            get => _selectedSpeechSpeedIndex;
+            set
+            {
+                if (SetProperty(ref _selectedSpeechSpeedIndex, value))
+                    OnSpeechSpeedChanged();
+            }
+        }
+
+        private void OnSpeechSpeedChanged()
+        {
+            if (_isLoadingScene || _currentScene == null) return;
+            if (_selectedSpeechSpeedIndex >= 0 && _selectedSpeechSpeedIndex < SpeechSpeedValues.Length)
+                _currentScene.SpeechSpeed = SpeechSpeedValues[_selectedSpeechSpeedIndex];
+        }
+
         // Current scene for UI binding
         public Scene? CurrentScene => _currentScene;
         public Project Project => _project;
@@ -606,6 +632,10 @@ namespace InsightMovie.ViewModels
                 SelectedOverlayIndex = 0;
             else
                 SelectedOverlayIndex = -1;
+
+            // Speech speed
+            SelectedSpeechSpeedIndex = Array.IndexOf(SpeechSpeedValues, _currentScene.SpeechSpeed);
+            if (_selectedSpeechSpeedIndex < 0) SelectedSpeechSpeedIndex = 1;
 
             _isLoadingScene = false;
         }
@@ -1183,11 +1213,23 @@ namespace InsightMovie.ViewModels
             {
                 var ffmpeg = _ffmpegWrapper!; // null already checked above
                 var exportService = new ExportService(ffmpeg, _voiceVoxClient, _audioCache);
-                var success = await Task.Run(() =>
-                    exportService.Export(projectSnapshot, outputPath, resolution, fps,
+                var exportResult = await Task.Run(() =>
+                    exportService.ExportFull(projectSnapshot, outputPath, resolution, fps,
                         exportSpeakerId, GetStyleSnapshot, progress, ct), ct);
 
-                OnExportFinished(success, outputPath);
+                if (exportResult.Success)
+                {
+                    var extras = new List<string>();
+                    if (!string.IsNullOrEmpty(exportResult.ThumbnailPath))
+                        extras.Add($"サムネイル: {exportResult.ThumbnailPath}");
+                    if (!string.IsNullOrEmpty(exportResult.ChapterFilePath))
+                        extras.Add($"チャプター: {exportResult.ChapterFilePath}");
+                    if (!string.IsNullOrEmpty(exportResult.MetadataFilePath))
+                        extras.Add($"メタデータ: {exportResult.MetadataFilePath}");
+                    foreach (var extra in extras) _logger.Log(extra);
+                }
+
+                OnExportFinished(exportResult.Success, outputPath);
             }
             catch (OperationCanceledException)
             {

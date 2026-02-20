@@ -26,6 +26,13 @@ namespace InsightMovie.Services
             return dlg.ShowDialog(_owner) == true ? dlg.FileName : null;
         }
 
+        public string[]? ShowOpenFileDialogMultiple(string title, string filter, string? defaultExt = null)
+        {
+            var dlg = new OpenFileDialog { Title = title, Filter = filter, Multiselect = true };
+            if (defaultExt != null) dlg.DefaultExt = defaultExt;
+            return dlg.ShowDialog(_owner) == true ? dlg.FileNames : null;
+        }
+
         public string? ShowSaveFileDialog(string title, string filter, string? defaultExt = null, string? fileName = null)
         {
             var dlg = new SaveFileDialog { Title = title, Filter = filter };

@@ -126,6 +126,39 @@ namespace InsightMovie.Models
         [JsonPropertyName("bgm")]
         public BGMSettings Bgm { get; set; } = new();
 
+        [JsonPropertyName("watermark")]
+        public WatermarkSettings Watermark { get; set; } = new();
+
+        [JsonPropertyName("introMediaPath")]
+        public string? IntroMediaPath { get; set; }
+
+        [JsonPropertyName("introDuration")]
+        public double IntroDuration { get; set; } = 3.0;
+
+        [JsonPropertyName("outroMediaPath")]
+        public string? OutroMediaPath { get; set; }
+
+        [JsonPropertyName("outroDuration")]
+        public double OutroDuration { get; set; } = 3.0;
+
+        [JsonPropertyName("defaultTransition")]
+        public TransitionType DefaultTransition { get; set; } = TransitionType.Fade;
+
+        [JsonPropertyName("defaultTransitionDuration")]
+        public double DefaultTransitionDuration { get; set; } = 0.5;
+
+        [JsonPropertyName("generateThumbnail")]
+        public bool GenerateThumbnail { get; set; } = true;
+
+        [JsonPropertyName("generateChapters")]
+        public bool GenerateChapters { get; set; } = true;
+
+        [JsonIgnore]
+        public bool HasIntro => !string.IsNullOrEmpty(IntroMediaPath);
+
+        [JsonIgnore]
+        public bool HasOutro => !string.IsNullOrEmpty(OutroMediaPath);
+
         public Project()
         {
         }
