@@ -1,407 +1,252 @@
-# InsightMovie → InsightCast 実装計画
+# InsightCast 実装計画（国内販売特化）
 
 作成日: 2026年2月20日
+改訂: 2026年2月20日（マーケティング視点で再構成）
 
 ---
 
-## 現状分析（As-Is）
+## 判断基準：顧客導線のどこで離脱するか
 
-### 実装済み機能
+```
+YouTube広告 → insightcast.jp LP → 無料DL → 初回起動 → 体験 → 「これだ」→ Business契約
+```
 
-| 機能 | 実装状況 | 対応ファイル |
-|---|---|---|
-| PPTX取込（ノート抽出＋画像エクスポート） | ✅ 実装済 | `Utils/PptxImporter.cs` |
-| VOICEVOX音声合成（日本語のみ） | ✅ 実装済 | `VoiceVox/VoiceVoxClient.cs` |
-| FFmpegによるMP4動画生成 | ✅ 実装済 | `Video/FFmpegWrapper.cs`, `Video/SceneGenerator.cs` |
-| シーン編集（素材・ナレーション・字幕） | ✅ 実装済 | `ViewModels/MainWindowViewModel.cs` |
-| 字幕スタイル（フォント・色・影・背景） | ✅ 実装済 | `Models/TextStyle.cs`, `Views/TextStyleDialog.xaml` |
-| トランジション（フェード・ワイプ等） | ✅ 実装済 | `Models/Transition.cs`, `Video/VideoComposer.cs` |
-| BGM（ボリューム・フェード・ダッキング） | ✅ 実装済 | `Models/BGMSettings.cs`, `Video/VideoComposer.cs` |
-| プロジェクト保存/読込（JSON） | ✅ 実装済 | `Models/Project.cs` |
-| ライセンス管理（Free/Trial/Std/Pro/Ent） | ✅ 実装済 | `Core/License.cs` |
-| 音声キャッシュ | ✅ 実装済 | `VoiceVox/AudioCache.cs` |
-| プレビュー再生 | ✅ 実装済 | `Views/PreviewPlayerDialog.xaml` |
-
-### 技術スタック
-
-- **フレームワーク**: WPF (.NET 8.0 Windows)
-- **音声エンジン**: VOICEVOX（ローカルREST API）
-- **動画処理**: FFmpeg（外部コマンド）
-- **PPTX解析**: DocumentFormat.OpenXml 3.0.1
-- **シリアライゼーション**: System.Text.Json 8.0.5
+この導線の**各ステップで何がボトルネックになるか**を基準に優先度を決定。
 
 ---
 
-## ギャップ分析（insightcast.jp 対 現コードベース）
+## 致命的ギャップ TOP 5
 
-| # | insightcast.jp の提供機能 | 現在の実装 | ギャップ |
+insightcast.jp が約束していることと、現アプリで実現できていないこと。
+
+| # | LPの約束 | 現アプリの現実 | 離脱インパクト |
 |---|---|---|---|
-| 1 | 製品名「InsightCast」 | 「InsightMovie」のまま | **リネーム必要** |
-| 2 | PDF取込 | なし | **新規実装** |
-| 3 | テキストファイル取込 | なし | **新規実装** |
-| 4 | 画像取込（JPG/PNG） | ✅ 手動選択で対応 | 一括取込UI改善 |
-| 5 | 多言語ナレーション（EN/ZH/VI/PT等） | 日本語のみ（VOICEVOX） | **クラウドTTS連携** |
-| 6 | 男声・女声選択 | VOICEVOXの話者で対応 | 多言語音声の男女選択追加 |
-| 7 | 30分以内で動画完成 | ✅ ローカル処理で達成可能 | - |
-| 8 | MP4ダウンロード | ✅ MP4エクスポート | - |
-| 9 | Free: 月3本・透かし付き | Free版あるが月制限・透かしなし | **透かし・月次カウント** |
-| 10 | Business: 30本・ロゴ挿入・透かしなし | なし | **ロゴ挿入機能** |
-| 11 | Enterprise: 無制限・API・SSO | なし | **Phase 3以降** |
-| 12 | API連携（LMS/SharePoint） | なし | **Phase 3以降** |
-| 13 | 暗号化処理・自動削除 | なし | **セキュリティ強化** |
-| 14 | 即座の修正・再生成 | ✅ シーン再編集で対応 | - |
+| 1 | 製品名「InsightCast」 | UIに「InsightMovie」と表示される | **致命的** — 広告とアプリが別物に見える |
+| 2 | 「ドラッグ&ドロップ」 | ファイル選択ダイアログのみ | **高** — LP Step 1 と体験が不一致 |
+| 3 | 「PDF対応」 | PDF取込不可 | **高** — 建設・製造の教材はPDFが主流 |
+| 4 | 「資料をアップロードするだけで完成」 | シーンエディタUIが表示される | **高** — 編集ソフトに見えて離脱 |
+| 5 | PPTX → 自動で動画化 | PPTX取込はあるがスライド画像にPowerPoint必須 | **中** — ターゲット層にPPT未インストールが多い |
 
 ---
 
-## 実装フェーズ
+## 優先度付き実装ロードマップ
 
-### Phase 1: ブランドリネーム（InsightMovie → InsightCast）
-**目標**: 全コードベースで「InsightMovie」を「InsightCast」にリネーム
-**期間**: 1-2日
-**リスク**: 低（検索・置換が主体）
+### Priority 1: 信頼の土台（これが無いと広告費が無駄になる）
 
-#### 1-1. プロジェクト構造のリネーム
+#### P1-1. ブランドリネーム：InsightMovie → InsightCast
+**なぜ最優先か**: 広告→LP→DL→起動で「InsightMovie」が表示されたら、ユーザーは「違うアプリをDLした？」と思って閉じる。**広告のCPAが全て無駄になる**。
 
-| 対象 | 変更前 | 変更後 |
+**変更範囲**:
+
+| カテゴリ | 変更対象 | ファイル数 |
 |---|---|---|
-| ソリューションファイル | `InsightMovie.sln` | `InsightCast.sln` |
-| プロジェクトフォルダ | `InsightMovie/` | `InsightCast/` |
-| csproj ファイル | `InsightMovie.csproj` | `InsightCast.csproj` |
-| RootNamespace | `InsightMovie` | `InsightCast` |
-| AssemblyName | `InsightMovie` | `InsightCast` |
+| プロジェクト構造 | .sln, .csproj, フォルダ名 | 3 |
+| C# namespace/using | 全 .cs ファイル | 32 |
+| XAML xmlns/x:Class | 全 .xaml ファイル | 8 |
+| UI表示文字列 | タイトルバー, About, Tutorial, エラーダイアログ | 10箇所 |
+| 設定パス | Config, AudioCache, ExportService の temp パス | 3 |
+| ライセンスコード | INMV → INCS（旧コードも受付維持） | 1 |
+| ビルド | build.ps1, Installer, app.manifest | 3 |
 
-#### 1-2. ソースコード内のリネーム
+**工数**: 1日
+**リスク**: 低（機械的な置換が主体）
 
-| 対象 | ファイル数 | 変更内容 |
-|---|---|---|
-| namespace宣言 | 全.csファイル（32ファイル） | `InsightMovie.*` → `InsightCast.*` |
-| using文 | 全.csファイル | `using InsightMovie.*` → `using InsightCast.*` |
-| XAML xmlns | 全.xamlファイル（8ファイル） | `clr-namespace:InsightMovie.*` → `clr-namespace:InsightCast.*` |
-| x:Class属性 | 全.xamlファイル | `InsightMovie.Views.*` → `InsightCast.Views.*` |
-
-#### 1-3. UIテキスト・ユーザー向け文字列
-
-| ファイル | 変更箇所 |
-|---|---|
-| `MainWindowViewModel.cs:50` | `_windowTitle = "InsightMovie - 新規プロジェクト"` → `"InsightCast - 新規プロジェクト"` |
-| `MainWindowViewModel.cs:965` | NewProject内の `WindowTitle` |
-| `MainWindowViewModel.cs:985` | OpenProject内の `WindowTitle` |
-| `MainWindowViewModel.cs:1030` | SaveProjectAs内の `WindowTitle` |
-| `MainWindowViewModel.cs:847` | ExportVideo内のデフォルトファイル名 `"InsightMovie.mp4"` → `"InsightCast.mp4"` |
-| `MainWindowViewModel.cs:1023` | SaveProjectAsの `"InsightMovie.json"` → `"InsightCast.json"` |
-| `MainWindowViewModel.cs:1176` | ShowTutorial: `"InsightMovie チュートリアル"` → `"InsightCast チュートリアル"` |
-| `MainWindowViewModel.cs:1220-1224` | ShowAbout: バージョン情報全体 |
-| `MainWindow.xaml:91` | ヘッダーのタイトルテキスト `"InsightMovie"` → `"InsightCast"` |
-| `MainWindow.xaml:235` | メニュー `"InsightMovieについて"` → `"InsightCastについて"` |
-
-#### 1-4. 設定パス・キャッシュパス
-
-| ファイル | 変更箇所 |
-|---|---|
-| `Core/Config.cs:12` | `"InsightMovie"` → `"InsightCast"` (AppData パス) |
-| `ViewModels/MainWindowViewModel.cs:1066` | `"insightmovie_cache"` → `"insightcast_cache"` |
-| `Services/ExportService.cs:45` | `"insightmovie_build"` → `"insightcast_build"` |
-
-#### 1-5. ライセンスプロダクトコード
-
-| ファイル | 変更箇所 | 注意 |
-|---|---|---|
-| `Core/License.cs:32` | `PRODUCT_CODE = "INMV"` → `"INCS"` | 既存キーの後方互換性を検討 |
-| `Core/License.cs:37` | 正規表現に `INCS` を追加 | 旧コード`INMV`も受け入れ可能にする |
-| `InsightMovie.csproj:13` | Description文字列 |
-| `InsightMovie.csproj:14-15` | Company, Product |
-
-#### 1-6. ビルド関連
-
-| ファイル | 変更内容 |
-|---|---|
-| `build.ps1` | プロジェクトパス参照の更新 |
-| `Installer/` | インストーラ設定の更新 |
-| `.gitmodules` | パス参照の確認 |
-
----
-
-### Phase 2: 入力形式の拡張
-**目標**: PDF・テキストファイルの取込サポート
-**期間**: 1-2週間
-**依存**: Phase 1 完了後
-
-#### 2-1. PDF取込機能
-
-**方針**: PDFの各ページを画像に変換し、テキストを抽出してナレーションテキストに設定
-
-**新規ファイル**: `Utils/PdfImporter.cs`
+#### P1-2. ドラッグ&ドロップ対応
+**なぜ重要か**: LPの Step 1 で「ドラッグ&ドロップ」と明記。これが無いとLPが嘘になる。
 
 **実装内容**:
-- NuGetパッケージ追加: `PdfPig`（テキスト抽出）+ FFmpegベースのPDF→画像変換（もしくは`SkiaSharp` + `PdfiumViewer`）
-- PDFの各ページを PNG 画像として export
-- 各ページのテキストを抽出し、Scene の NarrationText に設定
-- PptxImporter と同じインターフェースパターン（SlideData 互換）
+- `MainWindow.xaml` に `AllowDrop="True"` を追加
+- `MainWindow.xaml.cs` に `DragEnter` / `Drop` イベントハンドラ
+- 対応形式: `.pptx`, `.pdf`, `.png`, `.jpg`, `.jpeg`, `.bmp`, `.gif`, `.mp4`, `.txt`
+- ドロップされたファイル種別に応じて適切な取込処理を自動振り分け:
+  - PPTX → ImportPptx フロー
+  - PDF → ImportPdf フロー（P1-3で実装）
+  - 画像 → 新規シーンとして追加
+  - 動画 → 新規シーンとして追加
+  - テキスト → ImportText フロー
+- ドロップエリアのビジュアルフィードバック（枠線ハイライト）
 
-**UI変更**:
-- `MainWindowViewModel.cs`: `ImportPdfCommand` 追加
-- `MainWindow.xaml`: ヘッダーバーに「PDF取込」ボタン追加
-- ファイル選択ダイアログのフィルタにPDF追加
+**変更ファイル**: `MainWindow.xaml`, `MainWindow.xaml.cs`, `MainWindowViewModel.cs`
+**工数**: 1日
+**依存**: P1-1（namespace変更後に実装）
 
-**ライセンス**: PPTX取込と同じ制限（Trial/Pro以上）
+#### P1-3. PDF取込
+**なぜ重要か**: LPに「PowerPoint、画像、PDF」と明記。建設・製造業の教育資料はPDF配布が圧倒的に多い。「PDFが使えない」は購入断念の直接原因。
 
-#### 2-2. テキストファイル取込機能
+**実装内容**:
+- 新規ファイル: `Utils/PdfImporter.cs`
+- NuGet追加: `UglyToad.PdfPig`（テキスト抽出、Apache 2.0ライセンス）
+- PDFページ → 画像変換: FFmpegの`-i` でPDFは扱えないため、代替手段が必要
+  - 案A: `SkiaSharp` + `SkiaSharp.Views.WPF` でPDFレンダリング（推奨）
+  - 案B: PDFページをスクリーンキャプチャ的に変換
+- 各ページのテキストを抽出 → NarrationText に設定
+- PptxImporter と同じ `SlideData` パターンで出力
+- MainWindowViewModel に `ImportPdfCommand` 追加
+- MainWindow.xaml のヘッダーバーに「PDF取込」ボタン追加
 
-**方針**: テキストファイルを段落単位でシーンに分割。各シーンは黒背景＋ナレーション。
+**変更ファイル**: 新規 `Utils/PdfImporter.cs`, `MainWindowViewModel.cs`, `MainWindow.xaml`, `.csproj`
+**工数**: 3-5日
+**依存**: P1-1
+
+---
+
+### Priority 2: 初回体験の改善（Free→Businessの転換率直結）
+
+#### P2-1. 「かんたんモード」— ワンクリック動画生成
+**なぜ重要か**: LPは「資料をアップロードするだけで完成」と謳っているが、現アプリは**シーンエディタ**。現場管理者が起動して「シーン一覧」「トランジション」「字幕スタイル」を見たら「これは編集ソフトだ、自分には無理」と閉じる。
+
+**「アップロードするだけ」を実現する導線が必要。**
+
+**実装内容**:
+- 起動時またはメニューから選べる「かんたんモード」画面を追加
+- UI構成:
+  ```
+  ┌──────────────────────────────────┐
+  │  InsightCast                      │
+  │                                   │
+  │  ┌─────────────────────────────┐  │
+  │  │                             │  │
+  │  │   ここに資料をドロップ       │  │
+  │  │   （PPT・PDF・画像）        │  │
+  │  │                             │  │
+  │  └─────────────────────────────┘  │
+  │                                   │
+  │  話者: [▼ 青山龍星（ノーマル）]   │
+  │  解像度: [▼ 1080x1920 (縦)]      │
+  │                                   │
+  │  [ 動画を生成 ]                   │
+  │                                   │
+  │  ─── または ───                   │
+  │  [詳細エディタで開く]             │
+  └──────────────────────────────────┘
+  ```
+- ドロップ → 自動シーン構成 → 即エクスポート（話者・解像度のみ選択）
+- 生成後、詳細エディタに切り替えて微調整も可能
+- 「詳細エディタで開く」で従来のMainWindow表示
+
+**新規ファイル**: `Views/QuickMode.xaml`, `Views/QuickMode.xaml.cs`, `ViewModels/QuickModeViewModel.cs`
+**変更ファイル**: `App.xaml.cs`（起動フロー分岐）
+**工数**: 5-7日
+**依存**: P1-1, P1-2, P1-3
+
+#### P2-2. サンプルプロジェクト内蔵
+**なぜ重要か**: 初回起動時に空のエディタが表示されると「何をすればいいかわからない」。FAQで「動画編集経験は不要」と書いているなら、**体験で証明する必要がある**。
+
+**実装内容**:
+- アプリ内蔵のサンプルPPTX（3-5スライド、建設安全教育テーマ）
+- 初回起動時「サンプル動画を生成してみる」ボタン表示
+- ワンクリックでサンプルをロード → かんたんモードで即生成体験
+- 「30秒で動画ができた！」の成功体験を初回で提供
+
+**新規ファイル**: `Resources/sample_project.pptx`（埋め込みリソース）
+**変更ファイル**: `Views/SetupWizard.xaml`（最終ページにサンプル生成ボタン追加）, `App.xaml.cs`
+**工数**: 2-3日
+**依存**: P2-1
+
+#### P2-3. PPTX取込のCOM非依存化
+**なぜ重要か**: 現在のPPTXスライド画像エクスポートは PowerPoint COM interop 必須。ターゲットの現場管理者の多くはPowerPointがインストールされていない。LP で「PowerPointをアップロード」と言っているのに、PowerPointのインストールが必要なのは矛盾。
+
+**実装内容**:
+- `PptxImporter.cs` の `ExportPngsWin32()` に代替レンダリングを追加
+- 案A（推奨）: OpenXml でスライドのレイアウト情報を読み取り、SkiaSharp でレンダリング
+- 案B: LibreOffice CLI（soffice --headless --convert-to png）をフォールバックとして利用
+- 案C: スライドのテキスト＋ノートのみ取得し、画像はスキップ（現在のフォールバック動作を明示化）
+- COM利用可能時は高品質レンダリング、不可時はフォールバックで対応
+
+**変更ファイル**: `Utils/PptxImporter.cs`
+**新規NuGet**: `SkiaSharp`（案Aの場合）
+**工数**: 5-7日
+**依存**: P1-1
+
+---
+
+### Priority 3: 法人契約の安心材料
+
+#### P3-1. 一時ファイル自動削除
+**なぜ重要か**: LPで「暗号化環境で処理後、自動削除」と明記。法人のIT部門がセキュリティチェックシートで確認する項目。**Enterprise契約のブロッカー**になりうる。
+
+**実装内容**:
+- エクスポート完了後、`insightcast_build/` ディレクトリの中間ファイルを即削除
+- アプリ終了時（`App.OnExit`）にキャッシュディレクトリのクリーンアップ
+- 設定で「終了時にキャッシュを自動削除」のオン/オフ（デフォルトオン）
+- オーディオキャッシュ（`AudioCache`）にも有効期限（7日）を追加
+
+**変更ファイル**: `Services/ExportService.cs`, `VoiceVox/AudioCache.cs`, `App.xaml.cs`, `Core/Config.cs`
+**工数**: 1-2日
+**依存**: P1-1
+
+#### P3-2. テキストファイル取込
+**なぜ重要か**: 直接のLP約束ではないが、「原稿テキストから動画を作りたい」というニーズは高い。手順書がWordやテキストで残っている現場が多い。
+
+**実装内容**:
+- 新規ファイル: `Utils/TextImporter.cs`
+- `.txt` / `.md` ファイルを読み込み
+- 空行区切りで段落分割 → 各段落を1シーンに
+- ナレーションテキスト = 段落テキスト
+- 画像なし → 黒背景（既存の GenerateBlankVideo で対応済み）
+- ドラッグ&ドロップ（P1-2）と連携
 
 **新規ファイル**: `Utils/TextImporter.cs`
+**変更ファイル**: `MainWindowViewModel.cs`
+**工数**: 1-2日
+**依存**: P1-1, P1-2
+
+#### P3-3. 一括画像取込
+**なぜ重要か**: 現場で撮った写真10枚をまとめて教育動画にしたい。1枚ずつ「シーン追加→素材選択」は面倒で離脱する。
 
 **実装内容**:
-- `.txt` ファイルを読み込み
-- 空行区切りで段落を分割 → 各段落を1シーンとして追加
-- ナレーションテキスト = 段落テキスト
-- 字幕テキスト = 段落テキスト（オプション）
-- 画像なし → 黒背景（既存機能で対応可能）
+- ファイル選択ダイアログを複数選択対応に変更
+- 複数画像選択 → 画像数分のシーンを自動追加（各画像がMediaPathに設定済み）
+- ドラッグ&ドロップ（P1-2）でも複数ファイル対応
+- 追加後に自動的に最初の新規シーンを選択
 
-**UI変更**:
-- `MainWindowViewModel.cs`: `ImportTextCommand` 追加
-- `MainWindow.xaml`: メニューに「テキスト取込」追加
-
-#### 2-3. 一括素材取込の改善
-
-**方針**: 複数画像を一括選択してシーンに追加
-
-**実装内容**:
-- ファイル選択ダイアログで複数選択対応（既存のSelectMediaは単一選択）
-- 複数画像 → 画像数分のシーンを自動追加
-- ドラッグ＆ドロップ対応（MainWindow.xaml に AllowDrop）
+**変更ファイル**: `MainWindowViewModel.cs`, `Services/DialogService.cs`
+**工数**: 1日
+**依存**: P1-1, P1-2
 
 ---
 
-### Phase 3: 多言語音声ナレーション
-**目標**: 日本語以外の言語でのAI音声ナレーション
-**期間**: 2-3週間
-**依存**: Phase 1 完了後（Phase 2 と並行可能）
-
-#### 3-1. TTS抽象化レイヤー
-
-**方針**: 現在のVOICEVOX依存を抽象化し、複数のTTSバックエンドを切り替え可能にする
-
-**新規ファイル**:
+## 実装スケジュール
 
 ```
-Services/
-├── ITtsEngine.cs          # TTS抽象インターフェース
-├── TtsEngineFactory.cs    # エンジンファクトリー
-├── VoiceVoxTtsEngine.cs   # 既存VOICEVOX（ラッパー）
-├── AzureTtsEngine.cs      # Azure Cognitive Services TTS
-└── TtsVoiceInfo.cs        # 話者情報モデル
+Week 1:
+├── P1-1 ブランドリネーム                    [1日] ★ 最優先
+├── P1-2 ドラッグ&ドロップ                   [1日]
+├── P1-3 PDF取込                            [3-5日] ←ここまでで「LPの約束」を全て実現
+│
+Week 2:
+├── P2-1 かんたんモード                      [5-7日] ←これでFree→Business転換率が変わる
+│
+Week 3:
+├── P2-2 サンプルプロジェクト               [2-3日]
+├── P2-3 PPTX COM非依存化                   [5-7日]
+├── P3-1 一時ファイル自動削除               [1-2日]
+├── P3-2 テキストファイル取込               [1-2日]
+├── P3-3 一括画像取込                       [1日]
 ```
 
-**ITtsEngine インターフェース**:
-```csharp
-public interface ITtsEngine
-{
-    string EngineName { get; }
-    Task<List<TtsVoiceInfo>> GetVoicesAsync(string? languageFilter = null);
-    Task<byte[]> SynthesizeAsync(string text, string voiceId, TtsOptions? options = null);
-    Task<bool> CheckConnectionAsync();
-}
-```
+**Week 1 終了時点で広告を開始できる**（LPの約束と製品が一致するため）。
+Week 2-3 は広告運用と並行して改善。
 
-**対応言語と推奨エンジン**:
+---
 
-| 言語 | コード | TTSエンジン | 備考 |
+## 工数サマリー
+
+| Priority | 項目数 | 合計工数 | ビジネスインパクト |
 |---|---|---|---|
-| 日本語 | ja-JP | VOICEVOX（既存） | ローカル、無料 |
-| 英語 | en-US | Azure TTS | クラウド |
-| 中国語 | zh-CN | Azure TTS | クラウド |
-| ベトナム語 | vi-VN | Azure TTS | クラウド |
-| ポルトガル語 | pt-BR | Azure TTS | クラウド |
-
-#### 3-2. Azure TTS 連携
-
-**NuGetパッケージ追加**: `Microsoft.CognitiveServices.Speech`
-
-**設定**: APIキー・リージョンを `Config.cs` に追加
-```csharp
-public string? AzureTtsKey { get; set; }
-public string? AzureTtsRegion { get; set; }
-```
-
-**UI変更**:
-- 言語選択ドロップダウンの追加（プロジェクト全体 + シーン個別）
-- 話者リストを言語でフィルタリング
-- セットアップウィザードにAzure TTS設定画面を追加
-
-#### 3-3. 音声キャッシュの拡張
-
-**変更ファイル**: `VoiceVox/AudioCache.cs`
-
-- キャッシュキーにエンジン名と言語コードを追加
-- キャッシュパス: `{engine}/{lang}/{hash}.wav`
+| **P1: 信頼の土台** | 3項目 | **5-7日** | 広告費が無駄にならない |
+| **P2: 初回体験** | 3項目 | **12-17日** | Free→Business転換率UP |
+| **P3: 法人安心材料** | 3項目 | **3-5日** | Enterprise契約のブロッカー除去 |
+| **合計** | **9項目** | **20-29日** | |
 
 ---
 
-### Phase 4: プラン機能の実装
-**目標**: insightcast.jp の3プラン（Free/Business/Enterprise）に合わせた機能制限
-**期間**: 1-2週間
-**依存**: Phase 1 完了後
+## 対象外（今回のスコープ外）
 
-#### 4-1. プラン体系の再構成
-
-**変更ファイル**: `Core/License.cs`
-
-現在の5段階（Free/Trial/Std/Pro/Ent）を insightcast.jp の3段階にマッピング:
-
-| 現行プラン | 新プラン | 機能 |
-|---|---|---|
-| Free | Free | 月3本、透かし付き |
-| Trial | （廃止→Free移行） | - |
-| Std | Business | 月30本、5ユーザー、ロゴ挿入、透かしなし |
-| Pro | Business | 同上 |
-| Ent | Enterprise | 無制限、API連携、SSO |
-
-#### 4-2. 透かし（ウォーターマーク）機能
-
-**新規ファイル**: `Video/WatermarkService.cs`
-
-**実装内容**:
-- Free プランのエクスポート時、動画右下に「InsightCast Free」の半透明テキストを重ねる
-- FFmpeg drawtext フィルタで実装（SceneGenerator.cs の字幕と同じパターン）
-- ExportService.cs の Export メソッド内、最終結合後に適用
-
-#### 4-3. ロゴ挿入機能
-
-**新規ファイル**: `Video/LogoOverlayService.cs`
-
-**実装内容**:
-- Business プラン以上で利用可能
-- ユーザーがロゴ画像（PNG）を指定
-- 配置位置: 左上/右上/左下/右下 から選択
-- FFmpeg overlay フィルタで実装
-- Project モデルに `LogoSettings` を追加
-
-#### 4-4. 月次生成カウント
-
-**変更ファイル**: `Core/Config.cs`
-
-**実装内容**:
-- `Config.cs` に月次カウンター追加:
-  - `ExportCount` (int): 当月のエクスポート数
-  - `ExportCountMonth` (string): カウントの対象月 (YYYY-MM)
-- ExportVideo 実行前にカウントチェック
-- 月が変わればリセット
-- Free: 3本/月、Business: 30本/月、Enterprise: 無制限
-
-#### 4-5. Feature Matrix 更新
-
-```csharp
-private static readonly Dictionary<string, PlanCode[]> FEATURE_MATRIX = new()
-{
-    { "subtitle",       new[] { PlanCode.Business, PlanCode.Ent } },
-    { "subtitle_style", new[] { PlanCode.Business, PlanCode.Ent } },
-    { "transition",     new[] { PlanCode.Business, PlanCode.Ent } },
-    { "pptx_import",    new[] { PlanCode.Business, PlanCode.Ent } },
-    { "pdf_import",     new[] { PlanCode.Business, PlanCode.Ent } },
-    { "multilang_tts",  new[] { PlanCode.Business, PlanCode.Ent } },
-    { "logo_overlay",   new[] { PlanCode.Business, PlanCode.Ent } },
-    { "no_watermark",   new[] { PlanCode.Business, PlanCode.Ent } },
-    { "api_access",     new[] { PlanCode.Ent } },
-    { "sso",            new[] { PlanCode.Ent } },
-};
-```
-
----
-
-### Phase 5: セキュリティ・運用機能
-**目標**: insightcast.jp の信頼性/セキュリティ機能の実装
-**期間**: 1-2週間
-**依存**: Phase 1-4
-
-#### 5-1. 一時ファイルの自動削除
-
-**変更ファイル**: `Services/ExportService.cs`, `Video/SceneGenerator.cs`
-
-**実装内容**:
-- エクスポート完了後、temp ディレクトリ配下の中間ファイルを確実に削除
-- アプリ終了時にキャッシュディレクトリのクリーンアップ
-- `App.xaml.cs` の OnExit で残存一時ファイルを削除
-
-#### 5-2. プロジェクトファイルの暗号化（オプション）
-
-**新規ファイル**: `Core/ProjectEncryption.cs`
-
-**実装内容**:
-- AES-256-GCM による Project JSON の暗号化/復号
-- Enterprise プランのみ
-- パスワードベース鍵導出（PBKDF2）
-
----
-
-### Phase 6: 将来拡張（SaaS化・API化）
-**目標**: Web版・API連携の基盤整備
-**期間**: 要別途計画
-**備考**: デスクトップアプリの成熟後に着手
-
-- REST API サーバー（ASP.NET Core）の新規プロジェクト追加
-- バッチ動画生成キュー
-- LMS/SharePoint Webhook 連携
-- SSO（SAML/OIDC）連携
-- マルチテナント対応
-- ユーザー管理・課金連携
-
----
-
-## 実装優先順位
-
-```
-Phase 1 (ブランドリネーム)          ██████░░░░ 1-2日
-    ↓
-Phase 2 (PDF・テキスト取込)         ██████████ 1-2週 ─┐
-Phase 3 (多言語TTS)                ██████████ 2-3週 ─┤ 並行可
-Phase 4 (プラン機能)               ██████████ 1-2週 ─┘
-    ↓
-Phase 5 (セキュリティ)             ██████░░░░ 1-2週
-    ↓
-Phase 6 (SaaS化)                  ██████████████████ 要別途計画
-```
-
-**推奨開始順序**: Phase 1 → Phase 2 + Phase 4 並行 → Phase 3 → Phase 5
-
----
-
-## ファイル変更一覧（Phase 1-5 合計）
-
-### 変更ファイル
-
-| ファイル | Phase | 変更種別 |
-|---|---|---|
-| `InsightMovie.csproj` → `InsightCast.csproj` | 1 | リネーム＋修正 |
-| `InsightMovie.sln` → `InsightCast.sln` | 1 | リネーム＋修正 |
-| 全 .cs ファイル（32ファイル） | 1 | namespace/using リネーム |
-| 全 .xaml ファイル（8ファイル） | 1 | xmlns/x:Class リネーム |
-| `Core/Config.cs` | 1,4 | パスリネーム＋月次カウンター |
-| `Core/License.cs` | 1,4 | プロダクトコード＋プラン再構成 |
-| `ViewModels/MainWindowViewModel.cs` | 1,2,3,4 | UI文字列＋新コマンド＋TTS統合 |
-| `Views/MainWindow.xaml` | 1,2,3 | UIテキスト＋新ボタン＋言語選択 |
-| `Services/ExportService.cs` | 1,4,5 | パスリネーム＋透かし＋自動削除 |
-| `build.ps1` | 1 | パス参照更新 |
-
-### 新規ファイル
-
-| ファイル | Phase | 内容 |
-|---|---|---|
-| `Utils/PdfImporter.cs` | 2 | PDF取込 |
-| `Utils/TextImporter.cs` | 2 | テキストファイル取込 |
-| `Services/ITtsEngine.cs` | 3 | TTS抽象インターフェース |
-| `Services/TtsEngineFactory.cs` | 3 | TTSエンジンファクトリー |
-| `Services/VoiceVoxTtsEngine.cs` | 3 | VOICEVOX TTSアダプタ |
-| `Services/AzureTtsEngine.cs` | 3 | Azure TTS連携 |
-| `Services/TtsVoiceInfo.cs` | 3 | 話者情報モデル |
-| `Video/WatermarkService.cs` | 4 | 透かし機能 |
-| `Video/LogoOverlayService.cs` | 4 | ロゴ挿入機能 |
-| `Models/LogoSettings.cs` | 4 | ロゴ設定モデル |
-| `Core/ProjectEncryption.cs` | 5 | プロジェクト暗号化 |
-
-### 新規NuGetパッケージ
-
-| パッケージ | Phase | 用途 |
-|---|---|---|
-| `UglyToad.PdfPig` | 2 | PDFテキスト抽出 |
-| `Microsoft.CognitiveServices.Speech` | 3 | Azure TTS |
+| 機能 | 理由 |
+|---|---|
+| 多言語TTS | 国内販売では日本語VOICEVOXで十分。将来のグローバル展開時に検討 |
+| プラン制限（透かし・月次カウント・ロゴ挿入） | 他Insight製品と統一設計が必要。別途対応 |
+| API/LMS/SharePoint連携 | Enterprise個別案件で対応。汎用実装は時期尚早 |
+| SSO/IP制限 | Enterprise個別案件 |
+| SaaS化/Web版 | デスクトップ版の成熟が先 |
