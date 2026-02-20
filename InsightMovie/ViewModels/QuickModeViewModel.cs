@@ -16,6 +16,15 @@ using InsightMovie.VoiceVox;
 
 namespace InsightMovie.ViewModels
 {
+    /// <summary>Thumbnail data for the scene preview strip.</summary>
+    public class ThumbnailItem : ViewModelBase
+    {
+        public int Index { get; set; }
+        public string? ImagePath { get; set; }
+        public string Label { get; set; } = string.Empty;
+        public bool HasImage => !string.IsNullOrEmpty(ImagePath) && File.Exists(ImagePath);
+    }
+
     public class QuickModeViewModel : ViewModelBase
     {
         private readonly VoiceVoxClient _voiceVoxClient;
@@ -24,9 +33,11 @@ namespace InsightMovie.ViewModels
         private readonly Config _config;
         private readonly AudioCache _audioCache;
         private readonly IAppLogger _logger;
+        private IDialogService? _dialogService;
 
         private Project? _project;
         private bool _isGenerating;
+        private bool _isImporting;
         private bool _hasProject;
         private string _statusText = string.Empty;
         private string _importSummary = string.Empty;
@@ -37,8 +48,8 @@ namespace InsightMovie.ViewModels
         private string _progressText = string.Empty;
         private bool _isComplete;
         private string _outputPath = string.Empty;
+        private bool _isDragOver;
         private CancellationTokenSource? _exportCts;
-        private Dictionary<int, string> _speakerStyles = new();
 
         public QuickModeViewModel(VoiceVoxClient voiceVoxClient, int speakerId,
                                    FFmpegWrapper? ffmpegWrapper, Config config)
@@ -54,13 +65,18 @@ namespace InsightMovie.ViewModels
             OpenEditorCommand = new RelayCommand(() => OpenEditorRequested?.Invoke(_project!),
                 () => _hasProject);
             OpenOutputCommand = new RelayCommand(OpenOutput, () => _isComplete);
-            GenerateAnotherCommand = new RelayCommand(Reset);
+            GenerateAnotherCommand = new RelayCommand(ResetForRegenerate);
+            ResetAllCommand = new RelayCommand(ResetAll);
             CancelCommand = new RelayCommand(Cancel, () => _isGenerating);
+            PreviewSpeakerCommand = new AsyncRelayCommand(PreviewSpeaker);
         }
+
+        public void SetDialogService(IDialogService dialogService) => _dialogService = dialogService;
 
         #region Properties
 
         public ObservableCollection<SpeakerItem> Speakers { get; } = new();
+        public ObservableCollection<ThumbnailItem> Thumbnails { get; } = new();
 
         public int SelectedSpeakerIndex
         {
@@ -92,6 +108,12 @@ namespace InsightMovie.ViewModels
                 if (SetProperty(ref _isGenerating, value))
                     OnPropertyChanged(nameof(ShowSettings));
             }
+        }
+
+        public bool IsImporting
+        {
+            get => _isImporting;
+            private set => SetProperty(ref _isImporting, value);
         }
 
         public string StatusText
@@ -134,7 +156,13 @@ namespace InsightMovie.ViewModels
             }
         }
 
-        /// <summary>True when settings + generate button should be visible (has project, not generating, not complete).</summary>
+        public bool IsDragOver
+        {
+            get => _isDragOver;
+            set => SetProperty(ref _isDragOver, value);
+        }
+
+        /// <summary>True when settings + generate button should be visible.</summary>
         public bool ShowSettings => _hasProject && !_isGenerating && !_isComplete;
 
         public string OutputPath
@@ -153,17 +181,20 @@ namespace InsightMovie.ViewModels
         public ICommand OpenEditorCommand { get; }
         public ICommand OpenOutputCommand { get; }
         public ICommand GenerateAnotherCommand { get; }
+        public ICommand ResetAllCommand { get; }
         public ICommand CancelCommand { get; }
+        public ICommand PreviewSpeakerCommand { get; }
 
         #endregion
 
         #region Events
 
-        /// <summary>Raised when user clicks "Open in editor". Passes the current project.</summary>
         public event Action<Project>? OpenEditorRequested;
-
-        /// <summary>Raised when generated file should be opened/shown.</summary>
         public event Action<string>? OpenFileRequested;
+        /// <summary>Raised when speaker audio should play. Args: wav file path.</summary>
+        public event Action<string>? PlayAudioRequested;
+        /// <summary>Raised when audio playback should stop.</summary>
+        public event Action? StopAudioRequested;
 
         #endregion
 
@@ -180,7 +211,6 @@ namespace InsightMovie.ViewModels
             try
             {
                 var speakers = await _voiceVoxClient.GetSpeakersAsync();
-                _speakerStyles.Clear();
                 Speakers.Clear();
 
                 foreach (var speaker in speakers)
@@ -196,7 +226,6 @@ namespace InsightMovie.ViewModels
                         var styleName = style.TryGetProperty("name", out var snProp)
                             ? snProp.GetString() ?? "ノーマル" : "ノーマル";
                         var displayName = $"{speakerName} ({styleName})";
-                        _speakerStyles[styleId] = displayName;
                         Speakers.Add(new SpeakerItem { DisplayName = displayName, StyleId = styleId });
                     }
                 }
@@ -221,11 +250,53 @@ namespace InsightMovie.ViewModels
 
         #endregion
 
+        #region Speaker Preview (Fix 2)
+
+        private async Task PreviewSpeaker()
+        {
+            if (_selectedSpeakerIndex < 0 || _selectedSpeakerIndex >= Speakers.Count) return;
+
+            var speakerId = Speakers[_selectedSpeakerIndex].StyleId;
+            var sampleText = "こんにちは、これはサンプル音声です。";
+
+            try
+            {
+                StopAudioRequested?.Invoke();
+                _logger.Log("試聴音声を生成中...");
+
+                string audioPath;
+                if (_audioCache.Exists(sampleText, speakerId))
+                {
+                    audioPath = _audioCache.GetCachePath(sampleText, speakerId);
+                }
+                else
+                {
+                    var audioData = await _voiceVoxClient.GenerateAudioAsync(sampleText, speakerId);
+                    audioPath = _audioCache.Save(sampleText, speakerId, audioData);
+                }
+
+                PlayAudioRequested?.Invoke(audioPath);
+                _logger.Log("試聴再生中...");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("試聴エラー", ex);
+            }
+        }
+
+        #endregion
+
         #region File Drop Handling
 
         public async Task HandleFileDropAsync(string[] files)
         {
             if (_isGenerating) return;
+
+            // Fix 4: Show import progress
+            IsImporting = true;
+            ProgressVisible = true;
+            ProgressValue = 0;
+            ProgressText = "ファイルを読み込んでいます...";
 
             _project = new Project();
             _project.Scenes.Clear();
@@ -233,10 +304,14 @@ namespace InsightMovie.ViewModels
             int pptxCount = 0;
             int imageCount = 0;
             int videoCount = 0;
+            int textCount = 0;
 
-            foreach (var file in files)
+            for (int fi = 0; fi < files.Length; fi++)
             {
+                var file = files[fi];
                 var ext = Path.GetExtension(file).ToLowerInvariant();
+                ProgressValue = (double)(fi) / files.Length * 100;
+                ProgressText = $"読込中... ({fi + 1}/{files.Length}) {Path.GetFileName(file)}";
 
                 switch (ext)
                 {
@@ -266,9 +341,14 @@ namespace InsightMovie.ViewModels
 
                     case ".txt" or ".md":
                         ImportTextFile(file);
+                        textCount++;
                         break;
                 }
             }
+
+            IsImporting = false;
+            ProgressVisible = false;
+            ProgressValue = 0;
 
             if (_project.Scenes.Count == 0)
             {
@@ -279,14 +359,39 @@ namespace InsightMovie.ViewModels
             HasProject = true;
             IsComplete = false;
 
+            // Fix 1: Build thumbnails
+            BuildThumbnails();
+
             var parts = new List<string>();
             if (pptxCount > 0) parts.Add($"PPTX {pptxCount}件");
             if (imageCount > 0) parts.Add($"画像 {imageCount}件");
             if (videoCount > 0) parts.Add($"動画 {videoCount}件");
+            if (textCount > 0) parts.Add($"テキスト {textCount}件");
 
             ImportSummary = $"{_project.Scenes.Count} シーン（{string.Join("、", parts)}）";
             StatusText = "設定を確認して「動画を生成」をクリック";
             _logger.Log($"取込完了: {ImportSummary}");
+        }
+
+        private void BuildThumbnails()
+        {
+            Thumbnails.Clear();
+            if (_project == null) return;
+
+            for (int i = 0; i < _project.Scenes.Count; i++)
+            {
+                var scene = _project.Scenes[i];
+                var narration = scene.NarrationText ?? "";
+                var label = narration.Length > 20 ? narration.Substring(0, 20) + "..." : narration;
+                if (string.IsNullOrWhiteSpace(label)) label = $"シーン {i + 1}";
+
+                Thumbnails.Add(new ThumbnailItem
+                {
+                    Index = i,
+                    ImagePath = scene.HasMedia ? scene.MediaPath : null,
+                    Label = label
+                });
+            }
         }
 
         private async Task ImportPptxAsync(string path)
@@ -294,7 +399,7 @@ namespace InsightMovie.ViewModels
             try
             {
                 _logger.Log($"PPTX読込中: {Path.GetFileName(path)}");
-                StatusText = "PowerPointを読み込んでいます...";
+                ProgressText = $"PowerPointを読み込んでいます... {Path.GetFileName(path)}";
 
                 var outputDir = Path.Combine(
                     Path.GetTempPath(),
@@ -303,7 +408,12 @@ namespace InsightMovie.ViewModels
                     $"import_{Guid.NewGuid():N}");
 
                 var importer = new Utils.PptxImporter(
-                    (current, total, msg) => _logger.Log(msg));
+                    (current, total, msg) =>
+                    {
+                        _logger.Log(msg);
+                        if (total > 0)
+                            ProgressText = $"PPTX: {msg}";
+                    });
 
                 var slides = await Task.Run(() => importer.ImportPptx(path, outputDir));
 
@@ -372,25 +482,26 @@ namespace InsightMovie.ViewModels
                 return;
             }
 
-            // Ask for output path
-            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            // Fix 3: Use DialogService for SaveFileDialog
             var defaultName = $"InsightCast_{DateTime.Now:yyyyMMdd_HHmmss}.mp4";
-            var savePath = Path.Combine(desktopPath, defaultName);
-
-            // Use a simple save dialog via event - for now use desktop as default
-            var dialog = new Microsoft.Win32.SaveFileDialog
+            string? savePath;
+            if (_dialogService != null)
             {
-                Title = "動画の保存先を選択",
-                Filter = "MP4ファイル|*.mp4|すべてのファイル|*.*",
-                DefaultExt = ".mp4",
-                FileName = defaultName,
-                InitialDirectory = desktopPath
-            };
+                savePath = _dialogService.ShowSaveFileDialog(
+                    "動画の保存先を選択",
+                    "MP4ファイル|*.mp4|すべてのファイル|*.*",
+                    ".mp4",
+                    defaultName);
+            }
+            else
+            {
+                // Fallback if DialogService not set (shouldn't happen)
+                var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                savePath = Path.Combine(desktopPath, defaultName);
+            }
 
-            if (dialog.ShowDialog() != true)
+            if (string.IsNullOrEmpty(savePath))
                 return;
-
-            savePath = dialog.FileName;
 
             int speakerId = _defaultSpeakerId;
             if (_selectedSpeakerIndex >= 0 && _selectedSpeakerIndex < Speakers.Count)
@@ -409,7 +520,6 @@ namespace InsightMovie.ViewModels
                 ProgressText = msg;
                 _logger.Log(msg);
 
-                // Parse progress from message pattern: "シーン X/Y: ..."
                 if (msg.StartsWith("シーン ") && msg.Contains('/'))
                 {
                     var parts = msg.Split('/');
@@ -468,16 +578,22 @@ namespace InsightMovie.ViewModels
                 }
                 else
                 {
+                    // Fix 6: Clear progress on failure
+                    ProgressVisible = false;
                     StatusText = "動画の生成に失敗しました。ログを確認してください。";
                 }
             }
             catch (OperationCanceledException)
             {
+                // Fix 6: Clear progress on cancel
+                ProgressVisible = false;
                 StatusText = "生成をキャンセルしました";
                 _logger.Log("生成キャンセル");
             }
             catch (Exception ex)
             {
+                // Fix 6: Clear progress on error
+                ProgressVisible = false;
                 StatusText = $"エラー: {ex.Message}";
                 _logger.LogError("動画生成エラー", ex);
             }
@@ -501,9 +617,26 @@ namespace InsightMovie.ViewModels
             }
         }
 
-        private void Reset()
+        /// <summary>
+        /// Fix 5: Keep project and settings, only reset generation state.
+        /// User can change speaker/resolution and regenerate.
+        /// </summary>
+        private void ResetForRegenerate()
+        {
+            IsComplete = false;
+            ProgressVisible = false;
+            ProgressValue = 0;
+            ProgressText = string.Empty;
+            OutputPath = string.Empty;
+            StatusText = "設定を変更して「動画を生成」をクリック";
+            // HasProject stays true, _project stays, Thumbnails stay, settings stay
+        }
+
+        /// <summary>Full reset back to the drop zone.</summary>
+        private void ResetAll()
         {
             _project = null;
+            Thumbnails.Clear();
             HasProject = false;
             IsComplete = false;
             ProgressVisible = false;
@@ -511,7 +644,7 @@ namespace InsightMovie.ViewModels
             ProgressText = string.Empty;
             ImportSummary = string.Empty;
             OutputPath = string.Empty;
-            StatusText = "資料をドロップしてください";
+            StatusText = string.Empty;
         }
 
         private void Cancel()

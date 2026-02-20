@@ -4,8 +4,8 @@
         xmlns:conv="clr-namespace:InsightMovie.Converters"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="InsightMovie"
-        Width="720" Height="640"
-        MinWidth="600" MinHeight="500"
+        Width="720" Height="680"
+        MinWidth="600" MinHeight="520"
         WindowStartupLocation="CenterScreen"
         AllowDrop="True"
         DragEnter="Window_DragEnter"
@@ -39,7 +39,6 @@
         <Border Grid.Row="0" Background="{DynamicResource TitlebarBg}"
                 BorderBrush="{DynamicResource BorderDefault}" BorderThickness="0,0,0,1">
             <DockPanel>
-                <!-- Window controls -->
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
                     <Button x:Name="MinimizeButton" Click="MinimizeButton_Click"
                             Width="46" Height="32" BorderThickness="0"
@@ -99,7 +98,6 @@
                     Visibility="{Binding HasProject, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}">
 
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <!-- Big icon -->
                     <Path Data="M20,4 H4 C2.9,4 2,4.9 2,6 V18 C2,19.1 2.9,20 4,20 H20 C21.1,20 22,19.1 22,18 V6 C22,4.9 21.1,4 20,4 Z M11,15 L6,10 L7.4,8.6 L10,11.2 V5 H12 V11.2 L14.6,8.6 L16,10 L11,15 Z"
                           Fill="{DynamicResource BrandPrimary}"
                           Width="64" Height="64"
@@ -125,51 +123,108 @@
                 </StackPanel>
             </Border>
 
-            <!-- ── Import Summary (shown after import) ── -->
+            <!-- ── Import Summary + Thumbnail Strip (shown after import) ── -->
             <Border Grid.Row="0"
                     BorderBrush="{DynamicResource BorderDefault}"
                     BorderThickness="1" CornerRadius="12"
                     Background="{DynamicResource BgCard}"
-                    Margin="0,0,0,16" Padding="24"
+                    Margin="0,0,0,16" Padding="16"
                     Visibility="{Binding HasProject, Converter={StaticResource BoolToVis}}">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <!-- Checkmark icon for complete state -->
-                    <Path x:Name="CompleteIcon"
-                          Data="M12,2 C6.48,2 2,6.48 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,6.48 17.52,2 12,2 Z M10,17 L5,12 L6.41,10.59 L10,14.17 L17.59,6.59 L19,8 L10,17 Z"
-                          Fill="{DynamicResource ActionUpdate}"
-                          Width="48" Height="48"
-                          Stretch="Uniform"
-                          HorizontalAlignment="Center" Margin="0,0,0,12"
-                          Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>  <!-- Header: icon + summary -->
+                        <RowDefinition Height="*"/>     <!-- Thumbnails -->
+                    </Grid.RowDefinitions>
 
-                    <!-- Document icon for pre-generate state -->
-                    <Path x:Name="DocIcon"
-                          Data="M6,2 C4.9,2 4,2.9 4,4 V20 C4,21.1 4.9,22 6,22 H18 C19.1,22 20,21.1 20,20 V8 L14,2 H6 Z M13,9 V3.5 L18.5,9 H13 Z"
-                          Fill="{DynamicResource BrandPrimary}"
-                          Width="40" Height="40"
-                          Stretch="Uniform"
-                          HorizontalAlignment="Center" Margin="0,0,0,12"
-                          Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}"/>
+                    <!-- Header -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                        <!-- Checkmark for complete -->
+                        <Path Data="M12,2 C6.48,2 2,6.48 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,6.48 17.52,2 12,2 Z M10,17 L5,12 L6.41,10.59 L10,14.17 L17.59,6.59 L19,8 L10,17 Z"
+                              Fill="{DynamicResource ActionUpdate}"
+                              Width="24" Height="24" Stretch="Uniform"
+                              VerticalAlignment="Center" Margin="0,0,8,0"
+                              Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}"/>
+                        <!-- Doc icon for pre-complete -->
+                        <Path Data="M6,2 C4.9,2 4,2.9 4,4 V20 C4,21.1 4.9,22 6,22 H18 C19.1,22 20,21.1 20,20 V8 L14,2 H6 Z M13,9 V3.5 L18.5,9 H13 Z"
+                              Fill="{DynamicResource BrandPrimary}"
+                              Width="20" Height="20" Stretch="Uniform"
+                              VerticalAlignment="Center" Margin="0,0,8,0"
+                              Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}"/>
 
-                    <TextBlock Text="{Binding ImportSummary}"
-                               FontSize="18" FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextPrimary}"
-                               HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ImportSummary}"
+                                       FontSize="15" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="{Binding StatusText}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextSecondary}"/>
+                        </StackPanel>
+                    </StackPanel>
 
-                    <TextBlock Text="{Binding StatusText}"
-                               FontSize="13"
-                               Foreground="{DynamicResource TextSecondary}"
-                               HorizontalAlignment="Center"/>
-
-                    <!-- Output path shown on completion -->
-                    <TextBlock Text="{Binding OutputPath}"
-                               FontSize="11"
+                    <!-- Output path on completion -->
+                    <TextBlock Grid.Row="0" Text="{Binding OutputPath}"
+                               FontSize="10"
                                Foreground="{DynamicResource TextTertiary}"
                                TextTrimming="CharacterEllipsis"
-                               MaxWidth="500"
-                               HorizontalAlignment="Center" Margin="0,8,0,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Bottom" Margin="0,0,0,-4"
                                Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}"/>
-                </StackPanel>
+
+                    <!-- Fix 1: Thumbnail strip -->
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  Margin="0,4,0,0"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                        <ItemsControl ItemsSource="{Binding Thumbnails}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Width="100" Height="75"
+                                            Margin="4,4,4,4"
+                                            CornerRadius="6"
+                                            BorderBrush="{DynamicResource BorderDefault}"
+                                            BorderThickness="1"
+                                            Background="{DynamicResource BgSecondary}"
+                                            ToolTip="{Binding Label}">
+                                        <Grid>
+                                            <!-- Scene image -->
+                                            <Image Source="{Binding ImagePath}"
+                                                   Stretch="UniformToFill"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Visibility="{Binding HasImage, Converter={StaticResource SysBoolToVis}}"/>
+                                            <!-- Text-only scenes: show label -->
+                                            <TextBlock Text="{Binding Label}"
+                                                       FontSize="10"
+                                                       TextWrapping="Wrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{DynamicResource TextSecondary}"
+                                                       Padding="6"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"
+                                                       Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}, ConverterParameter=Invert}"/>
+                                            <!-- Scene number badge -->
+                                            <Border Background="{DynamicResource BrandPrimary}"
+                                                    CornerRadius="0,0,6,0"
+                                                    Padding="4,1"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top">
+                                                <TextBlock Text="{Binding Index, StringFormat={}{0}}"
+                                                           FontSize="9" FontWeight="Bold"
+                                                           Foreground="White"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
             </Border>
 
             <!-- ── Settings (speaker + resolution) ── -->
@@ -177,6 +232,7 @@
                   Visibility="{Binding ShowSettings, Converter={StaticResource BoolToVis}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>  <!-- Fix 2: preview button -->
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -189,7 +245,20 @@
                               shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                <!-- Fix 2: Speaker preview button -->
+                <Button Grid.Column="1" VerticalAlignment="Bottom"
+                        Width="36" Height="30"
+                        Margin="0,0,8,0"
+                        ToolTip="試聴"
+                        Command="{Binding PreviewSpeakerCommand}"
+                        shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Path Data="M8,5 V19 L19,12 Z"
+                          Fill="{DynamicResource TextPrimary}"
+                          Width="12" Height="12" Stretch="Uniform"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Button>
+
+                <StackPanel Grid.Column="2" Margin="0,0,0,0">
                     <TextBlock Text="向き" FontSize="12" FontWeight="SemiBold"
                                Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                     <ComboBox SelectedIndex="{Binding SelectedResolutionIndex}"
@@ -210,7 +279,6 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Generate button -->
                     <Button Grid.Column="0"
                             Content="動画を生成"
                             Height="52" FontSize="16" FontWeight="Bold"
@@ -219,7 +287,6 @@
                             Margin="0,0,8,0"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                    <!-- Editor link -->
                     <Button Grid.Column="1"
                             Content="詳細エディタで開く"
                             Height="52" FontSize="13"
@@ -235,26 +302,35 @@
                         Command="{Binding CancelCommand}"
                         shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                <!-- Complete: result buttons -->
+                <!-- Fix 5: Complete buttons — "もう一度" keeps project, "別の資料" resets -->
                 <Grid Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
                             Content="動画を開く"
-                            Height="48" FontSize="14" FontWeight="Bold"
+                            Height="48" FontSize="13" FontWeight="Bold"
                             Style="{DynamicResource SuccessButton}"
                             Command="{Binding OpenOutputCommand}"
-                            Margin="0,0,6,0"
+                            Margin="0,0,4,0"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
                     <Button Grid.Column="1"
-                            Content="もう一度作る"
-                            Height="48" FontSize="14"
+                            Content="設定変えて再生成"
+                            Height="48" FontSize="13"
                             Command="{Binding GenerateAnotherCommand}"
-                            Margin="6,0,0,0"
+                            Margin="4,0,4,0"
+                            ToolTip="話者や向きを変えてもう一度生成"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+
+                    <Button Grid.Column="2"
+                            Content="別の資料で作る"
+                            Height="48" FontSize="13"
+                            Command="{Binding ResetAllCommand}"
+                            Margin="4,0,0,0"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </Grid>
             </StackPanel>
@@ -262,7 +338,9 @@
             <!-- ── Progress ── -->
             <StackPanel Grid.Row="3"
                         Visibility="{Binding ProgressVisible, Converter={StaticResource SysBoolToVis}}">
+                <!-- Fix 4: IsIndeterminate during import (no known total) -->
                 <ProgressBar Value="{Binding ProgressValue}"
+                             IsIndeterminate="{Binding IsImporting}"
                              Maximum="100" Height="8" Margin="0,0,0,4"/>
                 <TextBlock Text="{Binding ProgressText}"
                            FontSize="11"
@@ -270,6 +348,25 @@
                            HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
+
+        <!-- Fix 7: D&D overlay (shown when dragging onto window while HasProject=true) -->
+        <Border x:Name="DragOverlay" Grid.Row="1"
+                Background="#C0FFFFFF"
+                CornerRadius="12"
+                Margin="24,16,24,8"
+                Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Path Data="M20,4 H4 C2.9,4 2,4.9 2,6 V18 C2,19.1 2.9,20 4,20 H20 C21.1,20 22,19.1 22,18 V6 C22,4.9 21.1,4 20,4 Z M11,15 L6,10 L7.4,8.6 L10,11.2 V5 H12 V11.2 L14.6,8.6 L16,10 L11,15 Z"
+                      Fill="{DynamicResource BrandPrimary}"
+                      Width="48" Height="48"
+                      Stretch="Uniform"
+                      HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                <TextBlock Text="ドロップして差し替え"
+                           FontSize="18" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimary}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
 
         <!-- ================================================================ -->
         <!-- Log Area (collapsible)                                            -->
@@ -284,5 +381,11 @@
                      FontFamily="Consolas, MS Gothic"
                      Background="{DynamicResource BgSecondary}"/>
         </Expander>
+
+        <!-- Fix 2: Hidden MediaElement for speaker preview -->
+        <MediaElement x:Name="AudioPlayer" Grid.Row="0"
+                      LoadedBehavior="Manual" UnloadedBehavior="Stop"
+                      MediaEnded="AudioPlayer_MediaEnded"
+                      Visibility="Collapsed"/>
     </Grid>
 </Window>

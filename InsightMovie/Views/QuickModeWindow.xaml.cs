@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using InsightMovie.Core;
 using InsightMovie.Models;
+using InsightMovie.Services;
 using InsightMovie.Video;
 using InsightMovie.ViewModels;
 using InsightMovie.VoiceVox;
@@ -42,29 +43,45 @@ namespace InsightMovie.Views
             _vm.OpenEditorRequested += OnOpenEditorRequested;
             _vm.OpenFileRequested += OnOpenFileRequested;
 
-            Loaded += async (_, _) => await _vm.InitializeAsync();
+            // Fix 2: Wire speaker preview audio events
+            _vm.PlayAudioRequested += OnPlayAudioRequested;
+            _vm.StopAudioRequested += OnStopAudioRequested;
+
+            Loaded += async (_, _) =>
+            {
+                // Fix 3: Set DialogService
+                _vm.SetDialogService(new DialogService(this));
+                await _vm.InitializeAsync();
+            };
         }
 
-        #region Drag & Drop
+        #region Drag & Drop (Fix 7: overlay for second drop)
+
+        private bool HasSupportedFiles(DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return false;
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            return files.Any(f =>
+                SupportedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()));
+        }
 
         private void Window_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (HasSupportedFiles(e))
             {
-                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                bool hasSupported = files.Any(f =>
-                    SupportedExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()));
+                e.Effects = DragDropEffects.Copy;
 
-                if (hasSupported)
+                if (_vm.HasProject)
                 {
-                    e.Effects = DragDropEffects.Copy;
-                    DropZone.BorderBrush = (SolidColorBrush)FindResource("BrandPrimary");
-                    DropZone.BorderThickness = new Thickness(3);
-                    DropZone.Background = (SolidColorBrush)FindResource("BrandLight");
+                    // Fix 7: Show overlay when project already loaded
+                    DragOverlay.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    e.Effects = DragDropEffects.None;
+                    // Original: highlight drop zone border
+                    DropZone.BorderBrush = (SolidColorBrush)FindResource("BrandPrimary");
+                    DropZone.BorderThickness = new Thickness(3);
+                    DropZone.Background = (SolidColorBrush)FindResource("BrandLight");
                 }
             }
             else
@@ -76,17 +93,26 @@ namespace InsightMovie.Views
 
         private void Window_DragLeave(object sender, DragEventArgs e)
         {
-            DropZone.BorderBrush = (SolidColorBrush)FindResource("BorderDark");
-            DropZone.BorderThickness = new Thickness(2);
-            DropZone.Background = (SolidColorBrush)FindResource("BgSecondary");
+            DragOverlay.Visibility = Visibility.Collapsed;
+
+            if (DropZone.Visibility == Visibility.Visible)
+            {
+                DropZone.BorderBrush = (SolidColorBrush)FindResource("BorderDark");
+                DropZone.BorderThickness = new Thickness(2);
+                DropZone.Background = (SolidColorBrush)FindResource("BgSecondary");
+            }
         }
 
         private async void Window_Drop(object sender, DragEventArgs e)
         {
-            // Reset visual state
-            DropZone.BorderBrush = (SolidColorBrush)FindResource("BorderDark");
-            DropZone.BorderThickness = new Thickness(2);
-            DropZone.Background = (SolidColorBrush)FindResource("BgSecondary");
+            // Reset all visual states
+            DragOverlay.Visibility = Visibility.Collapsed;
+            if (DropZone.Visibility == Visibility.Visible)
+            {
+                DropZone.BorderBrush = (SolidColorBrush)FindResource("BorderDark");
+                DropZone.BorderThickness = new Thickness(2);
+                DropZone.Background = (SolidColorBrush)FindResource("BgSecondary");
+            }
 
             if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return;
 
@@ -124,10 +150,39 @@ namespace InsightMovie.Views
 
         #endregion
 
+        #region Audio (Fix 2: speaker preview)
+
+        private void OnPlayAudioRequested(string path)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AudioPlayer.Source = new Uri(path, UriKind.Absolute);
+                AudioPlayer.Play();
+            });
+        }
+
+        private void OnStopAudioRequested()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AudioPlayer.Stop();
+                AudioPlayer.Source = null;
+            });
+        }
+
+        private void AudioPlayer_MediaEnded(object sender, RoutedEventArgs e)
+        {
+            AudioPlayer.Stop();
+            AudioPlayer.Source = null;
+        }
+
+        #endregion
+
         #region Events
 
         private void OnOpenEditorRequested(Project project)
         {
+            OnStopAudioRequested();
             var mainWindow = new MainWindow(_voiceVoxClient, _speakerId, _ffmpegWrapper, _config);
             mainWindow.LoadProject(project);
             mainWindow.Show();
@@ -175,6 +230,7 @@ namespace InsightMovie.Views
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            OnStopAudioRequested();
             if (!_vm.CanClose())
                 e.Cancel = true;
         }
