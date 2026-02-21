@@ -308,7 +308,22 @@ namespace InsightCast.ViewModels
             get => _canPptx;
             set => SetProperty(ref _canPptx, value);
         }
-// UI Mode toggle (Simple/Detail)        private bool _isSimpleMode = true;        public bool IsSimpleMode        {            get => _isSimpleMode;            set            {                if (SetProperty(ref _isSimpleMode, value))                {                    OnPropertyChanged(nameof(IsDetailMode));                }            }        }        public bool IsDetailMode => !_isSimpleMode;
+
+        // UI Mode toggle (Simple/Detail)
+        private bool _isSimpleMode = true;
+        public bool IsSimpleMode
+        {
+            get => _isSimpleMode;
+            set
+            {
+                if (SetProperty(ref _isSimpleMode, value))
+                {
+                    OnPropertyChanged(nameof(IsDetailMode));
+                }
+            }
+        }
+
+        public bool IsDetailMode => !_isSimpleMode;
 
         // Overlay properties
         public int SelectedOverlayIndex
