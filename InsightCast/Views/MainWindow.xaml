@@ -21,6 +21,7 @@
 
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:InverseBoolConverter x:Key="InverseBool"/>
     </Window.Resources>
 
     <!-- Command Bindings for standard commands -->
@@ -94,6 +95,7 @@
                     </StackPanel>
 
                     <!-- Right-inner: License + Status -->
+<!-- Mode Toggle -->                        <Border Background="{DynamicResource BgSecondary}" CornerRadius="12"                                Padding="2" Margin="0,0,8,0" VerticalAlignment="Center"                                BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"                                shell:WindowChrome.IsHitTestVisibleInChrome="True">                            <StackPanel Orientation="Horizontal">                                <RadioButton Content="{DynamicResource Mode.Simple}"                                             IsChecked="{Binding IsSimpleMode}"                                             GroupName="UIMode"                                             Padding="10,4" Cursor="Hand">                                    <RadioButton.Template>                                        <ControlTemplate TargetType="RadioButton">                                            <Border x:Name="border" Background="Transparent" CornerRadius="10" Padding="10,4">                                                <TextBlock x:Name="text" Text="{TemplateBinding Content}"                                                           FontSize="11" FontWeight="SemiBold"                                                           Foreground="{DynamicResource TextSecondary}"/>                                            </Border>                                            <ControlTemplate.Triggers>                                                <Trigger Property="IsChecked" Value="True">                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource BrandPrimary}"/>                                                    <Setter TargetName="text" Property="Foreground" Value="White"/>                                                </Trigger>                                            </ControlTemplate.Triggers>                                        </ControlTemplate>                                    </RadioButton.Template>                                </RadioButton>                                <RadioButton Content="{DynamicResource Mode.Detail}"                                             IsChecked="{Binding IsSimpleMode, Converter={StaticResource InverseBool}}"                                             GroupName="UIMode"                                             Padding="10,4" Cursor="Hand">                                    <RadioButton.Template>                                        <ControlTemplate TargetType="RadioButton">                                            <Border x:Name="border" Background="Transparent" CornerRadius="10" Padding="10,4">                                                <TextBlock x:Name="text" Text="{TemplateBinding Content}"                                                           FontSize="11" FontWeight="SemiBold"                                                           Foreground="{DynamicResource TextSecondary}"/>                                            </Border>                                            <ControlTemplate.Triggers>                                                <Trigger Property="IsChecked" Value="True">                                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource BrandPrimary}"/>                                                    <Setter TargetName="text" Property="Foreground" Value="White"/>                                                </Trigger>                                            </ControlTemplate.Triggers>                                        </ControlTemplate>                                    </RadioButton.Template>                                </RadioButton>                            </StackPanel>                        </Border>
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                         <Button Padding="6,3" Margin="2"
                                 FontSize="11"
@@ -197,6 +199,7 @@
         <!-- B) Menu Bar                                                       -->
         <!-- ================================================================ -->
         <Menu Grid.Row="1"
+              Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}"
               Background="{DynamicResource TitlebarBg}"
               Foreground="{DynamicResource TextPrimary}"
               Padding="6,2">
@@ -424,8 +427,8 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- Row 5: Subtitle style -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <!-- Row 5: Subtitle style (Detail mode only) -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4" Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource Scene.SubtitleStyle}" VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
                             <Border BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
@@ -443,8 +446,8 @@
                                     IsEnabled="{Binding CanSubtitleStyle}"/>
                         </StackPanel>
 
-                        <!-- Row 6: Text Overlays -->
-                        <StackPanel Margin="0,4,0,4">
+                        <!-- Row 6: Text Overlays (Detail mode only) -->
+                        <StackPanel Margin="0,4,0,4" Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                             <DockPanel Margin="0,0,0,4">
                                 <TextBlock Text="{DynamicResource Overlay.Title}" VerticalAlignment="Center"
                                            DockPanel.Dock="Left"/>
@@ -537,8 +540,8 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- Row 7: Duration mode -->
-                        <StackPanel Margin="0,0,0,4">
+                        <!-- Row 7: Duration mode (Detail mode only) -->
+                        <StackPanel Margin="0,0,0,4" Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource Duration.Title}" Margin="0,0,0,4"/>
                             <StackPanel Orientation="Horizontal">
                                 <RadioButton Content="{DynamicResource Duration.Auto}"
@@ -559,8 +562,8 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Row 8: Transition -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <!-- Row 8: Transition (Detail mode only) -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4" Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource Transition.Title}" VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
                             <ComboBox Width="160"
@@ -579,8 +582,8 @@
                                        Foreground="{DynamicResource TextTertiary}" FontSize="11"/>
                         </StackPanel>
 
-                        <!-- Row 8: Intro/Outro -->
-                        <StackPanel Margin="0,4,0,4">
+                        <!-- Row 8: Intro/Outro (Detail mode only) -->
+                        <StackPanel Margin="0,4,0,4" Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource IntroOutro.Title}" Margin="0,0,0,4"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -612,8 +615,8 @@
                             </Grid>
                         </StackPanel>
 
-                        <!-- Row 9: Watermark -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <!-- Row 9: Watermark (Detail mode only) -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4" Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource Watermark.Title}" VerticalAlignment="Center"
                                        Margin="0,0,4,0"/>
                             <TextBlock Text="{Binding WatermarkFileName}" VerticalAlignment="Center"
@@ -630,8 +633,8 @@
                                       SelectedIndex="{Binding SelectedWatermarkPosIndex}"/>
                         </StackPanel>
 
-                        <!-- Row 10: Template save/load -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <!-- Row 10: Template save/load (Detail mode only) -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4" Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource Template.Title}" VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
                             <Button Content="{DynamicResource Common.Save}" Padding="8,3" Margin="2"

@@ -147,9 +147,9 @@ public partial class App : Application
         // ── 5. Default speaker ID ──────────────────────────────────
         int speakerId = config.DefaultSpeakerId ?? 13;
 
-        // ── 6. Show quick mode (default) or main window ─────────────
-        var quickMode = new QuickModeWindow(client, speakerId, ffmpeg, config);
-        quickMode.Show();
+        // ── 6. Show main window ─────────────────────────────────────
+        var mainWindow = new MainWindow(client, speakerId, ffmpeg, config);
+        mainWindow.Show();
     }
 
     protected override void OnExit(ExitEventArgs e)
