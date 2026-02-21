@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using InsightMovie.Services;
 
 namespace InsightMovie.Models
 {
@@ -18,16 +19,16 @@ namespace InsightMovie.Models
 
     public static class TransitionNames
     {
-        public static readonly Dictionary<TransitionType, string> DisplayNames = new()
+        public static Dictionary<TransitionType, string> DisplayNames => new()
         {
-            { TransitionType.None, "なし" },
-            { TransitionType.Fade, "フェード" },
-            { TransitionType.Dissolve, "ディゾルブ" },
-            { TransitionType.WipeLeft, "ワイプ（左）" },
-            { TransitionType.WipeRight, "ワイプ（右）" },
-            { TransitionType.SlideLeft, "スライド（左）" },
-            { TransitionType.SlideRight, "スライド（右）" },
-            { TransitionType.ZoomIn, "ズームイン" }
+            { TransitionType.None, LocalizationService.GetString("Transition.Type.None") },
+            { TransitionType.Fade, LocalizationService.GetString("Transition.Type.Fade") },
+            { TransitionType.Dissolve, LocalizationService.GetString("Transition.Type.Dissolve") },
+            { TransitionType.WipeLeft, LocalizationService.GetString("Transition.Type.WipeLeft") },
+            { TransitionType.WipeRight, LocalizationService.GetString("Transition.Type.WipeRight") },
+            { TransitionType.SlideLeft, LocalizationService.GetString("Transition.Type.SlideLeft") },
+            { TransitionType.SlideRight, LocalizationService.GetString("Transition.Type.SlideRight") },
+            { TransitionType.ZoomIn, LocalizationService.GetString("Transition.Type.ZoomIn") }
         };
     }
 

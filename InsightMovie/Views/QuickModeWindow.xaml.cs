@@ -139,11 +139,8 @@ namespace InsightMovie.Views
         {
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "資料ファイルを選択",
-                Filter = "対応ファイル|*.pptx;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.mp4;*.avi;*.mov;*.txt;*.md|" +
-                         "PowerPoint|*.pptx|画像|*.png;*.jpg;*.jpeg;*.bmp;*.gif|" +
-                         "動画|*.mp4;*.avi;*.mov|テキスト|*.txt;*.md|" +
-                         "すべてのファイル|*.*",
+                Title = LocalizationService.GetString("QVM.SelectFile"),
+                Filter = LocalizationService.GetString("QVM.FileFilter"),
                 Multiselect = true
             };
 
@@ -206,7 +203,7 @@ namespace InsightMovie.Views
             }
             catch (Exception ex)
             {
-                _vm.Logger.LogError("ファイルを開けませんでした", ex);
+                _vm.Logger.LogError(LocalizationService.GetString("VM.File.OpenError"), ex);
             }
         }
 
@@ -252,6 +249,12 @@ namespace InsightMovie.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
             => Close();
+
+        private void LangSwitchButton_Click(object sender, RoutedEventArgs e)
+        {
+            var newLang = LocalizationService.ToggleLanguage();
+            _config.Language = newLang;
+        }
 
         #endregion
 

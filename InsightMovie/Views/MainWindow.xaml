@@ -58,7 +58,7 @@
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
-                            ToolTip="最小化">
+                            ToolTip="{DynamicResource Window.Minimize}">
                         <Path Data="M0,0 H10"
                               Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -67,7 +67,7 @@
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
-                            ToolTip="最大化">
+                            ToolTip="{DynamicResource Window.Maximize}">
                         <Path x:Name="MaximizeIcon" Data="M0,0 H10 V10 H0 Z"
                               Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -76,7 +76,7 @@
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
-                            ToolTip="閉じる">
+                            ToolTip="{DynamicResource Window.Close}">
                         <Path Data="M0,0 L10,10 M0,10 L10,0"
                               Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -99,13 +99,22 @@
                                 FontSize="11"
                                 Background="{DynamicResource BgPrimary}" Foreground="{DynamicResource TextPrimary}"
                                 BorderBrush="{DynamicResource BorderDark}"
+                                x:Name="LangSwitchButton"
+                                Click="LangSwitchButton_Click"
+                                shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <TextBlock Text="{DynamicResource Lang.SwitchTo}" VerticalAlignment="Center"/>
+                        </Button>
+                        <Button Padding="6,3" Margin="2"
+                                FontSize="11"
+                                Background="{DynamicResource BgPrimary}" Foreground="{DynamicResource TextPrimary}"
+                                BorderBrush="{DynamicResource BorderDark}"
                                 Command="{Binding ShowLicenseManagerCommand}"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <StackPanel Orientation="Horizontal">
                                 <Path Data="M6,0 L12,3 V7 L6,12 L0,7 V3 Z"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                <TextBlock Text="ライセンス管理" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Header.LicenseManager}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Border Background="{DynamicResource BgSecondary}" CornerRadius="3"
@@ -128,7 +137,7 @@
                                 <Path Data="M2,0 H8 L11,3 V13 H2 Z M8,0 V3 H11"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="新規" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Header.New}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Padding="10,4" Margin="2"
@@ -140,7 +149,7 @@
                                 <Path Data="M0,3 H3 L5,1 H8 V3 H12 L10,10 H0 Z"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="ファイルを開く" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Header.OpenFile}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Padding="10,4" Margin="2"
@@ -152,7 +161,7 @@
                                 <Path Data="M0,0 H7 L10,3 V10 H0 Z M3,0 V3 H6 V0 M2,6 H8 V10 H2 Z"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="上書き保存" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Header.Save}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Padding="10,4" Margin="2"
@@ -164,7 +173,7 @@
                                 <Path Data="M0,0 H7 L10,3 V10 H0 Z M3,0 V3 H6 V0"
                                       Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="別名で保存" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Header.SaveAs}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <Button Padding="10,4" Margin="2"
@@ -176,7 +185,7 @@
                                 <Path Data="M5,0 V7 M2,5 L5,8 L8,5 M1,10 V12 H9 V10"
                                       Stroke="#FFFFFF" StrokeThickness="1"
                                       VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                <TextBlock Text="PPTX取込" VerticalAlignment="Center"/>
+                                <TextBlock Text="{DynamicResource Header.ImportPptx}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -192,56 +201,56 @@
               Foreground="{DynamicResource TextPrimary}"
               Padding="6,2">
             <!-- ファイル -->
-            <MenuItem Header="ファイル(_F)">
-                <MenuItem Header="新規(_N)" InputGestureText="Ctrl+N"
+            <MenuItem Header="{DynamicResource Menu.File}">
+                <MenuItem Header="{DynamicResource Menu.File.New}" InputGestureText="Ctrl+N"
                           Command="{Binding NewProjectCommand}"/>
-                <MenuItem Header="開く(_O)" InputGestureText="Ctrl+O"
+                <MenuItem Header="{DynamicResource Menu.File.Open}" InputGestureText="Ctrl+O"
                           Command="{Binding OpenProjectCommand}"/>
-                <MenuItem Header="最近使ったファイル(_R)" x:Name="RecentFilesMenu"
+                <MenuItem Header="{DynamicResource Menu.File.Recent}" x:Name="RecentFilesMenu"
                           SubmenuOpened="RecentFilesMenu_SubmenuOpened"/>
                 <Separator/>
-                <MenuItem Header="上書き保存(_S)" InputGestureText="Ctrl+S"
+                <MenuItem Header="{DynamicResource Menu.File.Save}" InputGestureText="Ctrl+S"
                           Command="{Binding SaveProjectCommand}"/>
-                <MenuItem Header="別名保存(_A)" InputGestureText="Ctrl+Shift+S"
+                <MenuItem Header="{DynamicResource Menu.File.SaveAs}" InputGestureText="Ctrl+Shift+S"
                           Command="{Binding SaveProjectAsCommand}"/>
                 <Separator/>
-                <MenuItem Header="終了(_X)" InputGestureText="Alt+F4"
+                <MenuItem Header="{DynamicResource Menu.File.Exit}" InputGestureText="Alt+F4"
                           Command="{Binding ExitCommand}"/>
             </MenuItem>
 
             <!-- 編集 -->
-            <MenuItem Header="編集(_E)">
-                <MenuItem Header="シーン追加(_T)" InputGestureText="Ctrl+T"
+            <MenuItem Header="{DynamicResource Menu.Edit}">
+                <MenuItem Header="{DynamicResource Menu.Edit.AddScene}" InputGestureText="Ctrl+T"
                           Command="{Binding AddSceneCommand}"/>
-                <MenuItem Header="シーン削除(_D)" InputGestureText="Delete"
+                <MenuItem Header="{DynamicResource Menu.Edit.RemoveScene}" InputGestureText="Delete"
                           Command="{Binding RemoveSceneCommand}"/>
                 <Separator/>
-                <MenuItem Header="上へ(_U)" InputGestureText="Ctrl+Up"
+                <MenuItem Header="{DynamicResource Menu.Edit.MoveUp}" InputGestureText="Ctrl+Up"
                           Command="{Binding MoveSceneUpCommand}"/>
-                <MenuItem Header="下へ(_W)" InputGestureText="Ctrl+Down"
+                <MenuItem Header="{DynamicResource Menu.Edit.MoveDown}" InputGestureText="Ctrl+Down"
                           Command="{Binding MoveSceneDownCommand}"/>
             </MenuItem>
 
             <!-- ヘルプ -->
-            <MenuItem Header="ヘルプ(_H)">
-                <MenuItem Header="チュートリアル(_T)" InputGestureText="F1"
+            <MenuItem Header="{DynamicResource Menu.Help}">
+                <MenuItem Header="{DynamicResource Menu.Help.Tutorial}" InputGestureText="F1"
                           Command="{Binding ShowTutorialCommand}"/>
-                <MenuItem Header="FAQ(_Q)"
+                <MenuItem Header="{DynamicResource Menu.Help.FAQ}"
                           Command="{Binding ShowFaqCommand}"/>
-                <MenuItem Header="キーボードショートカット(_K)"
+                <MenuItem Header="{DynamicResource Menu.Help.Shortcuts}"
                           Command="{Binding ShowShortcutsCommand}"/>
                 <Separator/>
-                <MenuItem Header="ライセンス管理(_L)"
+                <MenuItem Header="{DynamicResource Menu.Help.License}"
                           Command="{Binding ShowLicenseManagerCommand}"/>
-                <MenuItem Header="ライセンス情報(_I)"
+                <MenuItem Header="{DynamicResource Menu.Help.LicenseInfo}"
                           Command="{Binding ShowLicenseInfoCommand}"/>
                 <Separator/>
-                <MenuItem Header="利用規約"
+                <MenuItem Header="{DynamicResource Menu.Help.Terms}"
                           Command="{Binding ShowTermsCommand}"/>
-                <MenuItem Header="プライバシーポリシー"
+                <MenuItem Header="{DynamicResource Menu.Help.Privacy}"
                           Command="{Binding ShowPrivacyCommand}"/>
                 <Separator/>
-                <MenuItem Header="InsightCastについて(_A)"
+                <MenuItem Header="{DynamicResource Menu.Help.About}"
                           Command="{Binding ShowAboutCommand}"/>
             </MenuItem>
         </Menu>
@@ -257,27 +266,27 @@
             </Grid.ColumnDefinitions>
 
             <!-- Left Panel: Scene List -->
-            <GroupBox Grid.Column="0" Header="シーン一覧" Padding="4">
+            <GroupBox Grid.Column="0" Header="{DynamicResource Scene.List}" Padding="4">
                 <DockPanel>
                     <!-- Bottom buttons -->
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
                                 HorizontalAlignment="Center" Margin="0,4,0,0">
-                        <Button Content="＋追加"
+                        <Button Content="{DynamicResource Common.Add}"
                                 Padding="4,2" Margin="1"
                                 Command="{Binding AddSceneCommand}"
-                                ToolTip="シーンを追加 (Ctrl+T)"/>
-                        <Button Content="－削除"
+                                ToolTip="{DynamicResource Scene.Add.Tooltip}"/>
+                        <Button Content="{DynamicResource Common.Remove}"
                                 Padding="4,2" Margin="1"
                                 Command="{Binding RemoveSceneCommand}"
-                                ToolTip="シーンを削除 (Delete)"/>
+                                ToolTip="{DynamicResource Scene.Remove.Tooltip}"/>
                         <Button Content="↑"
                                 Padding="6,2" Margin="1"
                                 Command="{Binding MoveSceneUpCommand}"
-                                ToolTip="上へ移動 (Ctrl+Up)"/>
+                                ToolTip="{DynamicResource Scene.MoveUp.Tooltip}"/>
                         <Button Content="↓"
                                 Padding="6,2" Margin="1"
                                 Command="{Binding MoveSceneDownCommand}"
-                                ToolTip="下へ移動 (Ctrl+Down)"/>
+                                ToolTip="{DynamicResource Scene.MoveDown.Tooltip}"/>
                     </StackPanel>
 
                     <!-- Scene ListBox -->
@@ -301,22 +310,22 @@
                           Background="{DynamicResource BorderDefault}"/>
 
             <!-- Right Panel: Scene Editor -->
-            <GroupBox Grid.Column="2" Header="シーン編集" Padding="4">
+            <GroupBox Grid.Column="2" Header="{DynamicResource Scene.Editor}" Padding="4">
                 <ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="8">
 
                         <!-- Row 1: Media info -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <TextBlock Text="素材:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Scene.Media}" VerticalAlignment="Center"
                                        Margin="0,0,6,0"/>
                             <TextBlock Text="{Binding MediaName}"
                                        VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}"
                                        MinWidth="120" Margin="0,0,8,0"/>
-                            <Button Content="選択"
+                            <Button Content="{DynamicResource Common.Select}"
                                     Padding="10,3" Margin="2"
                                     Command="{Binding SelectMediaCommand}"/>
-                            <Button Content="クリア"
+                            <Button Content="{DynamicResource Common.Clear}"
                                     Padding="10,3" Margin="2"
                                     Command="{Binding ClearMediaCommand}"/>
                         </StackPanel>
@@ -357,7 +366,7 @@
                                          MinHeight="140"
                                          VerticalContentAlignment="Top"
                                          Padding="4"/>
-                                <TextBlock Text="ここに話をさせる内容を入力してください。"
+                                <TextBlock Text="{DynamicResource Scene.Narration.Placeholder}"
                                            Foreground="{DynamicResource TextPlaceholder}" FontStyle="Italic"
                                            IsHitTestVisible="False"
                                            Margin="8,6,0,0"
@@ -368,7 +377,7 @@
 
                         <!-- Row 3: Speaker + Audio controls -->
                         <WrapPanel Margin="0,0,0,4">
-                            <TextBlock Text="話者:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Scene.Speaker}" VerticalAlignment="Center"
                                        Margin="0,0,4,0"/>
                             <ComboBox MinWidth="180"
                                       Margin="0,0,12,0"
@@ -376,22 +385,22 @@
                                       SelectedIndex="{Binding SelectedSceneSpeakerIndex}"
                                       DisplayMemberPath="DisplayName"/>
 
-                            <CheckBox Content="動画音声を残す"
+                            <CheckBox Content="{DynamicResource Scene.KeepAudio}"
                                       IsChecked="{Binding KeepOriginalAudio}"
                                       VerticalAlignment="Center" Margin="0,0,12,0"/>
 
-                            <Button Content="▶音声再生"
+                            <Button Content="{DynamicResource Scene.PreviewAudio}"
                                     Padding="8,3" Margin="2"
                                     Command="{Binding PreviewAudioCommand}"/>
-                            <Button Content="▶シーンプレビュー"
+                            <Button Content="{DynamicResource Scene.PreviewScene}"
                                     Padding="8,3" Margin="2"
                                     Command="{Binding PreviewSceneCommand}"
-                                    ToolTip="現在のシーンを動画プレビュー生成"/>
-                            <Button Content="■停止"
+                                    ToolTip="{DynamicResource Scene.PreviewScene.Tooltip}"/>
+                            <Button Content="{DynamicResource Scene.Stop}"
                                     Padding="8,3" Margin="2"
                                     Command="{Binding StopPreviewCommand}"/>
 
-                            <TextBlock Text="話速:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Scene.SpeechSpeed}" VerticalAlignment="Center"
                                        Margin="12,0,4,0"/>
                             <ComboBox Width="90"
                                       ItemsSource="{Binding SpeechSpeedOptions}"
@@ -400,7 +409,7 @@
 
                         <!-- Row 4: Subtitle TextBox -->
                         <StackPanel Margin="0,0,0,4">
-                            <TextBlock Text="字幕:" Margin="0,0,0,4"/>
+                            <TextBlock Text="{DynamicResource Scene.Subtitle}" Margin="0,0,0,4"/>
                             <Grid>
                                 <TextBox Text="{Binding SubtitleText, UpdateSourceTrigger=PropertyChanged}"
                                          Padding="4" Height="28"
@@ -417,7 +426,7 @@
 
                         <!-- Row 5: Subtitle style -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <TextBlock Text="字幕スタイル:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Scene.SubtitleStyle}" VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
                             <Border BorderBrush="{DynamicResource BorderDefault}" BorderThickness="1"
                                     CornerRadius="2" Padding="8,2" Margin="0,0,8,0"
@@ -428,7 +437,7 @@
                                            Foreground="White"
                                            HorizontalAlignment="Center"/>
                             </Border>
-                            <Button Content="選択..."
+                            <Button Content="{DynamicResource Scene.SubtitleStyle.Select}"
                                     Padding="10,3" Margin="2"
                                     Command="{Binding OpenStyleDialogCommand}"
                                     IsEnabled="{Binding CanSubtitleStyle}"/>
@@ -437,21 +446,21 @@
                         <!-- Row 6: Text Overlays -->
                         <StackPanel Margin="0,4,0,4">
                             <DockPanel Margin="0,0,0,4">
-                                <TextBlock Text="テキストオーバーレイ:" VerticalAlignment="Center"
+                                <TextBlock Text="{DynamicResource Overlay.Title}" VerticalAlignment="Center"
                                            DockPanel.Dock="Left"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="＋追加"
+                                    <Button Content="{DynamicResource Common.Add}"
                                             Padding="6,2" Margin="2"
                                             Command="{Binding AddOverlayCommand}"
-                                            ToolTip="テキストオーバーレイを追加"/>
-                                    <Button Content="表紙テンプレ"
+                                            ToolTip="{DynamicResource Overlay.Add.Tooltip}"/>
+                                    <Button Content="{DynamicResource Overlay.CoverTemplate}"
                                             Padding="6,2" Margin="2"
                                             Command="{Binding AddCoverTemplateCommand}"
-                                            ToolTip="表紙用のタイトル＋サブタイトルを追加"/>
-                                    <Button Content="－削除"
+                                            ToolTip="{DynamicResource Overlay.CoverTemplate.Tooltip}"/>
+                                    <Button Content="{DynamicResource Common.Remove}"
                                             Padding="6,2" Margin="2"
                                             Command="{Binding RemoveOverlayCommand}"
-                                            ToolTip="選択中のオーバーレイを削除"/>
+                                            ToolTip="{DynamicResource Overlay.Remove.Tooltip}"/>
                                 </StackPanel>
                             </DockPanel>
 
@@ -473,7 +482,7 @@
                                     CornerRadius="3" Padding="8,6" Margin="0,4,0,0"
                                     Visibility="{Binding OverlayEditorVisible, Converter={StaticResource BoolToVis}}">
                                 <StackPanel>
-                                    <TextBlock Text="テキスト:" FontSize="11" Margin="0,0,0,2"/>
+                                    <TextBlock Text="{DynamicResource Overlay.Text}" FontSize="11" Margin="0,0,0,2"/>
                                     <TextBox Text="{Binding OverlayText, UpdateSourceTrigger=PropertyChanged}"
                                              Padding="4" Height="28"
                                              VerticalContentAlignment="Center"/>
@@ -485,14 +494,14 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0" Margin="0,0,4,0">
-                                            <TextBlock Text="X位置 (%):" FontSize="11" Margin="0,0,0,2"/>
+                                            <TextBlock Text="{DynamicResource Overlay.XPosition}" FontSize="11" Margin="0,0,0,2"/>
                                             <TextBox Text="{Binding OverlayXPercent, UpdateSourceTrigger=PropertyChanged}"
                                                      Width="80" HorizontalAlignment="Left"
                                                      VerticalContentAlignment="Center" TextAlignment="Center"/>
                                         </StackPanel>
 
                                         <StackPanel Grid.Column="1">
-                                            <TextBlock Text="Y位置 (%):" FontSize="11" Margin="0,0,0,2"/>
+                                            <TextBlock Text="{DynamicResource Overlay.YPosition}" FontSize="11" Margin="0,0,0,2"/>
                                             <TextBox Text="{Binding OverlayYPercent, UpdateSourceTrigger=PropertyChanged}"
                                                      Width="80" HorizontalAlignment="Left"
                                                      VerticalContentAlignment="Center" TextAlignment="Center"/>
@@ -501,7 +510,7 @@
 
                                     <WrapPanel Margin="0,6,0,0">
                                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
-                                            <TextBlock Text="サイズ:" FontSize="11" VerticalAlignment="Center"
+                                            <TextBlock Text="{DynamicResource Overlay.FontSize}" FontSize="11" VerticalAlignment="Center"
                                                        Margin="0,0,4,0"/>
                                             <TextBox Text="{Binding OverlayFontSize, UpdateSourceTrigger=PropertyChanged}"
                                                      Width="50"
@@ -509,7 +518,7 @@
                                         </StackPanel>
 
                                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
-                                            <TextBlock Text="揃え:" FontSize="11" VerticalAlignment="Center"
+                                            <TextBlock Text="{DynamicResource Overlay.Alignment}" FontSize="11" VerticalAlignment="Center"
                                                        Margin="0,0,4,0"/>
                                             <ComboBox Width="80"
                                                       ItemsSource="{Binding AlignmentOptions}"
@@ -517,7 +526,7 @@
                                         </StackPanel>
 
                                         <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
-                                            <TextBlock Text="色:" FontSize="11" VerticalAlignment="Center"
+                                            <TextBlock Text="{DynamicResource Overlay.Color}" FontSize="11" VerticalAlignment="Center"
                                                        Margin="0,0,4,0"/>
                                             <ComboBox Width="80"
                                                       ItemsSource="{Binding OverlayColorOptions}"
@@ -530,13 +539,13 @@
 
                         <!-- Row 7: Duration mode -->
                         <StackPanel Margin="0,0,0,4">
-                            <TextBlock Text="シーンの長さ:" Margin="0,0,0,4"/>
+                            <TextBlock Text="{DynamicResource Duration.Title}" Margin="0,0,0,4"/>
                             <StackPanel Orientation="Horizontal">
-                                <RadioButton Content="自動"
+                                <RadioButton Content="{DynamicResource Duration.Auto}"
                                              IsChecked="{Binding IsAutoDuration}"
                                              VerticalAlignment="Center" Margin="0,0,16,0"
                                              GroupName="DurationMode"/>
-                                <RadioButton Content="固定"
+                                <RadioButton Content="{DynamicResource Duration.Fixed}"
                                              IsChecked="{Binding IsFixedDuration}"
                                              VerticalAlignment="Center" Margin="0,0,8,0"
                                              GroupName="DurationMode"/>
@@ -545,34 +554,34 @@
                                          VerticalContentAlignment="Center"
                                          TextAlignment="Center" Margin="0,0,4,0"
                                          IsEnabled="{Binding IsFixedDuration}"/>
-                                <TextBlock Text="秒 (0.1～60)" VerticalAlignment="Center"
+                                <TextBlock Text="{DynamicResource Duration.Range}" VerticalAlignment="Center"
                                            Foreground="{DynamicResource TextTertiary}" FontSize="11"/>
                             </StackPanel>
                         </StackPanel>
 
                         <!-- Row 8: Transition -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <TextBlock Text="トランジション:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Transition.Title}" VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
                             <ComboBox Width="160"
                                       Margin="0,0,12,0"
                                       ItemsSource="{Binding TransitionDisplayNames}"
                                       SelectedIndex="{Binding SelectedTransitionIndex}"
                                       IsEnabled="{Binding CanTransition}"/>
-                            <TextBlock Text="時間:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Transition.Duration}" VerticalAlignment="Center"
                                        Margin="0,0,4,0"/>
                             <TextBox Text="{Binding TransitionDuration, UpdateSourceTrigger=PropertyChanged}"
                                      Width="60"
                                      VerticalContentAlignment="Center"
                                      TextAlignment="Center" Margin="0,0,4,0"
                                      IsEnabled="{Binding CanTransition}"/>
-                            <TextBlock Text="秒 (0.2～2.0)" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Transition.Range}" VerticalAlignment="Center"
                                        Foreground="{DynamicResource TextTertiary}" FontSize="11"/>
                         </StackPanel>
 
                         <!-- Row 8: Intro/Outro -->
                         <StackPanel Margin="0,4,0,4">
-                            <TextBlock Text="イントロ / アウトロ:" Margin="0,0,0,4"/>
+                            <TextBlock Text="{DynamicResource IntroOutro.Title}" Margin="0,0,0,4"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -580,22 +589,22 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,0">
-                                    <TextBlock Text="イントロ:" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11"/>
+                                    <TextBlock Text="{DynamicResource IntroOutro.Intro}" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11"/>
                                     <TextBlock Text="{Binding IntroFileName}" VerticalAlignment="Center"
                                                Foreground="{DynamicResource TextSecondary}" FontSize="11"
                                                MinWidth="80" MaxWidth="140" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
-                                    <Button Content="選択" Padding="6,2" Margin="1"
+                                    <Button Content="{DynamicResource Common.Select}" Padding="6,2" Margin="1"
                                             Command="{Binding SelectIntroCommand}" FontSize="11"/>
                                     <Button Content="✕" Padding="4,2" Margin="1"
                                             Command="{Binding ClearIntroCommand}" FontSize="11"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <TextBlock Text="アウトロ:" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11"/>
+                                    <TextBlock Text="{DynamicResource IntroOutro.Outro}" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11"/>
                                     <TextBlock Text="{Binding OutroFileName}" VerticalAlignment="Center"
                                                Foreground="{DynamicResource TextSecondary}" FontSize="11"
                                                MinWidth="80" MaxWidth="140" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
-                                    <Button Content="選択" Padding="6,2" Margin="1"
+                                    <Button Content="{DynamicResource Common.Select}" Padding="6,2" Margin="1"
                                             Command="{Binding SelectOutroCommand}" FontSize="11"/>
                                     <Button Content="✕" Padding="4,2" Margin="1"
                                             Command="{Binding ClearOutroCommand}" FontSize="11"/>
@@ -605,16 +614,16 @@
 
                         <!-- Row 9: Watermark -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <TextBlock Text="ロゴ透かし:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Watermark.Title}" VerticalAlignment="Center"
                                        Margin="0,0,4,0"/>
                             <TextBlock Text="{Binding WatermarkFileName}" VerticalAlignment="Center"
                                        Foreground="{DynamicResource TextSecondary}" FontSize="11"
                                        MinWidth="80" MaxWidth="140" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
-                            <Button Content="選択" Padding="6,2" Margin="1"
+                            <Button Content="{DynamicResource Common.Select}" Padding="6,2" Margin="1"
                                     Command="{Binding SelectWatermarkCommand}"/>
                             <Button Content="✕" Padding="4,2" Margin="1"
                                     Command="{Binding ClearWatermarkCommand}"/>
-                            <TextBlock Text="位置:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Watermark.Position}" VerticalAlignment="Center"
                                        Margin="12,0,4,0"/>
                             <ComboBox Width="80"
                                       ItemsSource="{Binding WatermarkPositionOptions}"
@@ -623,21 +632,21 @@
 
                         <!-- Row 10: Template save/load -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <TextBlock Text="テンプレート:" VerticalAlignment="Center"
+                            <TextBlock Text="{DynamicResource Template.Title}" VerticalAlignment="Center"
                                        Margin="0,0,8,0"/>
-                            <Button Content="保存" Padding="8,3" Margin="2"
+                            <Button Content="{DynamicResource Common.Save}" Padding="8,3" Margin="2"
                                     Command="{Binding SaveTemplateCommand}"
-                                    ToolTip="現在の設定をテンプレートとして保存"/>
-                            <Button Content="読込" Padding="8,3" Margin="2"
+                                    ToolTip="{DynamicResource Template.Save.Tooltip}"/>
+                            <Button Content="{DynamicResource Common.Load}" Padding="8,3" Margin="2"
                                     Command="{Binding LoadTemplateCommand}"
-                                    ToolTip="最新のテンプレートを適用"/>
-                            <Button Content="出力フォルダを開く" Padding="8,3" Margin="12,2,2,2"
+                                    ToolTip="{DynamicResource Template.Load.Tooltip}"/>
+                            <Button Content="{DynamicResource Template.OpenOutput}" Padding="8,3" Margin="12,2,2,2"
                                     Command="{Binding OpenOutputFolderCommand}"
-                                    ToolTip="最後に書き出したフォルダを開く"/>
+                                    ToolTip="{DynamicResource Template.OpenOutput.Tooltip}"/>
                         </StackPanel>
 
                         <!-- Row 11: Info label -->
-                        <TextBlock Text="「自動」の場合、ナレーション音声の長さに応じてシーンの長さが自動的に決まります。素材がない場合は黒背景が使用されます。"
+                        <TextBlock Text="{DynamicResource Duration.Info}"
                                    TextWrapping="Wrap" Foreground="{DynamicResource TextTertiary}"
                                    FontSize="11" Margin="0,0,0,0"/>
                     </StackPanel>
@@ -648,7 +657,7 @@
         <!-- ================================================================ -->
         <!-- D) Export Panel                                                   -->
         <!-- ================================================================ -->
-        <GroupBox Grid.Row="3" Header="書き出し設定" Margin="4,2,4,2" Padding="4">
+        <GroupBox Grid.Row="3" Header="{DynamicResource Export.Settings}" Margin="4,2,4,2" Padding="4">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -658,7 +667,7 @@
                 <!-- Left: Export settings controls -->
                 <WrapPanel Grid.Column="0" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="0,2,12,2">
-                        <TextBlock Text="話者:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="{DynamicResource Export.Speaker}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                         <ComboBox MinWidth="200"
                                   ItemsSource="{Binding ExportSpeakers}"
                                   SelectedIndex="{Binding SelectedExportSpeakerIndex}"
@@ -666,11 +675,11 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" Margin="0,2,12,2">
-                        <TextBlock Text="解像度:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="{DynamicResource Export.Resolution}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                         <ComboBox Width="180"
                                   SelectedIndex="{Binding SelectedResolutionIndex}">
-                            <ComboBoxItem Content="1080x1920 (縦動画)" Tag="1080x1920"/>
-                            <ComboBoxItem Content="1920x1080 (横動画)" Tag="1920x1080"/>
+                            <ComboBoxItem Content="{DynamicResource Export.Res.Portrait}" Tag="1080x1920"/>
+                            <ComboBoxItem Content="{DynamicResource Export.Res.Landscape}" Tag="1920x1080"/>
                         </ComboBox>
                     </StackPanel>
 
@@ -686,7 +695,7 @@
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"
                                    Margin="0,0,6,0"/>
-                        <Button Content="BGM設定..."
+                        <Button Content="{DynamicResource Export.BGM.Settings}"
                                 Padding="8,3"
                                 Command="{Binding BgmSettingsCommand}"/>
                     </StackPanel>
@@ -694,12 +703,12 @@
 
                 <!-- Right: Export button -->
                 <Button Grid.Column="1"
-                        Content="動画を書き出し"
+                        Content="{DynamicResource Export.Button}"
                         Width="150" Height="44"
                         FontSize="12" FontWeight="Bold"
                         Style="{DynamicResource PrimaryButton}"
                         Command="{Binding ExportVideoCommand}"
-                        ToolTip="プロジェクトを動画ファイルとして書き出します"/>
+                        ToolTip="{DynamicResource Export.Button.Tooltip}"/>
             </Grid>
         </GroupBox>
 
@@ -708,10 +717,10 @@
         <!-- ================================================================ -->
         <DockPanel Grid.Row="4" Margin="4,0,4,2"
                    Visibility="{Binding ExportProgressVisible, Converter={StaticResource BoolToVis}}">
-            <Button DockPanel.Dock="Right" Content="キャンセル"
+            <Button DockPanel.Dock="Right" Content="{DynamicResource Export.Cancel}"
                     Padding="12,2" Margin="4,0,0,0"
                     Command="{Binding CancelExportCommand}"
-                    ToolTip="書き出し/プレビューをキャンセル"/>
+                    ToolTip="{DynamicResource Export.Cancel.Tooltip}"/>
             <ProgressBar Height="6" Minimum="0" Maximum="100"
                          Value="{Binding ExportProgressValue, Mode=OneWay}"/>
         </DockPanel>
@@ -720,7 +729,7 @@
         <!-- F) Log Area                                                       -->
         <!-- ================================================================ -->
         <DockPanel Grid.Row="5" Height="120" Margin="4,0,4,4">
-            <TextBlock Text="ログ:" DockPanel.Dock="Top" FontSize="11"
+            <TextBlock Text="{DynamicResource Export.Log}" DockPanel.Dock="Top" FontSize="11"
                        Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,2"/>
             <TextBox x:Name="LogTextBox" IsReadOnly="True"
                      VerticalScrollBarVisibility="Auto"

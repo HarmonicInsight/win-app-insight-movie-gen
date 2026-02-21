@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using Microsoft.Win32;
 using InsightMovie.Models;
+using InsightMovie.Services;
 
 namespace InsightMovie.Views
 {
@@ -69,7 +70,7 @@ namespace InsightMovie.Views
         private void LoadSettingsIntoControls()
         {
             FilePathLabel.Text = string.IsNullOrEmpty(_settings.FilePath)
-                ? "（未選択）" : _settings.FilePath;
+                ? LocalizationService.GetString("Common.Unselected") : _settings.FilePath;
 
             MainVolumeSlider.Value = _settings.Volume * 100;
             MainVolumeLabel.Text = $"{(int)(_settings.Volume * 100)}%";
@@ -124,8 +125,8 @@ namespace InsightMovie.Views
         {
             var dialog = new OpenFileDialog
             {
-                Title = "BGMファイルを選択",
-                Filter = "音声ファイル|*.mp3;*.wav;*.ogg;*.m4a;*.aac;*.flac;*.wma|すべてのファイル|*.*"
+                Title = LocalizationService.GetString("BGM.SelectFile"),
+                Filter = LocalizationService.GetString("BGM.FileFilter")
             };
             if (dialog.ShowDialog(this) == true)
             {
@@ -137,7 +138,7 @@ namespace InsightMovie.Views
         private void ClearFileButton_Click(object sender, RoutedEventArgs e)
         {
             _settings.FilePath = null;
-            FilePathLabel.Text = "（未選択）";
+            FilePathLabel.Text = LocalizationService.GetString("Common.Unselected");
         }
 
         private void MainVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

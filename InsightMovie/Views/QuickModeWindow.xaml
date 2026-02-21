@@ -39,11 +39,17 @@
                 BorderBrush="{DynamicResource BorderDefault}" BorderThickness="0,0,0,1">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                    <Button Click="LangSwitchButton_Click"
+                            Width="60" Height="32" BorderThickness="0"
+                            Background="Transparent" FontSize="11"
+                            Foreground="{DynamicResource TitlebarSecondary}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                            Content="{DynamicResource Lang.SwitchTo}"/>
                     <Button x:Name="MinimizeButton" Click="MinimizeButton_Click"
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
-                            ToolTip="最小化">
+                            ToolTip="{DynamicResource Window.Minimize}">
                         <Path Data="M0,0 H10"
                               Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -52,7 +58,7 @@
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
-                            ToolTip="最大化">
+                            ToolTip="{DynamicResource Window.Maximize}">
                         <Path x:Name="MaximizeIcon" Data="M0,0 H10 V10 H0 Z"
                               Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -61,7 +67,7 @@
                             Width="46" Height="32" BorderThickness="0"
                             Background="Transparent"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
-                            ToolTip="閉じる">
+                            ToolTip="{DynamicResource Window.Close}">
                         <Path Data="M0,0 L10,10 M0,10 L10,0"
                               Stroke="{DynamicResource TextPrimary}" StrokeThickness="1"
                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
@@ -103,31 +109,31 @@
                           Stretch="Uniform"
                           HorizontalAlignment="Center" Margin="0,0,0,16"/>
 
-                    <TextBlock Text="ここに資料をドロップ"
+                    <TextBlock Text="{DynamicResource Quick.DropZone.Title}"
                                FontSize="22" FontWeight="Bold"
                                Foreground="{DynamicResource TextPrimary}"
                                HorizontalAlignment="Center" Margin="0,0,0,8"/>
 
-                    <TextBlock Text="PowerPoint (.pptx)・画像・動画・テキストに対応"
+                    <TextBlock Text="{DynamicResource Quick.DropZone.Subtitle}"
                                FontSize="13"
                                Foreground="{DynamicResource TextSecondary}"
                                HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-                    <Button Content="またはファイルを選択"
+                    <Button Content="{DynamicResource Quick.DropZone.SelectFile}"
                             Padding="20,10"
                             FontSize="13"
                             HorizontalAlignment="Center"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             Click="SelectFile_Click"/>
 
-                    <Button Content="複数ファイルを一括取込"
+                    <Button Content="{DynamicResource Quick.DropZone.BatchImport}"
                             Padding="16,8"
                             FontSize="11" Margin="0,8,0,0"
                             HorizontalAlignment="Center"
                             Foreground="{DynamicResource TextSecondary}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             Command="{Binding BatchImportCommand}"
-                            ToolTip="ファイルダイアログから複数ファイルをまとめて取り込みます"/>
+                            ToolTip="{DynamicResource Quick.DropZone.BatchImport.Tooltip}"/>
                 </StackPanel>
             </Border>
 
@@ -248,7 +254,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                        <TextBlock Text="話者" FontSize="12" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource Quick.Speaker}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                         <ComboBox ItemsSource="{Binding Speakers}"
                                   SelectedIndex="{Binding SelectedSpeakerIndex}"
@@ -259,7 +265,7 @@
                     <Button Grid.Column="1" VerticalAlignment="Bottom"
                             Width="36" Height="30"
                             Margin="0,0,8,0"
-                            ToolTip="試聴"
+                            ToolTip="{DynamicResource Quick.Speaker.Preview.Tooltip}"
                             Command="{Binding PreviewSpeakerCommand}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True">
                         <Path Data="M8,5 V19 L19,12 Z"
@@ -269,12 +275,12 @@
                     </Button>
 
                     <StackPanel Grid.Column="2" Margin="0,0,0,0">
-                        <TextBlock Text="向き" FontSize="12" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource Quick.Orientation}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                         <ComboBox SelectedIndex="{Binding SelectedResolutionIndex}"
                                   shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                            <ComboBoxItem Content="縦動画 (9:16)" Tag="1080x1920"/>
-                            <ComboBoxItem Content="横動画 (16:9)" Tag="1920x1080"/>
+                            <ComboBoxItem Content="{DynamicResource Quick.Res.Portrait}" Tag="1080x1920"/>
+                            <ComboBoxItem Content="{DynamicResource Quick.Res.Landscape}" Tag="1920x1080"/>
                         </ComboBox>
                     </StackPanel>
                 </Grid>
@@ -287,7 +293,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                        <TextBlock Text="切り替え効果" FontSize="12" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource Quick.Transition}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                         <ComboBox ItemsSource="{Binding TransitionOptions}"
                                   SelectedIndex="{Binding SelectedTransitionIndex}"
@@ -295,7 +301,7 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="話す速さ" FontSize="12" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource Quick.SpeechSpeed}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                         <ComboBox ItemsSource="{Binding SpeedOptions}"
                                   SelectedIndex="{Binding SelectedSpeedIndex}"
@@ -316,7 +322,7 @@
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Content="✕" Width="28" Height="28"
                                     Margin="4,0,0,0"
-                                    ToolTip="BGMを解除"
+                                    ToolTip="{DynamicResource Watermark.Clear.Tooltip}"
                                     Command="{Binding ClearBgmCommand}"
                                     Visibility="{Binding HasBgm, Converter={StaticResource BoolToVis}}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
@@ -325,13 +331,13 @@
                                     HorizontalContentAlignment="Left"
                                     Padding="8,0"
                                     Command="{Binding SelectBgmCommand}"
-                                    ToolTip="BGMファイルを選択"
+                                    ToolTip="{DynamicResource BGM.SelectFile}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                         </DockPanel>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
-                        <CheckBox Content="サムネイル生成"
+                        <CheckBox Content="{DynamicResource Quick.Thumbnail}"
                                   IsChecked="{Binding GenerateThumbnailEnabled}"
                                   FontSize="11"
                                   Foreground="{DynamicResource TextSecondary}"
@@ -347,7 +353,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                        <TextBlock Text="イントロ" FontSize="12" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource IntroOutro.Intro.Short}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
@@ -359,13 +365,13 @@
                                     Height="24" FontSize="10"
                                     HorizontalContentAlignment="Left" Padding="6,0"
                                     Command="{Binding SelectIntroCommand}"
-                                    ToolTip="オープニング画像/動画を選択"
+                                    ToolTip="{DynamicResource IntroOutro.Intro.Tooltip}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                         </DockPanel>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="アウトロ" FontSize="12" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource IntroOutro.Outro.Short}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                         <DockPanel>
                             <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
@@ -377,7 +383,7 @@
                                     Height="24" FontSize="10"
                                     HorizontalContentAlignment="Left" Padding="6,0"
                                     Command="{Binding SelectOutroCommand}"
-                                    ToolTip="エンディング画像/動画を選択"
+                                    ToolTip="{DynamicResource IntroOutro.Outro.Tooltip}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                         </DockPanel>
                     </StackPanel>
@@ -392,7 +398,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                        <TextBlock Text="ロゴ透かし" FontSize="12" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource Watermark.Short}" FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
                         <DockPanel>
                             <ComboBox DockPanel.Dock="Right" Width="56"
@@ -410,24 +416,24 @@
                                     Height="24" FontSize="10"
                                     HorizontalContentAlignment="Left" Padding="6,0"
                                     Command="{Binding SelectWatermarkCommand}"
-                                    ToolTip="ロゴ画像（PNG推奨）を選択"
+                                    ToolTip="{DynamicResource Watermark.Tooltip}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                         </DockPanel>
                     </StackPanel>
 
                     <Button Grid.Column="1"
-                            Content="テンプレ保存"
+                            Content="{DynamicResource Template.Save}"
                             Height="24" FontSize="10" Padding="8,0"
                             Margin="0,18,4,0"
                             Command="{Binding SaveTemplateCommand}"
-                            ToolTip="現在の設定をテンプレートとして保存"
+                            ToolTip="{DynamicResource Template.Save.Tooltip}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                     <Button Grid.Column="2"
-                            Content="テンプレ読込"
+                            Content="{DynamicResource Template.Load}"
                             Height="24" FontSize="10" Padding="8,0"
                             Margin="0,18,0,0"
                             Command="{Binding LoadTemplateCommand}"
-                            ToolTip="保存済みテンプレートを適用"
+                            ToolTip="{DynamicResource Template.Load.Tooltip}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </Grid>
             </StackPanel>
@@ -443,7 +449,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
-                            Content="動画を生成"
+                            Content="{DynamicResource Quick.Generate}"
                             Height="52" FontSize="16" FontWeight="Bold"
                             Style="{DynamicResource PrimaryButton}"
                             Command="{Binding GenerateCommand}"
@@ -451,7 +457,7 @@
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
                     <Button Grid.Column="1"
-                            Content="詳細エディタで開く"
+                            Content="{DynamicResource Quick.OpenEditor}"
                             Height="52" FontSize="13"
                             Padding="20,8"
                             Command="{Binding OpenEditorCommand}"
@@ -459,7 +465,7 @@
                 </Grid>
 
                 <!-- Generating: cancel button -->
-                <Button Content="生成をキャンセル"
+                <Button Content="{DynamicResource Quick.CancelGenerate}"
                         Height="44" FontSize="13"
                         Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVis}}"
                         Command="{Binding CancelCommand}"
@@ -478,7 +484,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Row="0" Grid.Column="0"
-                            Content="動画を開く"
+                            Content="{DynamicResource Quick.OpenVideo}"
                             Height="48" FontSize="13" FontWeight="Bold"
                             Style="{DynamicResource SuccessButton}"
                             Command="{Binding OpenOutputCommand}"
@@ -486,15 +492,15 @@
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
                     <Button Grid.Row="0" Grid.Column="1"
-                            Content="設定変えて再生成"
+                            Content="{DynamicResource Quick.Regenerate}"
                             Height="48" FontSize="13"
                             Command="{Binding GenerateAnotherCommand}"
                             Margin="4,0,4,0"
-                            ToolTip="話者や向きを変えてもう一度生成"
+                            ToolTip="{DynamicResource Quick.Regenerate.Tooltip}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
                     <Button Grid.Row="0" Grid.Column="2"
-                            Content="別の資料で作る"
+                            Content="{DynamicResource Quick.NewMaterial}"
                             Height="48" FontSize="13"
                             Command="{Binding ResetAllCommand}"
                             Margin="4,0,0,0"
@@ -502,11 +508,11 @@
 
                     <!-- Extra output access row -->
                     <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                            Content="出力フォルダを開く（サムネイル・チャプター・メタデータ）"
+                            Content="{DynamicResource Quick.OpenOutputFolder}"
                             Height="30" FontSize="11"
                             Margin="0,6,0,0"
                             Command="{Binding OpenOutputFolderCommand}"
-                            ToolTip="サムネイル(.jpg)、チャプター(.chapters.txt)、メタデータ(.metadata.txt)が同フォルダに出力されています"
+                            ToolTip="{DynamicResource Quick.OpenOutputFolder.Tooltip}"
                             Visibility="{Binding HasExtraOutputs, Converter={StaticResource BoolToVis}}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </Grid>
@@ -538,7 +544,7 @@
                       Width="48" Height="48"
                       Stretch="Uniform"
                       HorizontalAlignment="Center" Margin="0,0,0,12"/>
-                <TextBlock Text="ドロップして差し替え"
+                <TextBlock Text="{DynamicResource Quick.DropReplace}"
                            FontSize="18" FontWeight="Bold"
                            Foreground="{DynamicResource TextPrimary}"
                            HorizontalAlignment="Center"/>
@@ -548,7 +554,7 @@
         <!-- ================================================================ -->
         <!-- Log Area (collapsible)                                            -->
         <!-- ================================================================ -->
-        <Expander Grid.Row="2" Header="ログ" IsExpanded="False"
+        <Expander Grid.Row="2" Header="{DynamicResource Quick.Log}" IsExpanded="False"
                   Margin="8,0,8,4" Padding="0">
             <TextBox x:Name="LogTextBox" IsReadOnly="True"
                      Height="100"

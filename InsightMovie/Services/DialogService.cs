@@ -112,7 +112,7 @@ namespace InsightMovie.Services
                 Margin = new Thickness(8, 4, 8, 8)
             };
             var okBtn = new Button { Content = "OK", Width = 80, Height = 28, Margin = new Thickness(4, 0, 0, 0), IsDefault = true };
-            var cancelBtn = new Button { Content = "キャンセル", Width = 80, Height = 28, Margin = new Thickness(4, 0, 0, 0), IsCancel = true };
+            var cancelBtn = new Button { Content = LocalizationService.GetString("Common.Cancel"), Width = 80, Height = 28, Margin = new Thickness(4, 0, 0, 0), IsCancel = true };
             okBtn.Click += (_, _) => { if (listBox.SelectedIndex >= 0) dlg.DialogResult = true; };
             btnPanel.Children.Add(okBtn);
             btnPanel.Children.Add(cancelBtn);
@@ -136,10 +136,10 @@ namespace InsightMovie.Services
                 LicenseManager = licenseManager,
                 Features = new[]
                 {
-                    new FeatureDefinition("subtitle", "字幕機能"),
-                    new FeatureDefinition("subtitle_style", "字幕スタイル選択"),
-                    new FeatureDefinition("transition", "トランジション効果"),
-                    new FeatureDefinition("pptx_import", "PPTX取込"),
+                    new FeatureDefinition("subtitle", LocalizationService.GetString("Dialog.Feature.Subtitle")),
+                    new FeatureDefinition("subtitle_style", LocalizationService.GetString("Dialog.Feature.SubtitleStyle")),
+                    new FeatureDefinition("transition", LocalizationService.GetString("Dialog.Feature.Transition")),
+                    new FeatureDefinition("pptx_import", LocalizationService.GetString("Dialog.Feature.PptxImport")),
                 },
                 FeatureMatrix = new Dictionary<string, InsightCommon.License.PlanCode[]>
                 {

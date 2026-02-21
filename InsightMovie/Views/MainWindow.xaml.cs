@@ -17,10 +17,12 @@ namespace InsightMovie.Views
     public partial class MainWindow : Window
     {
         private readonly MainWindowViewModel _vm;
+        private readonly Config _config;
 
         public MainWindow(VoiceVoxClient voiceVoxClient, int speakerId,
                           FFmpegWrapper? ffmpegWrapper, Config config)
         {
+            _config = config;
             InitializeComponent();
 
             _vm = new MainWindowViewModel(voiceVoxClient, speakerId, ffmpegWrapper, config);
@@ -141,7 +143,7 @@ namespace InsightMovie.Views
             }
             catch (Exception ex)
             {
-                _vm.Logger.LogError("ファイルを開けませんでした", ex);
+                _vm.Logger.LogError(LocalizationService.GetString("VM.File.OpenError"), ex);
             }
         }
 
@@ -157,7 +159,7 @@ namespace InsightMovie.Views
                 }
                 catch (Exception ex)
                 {
-                    _vm.Logger.LogError("プレビュープレイヤーを開けませんでした", ex);
+                    _vm.Logger.LogError(LocalizationService.GetString("VM.Preview.OpenError"), ex);
                 }
             });
         }
@@ -267,6 +269,12 @@ namespace InsightMovie.Views
             Close();
         }
 
+        private void LangSwitchButton_Click(object sender, RoutedEventArgs e)
+        {
+            var newLang = LocalizationService.ToggleLanguage();
+            _config.Language = newLang;
+        }
+
         private void Window_StateChanged(object? sender, EventArgs e)
         {
             // Update maximize button icon: restore ↔ maximize
@@ -277,8 +285,8 @@ namespace InsightMovie.Views
                         ? "M0,2 H8 V10 H0 Z M2,2 V0 H10 V8 H8"   // Restore (two overlapping squares)
                         : "M0,0 H10 V10 H0 Z");                     // Maximize (single square)
                 MaximizeButton.ToolTip = WindowState == WindowState.Maximized
-                    ? "元に戻す"
-                    : "最大化";
+                    ? LocalizationService.GetString("Window.Restore")
+                    : LocalizationService.GetString("Window.Maximize");
             }
         }
 
@@ -297,7 +305,7 @@ namespace InsightMovie.Views
             var files = _vm.RecentFiles;
             if (files.Count == 0)
             {
-                var empty = new MenuItem { Header = "(なし)", IsEnabled = false };
+                var empty = new MenuItem { Header = LocalizationService.GetString("Common.None"), IsEnabled = false };
                 RecentFilesMenu.Items.Add(empty);
                 return;
             }

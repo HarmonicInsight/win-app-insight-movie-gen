@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json.Serialization;
+using InsightMovie.Services;
 
 namespace InsightMovie.Models
 {
@@ -64,17 +65,17 @@ namespace InsightMovie.Models
 
         [JsonIgnore]
         public string DisplayLabel => string.IsNullOrWhiteSpace(Text)
-            ? "(空)"
+            ? LocalizationService.GetString("Overlay.Empty")
             : Text.Length > 20 ? Text[..20] + "..." : Text;
 
         /// <summary>
         /// Creates a title overlay preset for cover pages.
         /// </summary>
-        public static TextOverlay CreateTitle(string text = "タイトル")
+        public static TextOverlay CreateTitle(string? text = null)
         {
             return new TextOverlay
             {
-                Text = text,
+                Text = text ?? LocalizationService.GetString("Overlay.DefaultTitle"),
                 XPercent = 50.0,
                 YPercent = 40.0,
                 FontSize = 72,
@@ -92,11 +93,11 @@ namespace InsightMovie.Models
         /// <summary>
         /// Creates a subtitle overlay preset for cover pages.
         /// </summary>
-        public static TextOverlay CreateSubheading(string text = "サブタイトル")
+        public static TextOverlay CreateSubheading(string? text = null)
         {
             return new TextOverlay
             {
-                Text = text,
+                Text = text ?? LocalizationService.GetString("Overlay.DefaultSubtitle"),
                 XPercent = 50.0,
                 YPercent = 55.0,
                 FontSize = 40,
