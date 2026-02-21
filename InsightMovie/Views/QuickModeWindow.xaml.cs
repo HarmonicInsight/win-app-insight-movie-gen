@@ -232,7 +232,17 @@ namespace InsightMovie.Views
         {
             OnStopAudioRequested();
             if (!_vm.CanClose())
+            {
                 e.Cancel = true;
+                return;
+            }
+
+            // Unsubscribe event handlers to prevent memory leaks
+            _vm.Logger.LogReceived -= OnLogReceived;
+            _vm.OpenEditorRequested -= OnOpenEditorRequested;
+            _vm.OpenFileRequested -= OnOpenFileRequested;
+            _vm.PlayAudioRequested -= OnPlayAudioRequested;
+            _vm.StopAudioRequested -= OnStopAudioRequested;
         }
     }
 }

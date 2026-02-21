@@ -41,6 +41,8 @@ namespace InsightMovie.ViewModels
         #region Observable State
 
         private Project _project;
+        private Timer? _autoSaveTimer;
+        private bool _isDirty;
         private int _selectedSceneIndex = -1;
         private Scene? _currentScene;
         private bool _isLoadingScene;
@@ -528,6 +530,10 @@ namespace InsightMovie.ViewModels
         public ICommand ShowLicenseManagerCommand { get; }
         public ICommand ShowLicenseInfoCommand { get; }
         public ICommand ShowAboutCommand { get; }
+        public ICommand ShowShortcutsCommand { get; }
+        public ICommand ShowTermsCommand { get; }
+        public ICommand ShowPrivacyCommand { get; }
+        public ICommand OpenRecentFileCommand { get; }
         public ICommand CancelExportCommand { get; }
         public ICommand ExitCommand { get; }
 
@@ -584,8 +590,15 @@ namespace InsightMovie.ViewModels
             ShowLicenseManagerCommand = new RelayCommand(ShowLicenseManager);
             ShowLicenseInfoCommand = new RelayCommand(ShowLicenseInfo);
             ShowAboutCommand = new RelayCommand(ShowAbout);
+            ShowShortcutsCommand = new RelayCommand(ShowShortcuts);
+            ShowTermsCommand = new RelayCommand(ShowTerms);
+            ShowPrivacyCommand = new RelayCommand(ShowPrivacy);
+            OpenRecentFileCommand = new RelayCommand(p => { if (p is string path) OpenRecentFile(path); });
             CancelExportCommand = new RelayCommand(CancelExport, () => _isExporting);
             ExitCommand = new RelayCommand(() => ExitRequested?.Invoke());
+
+            // Auto-save every 5 minutes
+            _autoSaveTimer = new Timer(_ => AutoSave(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
 
             UpdateStatusText();
             LoadLicense();
@@ -622,9 +635,19 @@ namespace InsightMovie.ViewModels
 
         #region Status
 
-        private void UpdateStatusText()
+        private async void UpdateStatusText()
         {
-            var vvStatus = "VOICEVOX: ✓接続OK";
+            string vvStatus;
+            try
+            {
+                var version = await _voiceVoxClient.CheckConnectionAsync();
+                vvStatus = version != null ? $"VOICEVOX: ✓接続OK (v{version})" : "VOICEVOX: ✗未接続";
+            }
+            catch
+            {
+                vvStatus = "VOICEVOX: ✗未接続";
+            }
+
             var ffStatus = _ffmpegWrapper?.CheckAvailable() == true
                 ? "ffmpeg: ✓検出OK"
                 : "ffmpeg: ✗未検出";
@@ -718,6 +741,7 @@ namespace InsightMovie.ViewModels
 
         private void AddScene()
         {
+            _isDirty = true;
             _project.AddScene();
             RefreshSceneList();
             SelectedSceneIndex = _project.Scenes.Count - 1;
@@ -726,6 +750,7 @@ namespace InsightMovie.ViewModels
 
         private void RemoveScene()
         {
+            _isDirty = true;
             if (_project.Scenes.Count <= 1)
             {
                 _dialogService?.ShowWarning("最低1つのシーンが必要です。", "削除不可");
@@ -765,6 +790,7 @@ namespace InsightMovie.ViewModels
             OnPropertyChanged(nameof(NarrationPlaceholderVisible));
 
             if (_isLoadingScene || _currentScene == null) return;
+            _isDirty = true;
             _currentScene.NarrationText = _narrationText;
 
             var idx = _selectedSceneIndex;
@@ -1238,6 +1264,15 @@ namespace InsightMovie.ViewModels
 
             var previewDir = Path.Combine(Path.GetTempPath(), "insightmovie_cache", "preview");
             Directory.CreateDirectory(previewDir);
+
+            // Clean up old preview files to prevent disk bloat
+            try
+            {
+                foreach (var old in Directory.GetFiles(previewDir, "preview_*.mp4"))
+                    File.Delete(old);
+            }
+            catch { /* best-effort cleanup */ }
+
             var previewPath = Path.Combine(previewDir, $"preview_{Guid.NewGuid():N}.mp4");
 
             string resolution = _selectedResolutionIndex == 1 ? "1920x1080" : "1080x1920";
@@ -1654,6 +1689,7 @@ namespace InsightMovie.ViewModels
             try
             {
                 _project = Project.Load(path);
+                _config.AddRecentFile(path);
                 _sceneSubtitleStyles.Clear();
                 WindowTitle = $"InsightMovie - {Path.GetFileNameWithoutExtension(path)}";
                 RefreshSceneList();
@@ -1678,11 +1714,57 @@ namespace InsightMovie.ViewModels
             try
             {
                 _project.Save();
+                _isDirty = false;
+                _config.AddRecentFile(_project.ProjectPath!);
                 _logger.Log($"プロジェクトを保存しました: {_project.ProjectPath}");
             }
             catch (Exception ex)
             {
                 _dialogService?.ShowError($"保存に失敗しました:\n{ex.Message}", "保存エラー");
+            }
+        }
+
+        public List<string> RecentFiles => _config.RecentFiles;
+
+        private void OpenRecentFile(string path)
+        {
+            if (!File.Exists(path))
+            {
+                _dialogService?.ShowWarning($"ファイルが見つかりません:\n{path}", "最近使ったファイル");
+                return;
+            }
+
+            try
+            {
+                _project = Project.Load(path);
+                _config.AddRecentFile(path);
+                _sceneSubtitleStyles.Clear();
+                WindowTitle = $"InsightMovie - {Path.GetFileNameWithoutExtension(path)}";
+                RefreshSceneList();
+                UpdateBgmStatus();
+                SyncProjectToUI();
+                _logger.Log($"プロジェクトを開きました: {path}");
+            }
+            catch (Exception ex)
+            {
+                _dialogService?.ShowError($"プロジェクトファイルの読み込みに失敗しました:\n{ex.Message}", "読み込みエラー");
+            }
+        }
+
+        private void AutoSave()
+        {
+            try
+            {
+                var autoSaveDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "InsightMovie", "AutoSave");
+                Directory.CreateDirectory(autoSaveDir);
+                var autoSavePath = Path.Combine(autoSaveDir, "autosave.json");
+                _project.Save(autoSavePath);
+            }
+            catch
+            {
+                // Auto-save failure should not disrupt the user
             }
         }
 
@@ -1701,6 +1783,8 @@ namespace InsightMovie.ViewModels
             try
             {
                 _project.Save(path);
+                _isDirty = false;
+                _config.AddRecentFile(path);
                 WindowTitle = $"InsightMovie - {Path.GetFileNameWithoutExtension(path)}";
                 _logger.Log($"プロジェクトを保存しました: {path}");
             }
@@ -1848,12 +1932,26 @@ namespace InsightMovie.ViewModels
         {
             _dialogService?.ShowInfo(
                 "InsightMovie チュートリアル\n─────────────────────\n\n" +
-                "1. シーンを追加: 左パネルの「＋追加」ボタンでシーンを追加します。\n\n" +
-                "2. 素材を設定: 「選択」ボタンで画像または動画を選びます。\n\n" +
-                "3. ナレーション入力: テキストエリアに話させたい内容を入力します。\n\n" +
-                "4. 音声プレビュー: 「▶音声再生」ボタンで音声を確認できます。\n\n" +
-                "5. 字幕設定: 字幕テキストとスタイルを設定します。\n\n" +
-                "6. 書き出し: 「動画を書き出し」ボタンで動画を生成します。",
+                "■ かんたんモード（QuickMode）\n" +
+                "  1. ファイルをドラッグ＆ドロップ、またはファイル選択ボタンで素材を取り込み\n" +
+                "  2. 話者・解像度・速度などを設定\n" +
+                "  3.「生成」ボタンで動画を自動生成\n\n" +
+                "■ 詳細エディタ（MainWindow）\n" +
+                "  1. 左パネルの「＋追加」でシーンを追加\n" +
+                "  2.「選択」ボタンで画像・動画を設定\n" +
+                "  3. ナレーション欄にテキストを入力\n" +
+                "  4.「▶音声再生」でプレビュー確認\n" +
+                "  5. 字幕テキスト・スタイルを設定\n" +
+                "  6.「動画を書き出し」で生成\n\n" +
+                "■ テキストオーバーレイ\n" +
+                "  各シーンに自由なテキストを配置できます。\n" +
+                "  位置（X/Y%）、サイズ、色、配置を個別設定可能。\n" +
+                "  「表紙テンプレート」ボタンでタイトル＋サブタイトルを一括追加。\n\n" +
+                "■ テンプレート\n" +
+                "  BGM・透かし・解像度などの設定をテンプレートとして保存・読込可能。\n\n" +
+                "■ PPTX取込\n" +
+                "  PowerPointファイルをドロップすると、スライドごとにシーンが自動作成されます。\n" +
+                "  （Trial以上のプランが必要）",
                 "チュートリアル");
         }
 
@@ -1862,11 +1960,26 @@ namespace InsightMovie.ViewModels
             _dialogService?.ShowInfo(
                 "よくある質問 (FAQ)\n─────────────────────\n\n" +
                 "Q: VOICEVOXが接続できません。\n" +
-                "A: VOICEVOXエンジンが起動していることを確認してください。\n\n" +
+                "A: VOICEVOXエンジンが起動しているか確認してください。\n" +
+                "   初回起動時にセットアップウィザードで接続設定を行います。\n\n" +
                 "Q: 動画の書き出しに失敗します。\n" +
-                "A: ffmpegがインストールされ、PATHに含まれているか確認してください。\n\n" +
+                "A: FFmpegがインストールされ、PATHに含まれているか確認してください。\n" +
+                "   起動時にFFmpegが見つからない場合は警告が表示されます。\n\n" +
                 "Q: ライセンスキーの入力方法は？\n" +
-                "A: メニュー「ヘルプ」→「ライセンス管理」から入力してください。",
+                "A: メニュー「ヘルプ」→「ライセンス管理」から入力してください。\n\n" +
+                "Q: 字幕やトランジションが使えません。\n" +
+                "A: Trial以上のプランが必要です。「ヘルプ」→「ライセンス管理」から\n" +
+                "   ライセンスをアクティベートしてください。\n\n" +
+                "Q: 対応ファイル形式は？\n" +
+                "A: 画像: PNG, JPG, BMP, GIF / 動画: MP4, AVI, MOV, WMV, MKV\n" +
+                "   音声(BGM): MP3, WAV, OGG, FLAC, AAC, M4A\n" +
+                "   その他: PPTX, TXT, MD\n\n" +
+                "Q: 書き出しをキャンセルしたい。\n" +
+                "A: 進捗バー横の「キャンセル」ボタンをクリックしてください。\n\n" +
+                "Q: テンプレートはどこに保存されますか？\n" +
+                "A: %LOCALAPPDATA%\\InsightMovie\\Templates に保存されます。\n\n" +
+                "Q: お問い合わせ先は？\n" +
+                "A: support@h-insight.jp までご連絡ください。",
                 "FAQ");
         }
 
@@ -1890,12 +2003,72 @@ namespace InsightMovie.ViewModels
 
         private void ShowAbout()
         {
+            var version = typeof(MainWindowViewModel).Assembly.GetName().Version;
+            var versionStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v1.0.0";
+
             _dialogService?.ShowInfo(
-                "InsightMovie v1.0.0\n\n" +
+                $"InsightMovie {versionStr}\n\n" +
                 "VOICEVOX音声エンジンを使用した動画自動生成ツール\n\n" +
                 "テキストを入力するだけで、ナレーション付き動画を\n簡単に作成できます。\n\n" +
-                "Copyright (C) 2026 InsightMovie\nAll rights reserved.",
+                "開発元: Harmonic Insight Inc.\n" +
+                "Web: https://h-insight.jp\n" +
+                "サポート: support@h-insight.jp\n\n" +
+                "Copyright (C) 2024-2026 Harmonic Insight Inc.\nAll rights reserved.",
                 "InsightMovieについて");
+        }
+
+        private void ShowShortcuts()
+        {
+            _dialogService?.ShowInfo(
+                "キーボードショートカット一覧\n─────────────────────\n\n" +
+                "Ctrl+N          新規プロジェクト\n" +
+                "Ctrl+O          プロジェクトを開く\n" +
+                "Ctrl+S          プロジェクトを保存\n" +
+                "Ctrl+Shift+S    名前を付けて保存\n" +
+                "Ctrl+T          シーンを追加\n" +
+                "Delete          シーンを削除\n" +
+                "Ctrl+Up         シーンを上へ移動\n" +
+                "Ctrl+Down       シーンを下へ移動\n" +
+                "F1              チュートリアルを表示",
+                "キーボードショートカット");
+        }
+
+        private void ShowTerms()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "https://h-insight.jp/terms",
+                    UseShellExecute = true
+                });
+            }
+            catch
+            {
+                _dialogService?.ShowInfo(
+                    "利用規約は以下のURLからご確認ください:\nhttps://h-insight.jp/terms\n\n" +
+                    "お問い合わせ: info@h-insight.jp",
+                    "利用規約");
+            }
+        }
+
+        private void ShowPrivacy()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "https://h-insight.jp/privacy",
+                    UseShellExecute = true
+                });
+            }
+            catch
+            {
+                _dialogService?.ShowInfo(
+                    "プライバシーポリシーは以下のURLからご確認ください:\nhttps://h-insight.jp/privacy\n\n" +
+                    "お問い合わせ: info@h-insight.jp",
+                    "プライバシーポリシー");
+            }
         }
 
         #endregion
@@ -1904,16 +2077,42 @@ namespace InsightMovie.ViewModels
 
         public bool CanClose()
         {
-            if (!_isExporting) return true;
-
-            if (_dialogService?.ShowConfirmation(
-                "書き出し処理が実行中です。中断して終了しますか？",
-                "終了確認") == true)
+            if (_isExporting)
             {
-                _exportCts?.Cancel();
-                return true;
+                if (_dialogService?.ShowConfirmation(
+                    "書き出し処理が実行中です。中断して終了しますか？",
+                    "終了確認") == true)
+                {
+                    _exportCts?.Cancel();
+                    return true;
+                }
+                return false;
             }
-            return false;
+
+            if (_isDirty)
+            {
+                if (_dialogService?.ShowConfirmation(
+                    "変更が保存されていません。保存せずに終了しますか？",
+                    "未保存の変更") != true)
+                {
+                    return false;
+                }
+            }
+
+            // Dispose auto-save timer
+            _autoSaveTimer?.Dispose();
+            _autoSaveTimer = null;
+
+            // Clean up preview files
+            try
+            {
+                var previewDir = Path.Combine(Path.GetTempPath(), "insightmovie_cache", "preview");
+                if (Directory.Exists(previewDir))
+                    Directory.Delete(previewDir, true);
+            }
+            catch { /* best-effort */ }
+
+            return true;
         }
 
         #endregion

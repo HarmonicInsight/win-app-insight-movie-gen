@@ -42,6 +42,7 @@ namespace InsightMovie.Views
             {
                 _vm.SetDialogService(new DialogService(this));
                 await _vm.InitializeAsync();
+                PopulateRecentFiles();
             };
         }
 
@@ -275,6 +276,34 @@ namespace InsightMovie.Views
 
         #endregion
 
+        #region Recent Files
+
+        private void PopulateRecentFiles()
+        {
+            RecentFilesMenu.Items.Clear();
+            var files = _vm.RecentFiles;
+            if (files.Count == 0)
+            {
+                var empty = new MenuItem { Header = "(なし)", IsEnabled = false };
+                RecentFilesMenu.Items.Add(empty);
+                return;
+            }
+
+            foreach (var file in files)
+            {
+                var item = new MenuItem
+                {
+                    Header = Path.GetFileName(file),
+                    ToolTip = file,
+                    CommandParameter = file,
+                    Command = _vm.OpenRecentFileCommand
+                };
+                RecentFilesMenu.Items.Add(item);
+            }
+        }
+
+        #endregion
+
         #region Window Lifecycle
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -285,6 +314,15 @@ namespace InsightMovie.Views
                 return;
             }
             OnStopAudioRequested();
+
+            // Unsubscribe event handlers to prevent memory leaks
+            _vm.PlayAudioRequested -= OnPlayAudioRequested;
+            _vm.StopAudioRequested -= OnStopAudioRequested;
+            _vm.ThumbnailUpdateRequested -= OnThumbnailUpdateRequested;
+            _vm.StylePreviewUpdateRequested -= OnStylePreviewUpdateRequested;
+            _vm.OpenFileRequested -= OnOpenFileRequested;
+            _vm.PreviewVideoReady -= OnPreviewVideoReady;
+            _vm.Logger.LogReceived -= OnLogReceived;
         }
 
         #endregion

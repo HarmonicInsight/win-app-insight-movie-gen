@@ -13,6 +13,8 @@ using InsightMovie.VoiceVox;
 /// </summary>
 public partial class App : Application
 {
+    private VoiceVoxClient? _voiceVoxClient;
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -78,6 +80,7 @@ public partial class App : Application
         // ── 3. Create VOICEVOX client ──────────────────────────────
         // Reuse the client from the wizard when available; otherwise create a new one.
         var client = wizardClient ?? new VoiceVoxClient(config.EngineUrl);
+        _voiceVoxClient = client;
 
         if (!config.IsFirstRun)
         {
@@ -118,5 +121,11 @@ public partial class App : Application
         // ── 6. Show quick mode (default) or main window ─────────────
         var quickMode = new QuickModeWindow(client, speakerId, ffmpeg, config);
         quickMode.Show();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _voiceVoxClient?.Dispose();
+        base.OnExit(e);
     }
 }

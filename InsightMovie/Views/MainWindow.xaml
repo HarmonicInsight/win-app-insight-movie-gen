@@ -198,6 +198,7 @@
                           Command="{Binding NewProjectCommand}"/>
                 <MenuItem Header="開く(_O)" InputGestureText="Ctrl+O"
                           Command="{Binding OpenProjectCommand}"/>
+                <MenuItem Header="最近使ったファイル(_R)" x:Name="RecentFilesMenu"/>
                 <Separator/>
                 <MenuItem Header="上書き保存(_S)" InputGestureText="Ctrl+S"
                           Command="{Binding SaveProjectCommand}"/>
@@ -227,11 +228,19 @@
                           Command="{Binding ShowTutorialCommand}"/>
                 <MenuItem Header="FAQ(_Q)"
                           Command="{Binding ShowFaqCommand}"/>
+                <MenuItem Header="キーボードショートカット(_K)"
+                          Command="{Binding ShowShortcutsCommand}"/>
                 <Separator/>
                 <MenuItem Header="ライセンス管理(_L)"
                           Command="{Binding ShowLicenseManagerCommand}"/>
                 <MenuItem Header="ライセンス情報(_I)"
                           Command="{Binding ShowLicenseInfoCommand}"/>
+                <Separator/>
+                <MenuItem Header="利用規約"
+                          Command="{Binding ShowTermsCommand}"/>
+                <MenuItem Header="プライバシーポリシー"
+                          Command="{Binding ShowPrivacyCommand}"/>
+                <Separator/>
                 <MenuItem Header="InsightMovieについて(_A)"
                           Command="{Binding ShowAboutCommand}"/>
             </MenuItem>

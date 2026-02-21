@@ -1097,8 +1097,15 @@ namespace InsightMovie.ViewModels
         public bool CanClose()
         {
             if (!_isGenerating) return true;
-            _exportCts?.Cancel();
-            return true;
+
+            if (_dialogService?.ShowConfirmation(
+                "書き出し処理が実行中です。中断して終了しますか？",
+                "終了確認") == true)
+            {
+                _exportCts?.Cancel();
+                return true;
+            }
+            return false;
         }
 
         #endregion

@@ -11,7 +11,8 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <Description>InsightMovie - VOICEVOX powered video generation application</Description>
-    <Company>InsightMovie</Company>
+    <Company>Harmonic Insight</Company>
+    <Copyright>Copyright (C) 2024-2026 Harmonic Insight Inc.</Copyright>
     <Product>InsightMovie</Product>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>

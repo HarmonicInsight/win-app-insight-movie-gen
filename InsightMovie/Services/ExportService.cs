@@ -67,6 +67,12 @@ namespace InsightMovie.Services
                 return result;
             }
 
+            if (project.Scenes.Count == 0 || !project.Scenes.Any(s => s.HasMedia || s.HasNarration))
+            {
+                progress.Report("エラー: 有効なシーンがありません。素材またはナレーションを設定してください。");
+                return result;
+            }
+
             var sceneGen = new SceneGenerator(_ffmpeg);
             var composer = new VideoComposer(_ffmpeg);
             var tempDir = Path.Combine(Path.GetTempPath(), "insightmovie_build");
@@ -283,6 +289,14 @@ namespace InsightMovie.Services
             WriteYouTubeMetadata(metadataPath, project, chapterTimes);
             result.MetadataFilePath = metadataPath;
 
+            // Clean up temp build directory
+            try
+            {
+                if (Directory.Exists(tempDir))
+                    Directory.Delete(tempDir, true);
+            }
+            catch { /* Best-effort cleanup */ }
+
             progress.Report("書き出し完了");
             return result;
         }
@@ -386,7 +400,7 @@ namespace InsightMovie.Services
 
             // Description
             sb.AppendLine("【説明文】");
-            sb.AppendLine("この動画はInsightCastで自動生成されました。");
+            sb.AppendLine("この動画はInsightMovieで自動生成されました。");
             sb.AppendLine();
 
             // Chapter markers for YouTube

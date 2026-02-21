@@ -153,4 +153,22 @@ public class Config
         LicenseEmail = null;
         EndUpdate();
     }
+
+    private const int MaxRecentFiles = 5;
+
+    public List<string> RecentFiles
+    {
+        get => Get<List<string>>("recent_files", new List<string>()) ?? new List<string>();
+        set => Set("recent_files", value);
+    }
+
+    public void AddRecentFile(string path)
+    {
+        var files = RecentFiles;
+        files.Remove(path);
+        files.Insert(0, path);
+        if (files.Count > MaxRecentFiles)
+            files.RemoveRange(MaxRecentFiles, files.Count - MaxRecentFiles);
+        RecentFiles = files;
+    }
 }
