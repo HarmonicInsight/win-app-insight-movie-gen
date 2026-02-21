@@ -39,7 +39,7 @@
                 BorderBrush="{DynamicResource BorderDefault}" BorderThickness="0,0,0,1">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
-                    <Button Click="LanguageSwitchButton_Click"
+                    <Button Click="LangSwitchButton_Click"
                             Width="60" Height="32" BorderThickness="0"
                             Background="Transparent" FontSize="11"
                             Foreground="{DynamicResource TitlebarSecondary}"
