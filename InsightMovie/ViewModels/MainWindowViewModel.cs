@@ -80,6 +80,12 @@ namespace InsightMovie.ViewModels
         private readonly Dictionary<string, TextStyle> _sceneSubtitleStyles = new();
         private Dictionary<int, string> _speakerStyles = new();
 
+        // Intro/Outro/Watermark
+        private string _introFilePath = string.Empty;
+        private string _outroFilePath = string.Empty;
+        private string _watermarkFilePath = string.Empty;
+        private int _selectedWatermarkPosIndex = 3; // bottom-right
+
         // Overlay
         private int _selectedOverlayIndex = -1;
         private string _overlayText = string.Empty;
@@ -387,6 +393,51 @@ namespace InsightMovie.ViewModels
             new[] { 0, 191, 255 },   // 水色
         };
 
+        // Intro/Outro properties
+        public string IntroFilePath
+        {
+            get => _introFilePath;
+            set => SetProperty(ref _introFilePath, value);
+        }
+
+        public string OutroFilePath
+        {
+            get => _outroFilePath;
+            set => SetProperty(ref _outroFilePath, value);
+        }
+
+        public bool HasIntro => !string.IsNullOrEmpty(_introFilePath);
+        public bool HasOutro => !string.IsNullOrEmpty(_outroFilePath);
+        public string IntroFileName => string.IsNullOrEmpty(_introFilePath)
+            ? "（なし）" : Path.GetFileName(_introFilePath);
+        public string OutroFileName => string.IsNullOrEmpty(_outroFilePath)
+            ? "（なし）" : Path.GetFileName(_outroFilePath);
+
+        // Watermark properties
+        public string WatermarkFilePath
+        {
+            get => _watermarkFilePath;
+            set => SetProperty(ref _watermarkFilePath, value);
+        }
+
+        public bool HasWatermark => !string.IsNullOrEmpty(_watermarkFilePath);
+        public string WatermarkFileName => string.IsNullOrEmpty(_watermarkFilePath)
+            ? "（なし）" : Path.GetFileName(_watermarkFilePath);
+
+        public int SelectedWatermarkPosIndex
+        {
+            get => _selectedWatermarkPosIndex;
+            set => SetProperty(ref _selectedWatermarkPosIndex, value);
+        }
+
+        public List<string> WatermarkPositionOptions { get; } = new()
+        {
+            "左上", "右上", "左下", "右下", "中央"
+        };
+
+        private static readonly string[] WatermarkPositionValues =
+            { "top-left", "top-right", "bottom-left", "bottom-right", "center" };
+
         // Speech speed
         public List<string> SpeechSpeedOptions { get; } = new()
         {
@@ -453,11 +504,21 @@ namespace InsightMovie.ViewModels
         public ICommand ClearMediaCommand { get; }
         public ICommand OpenStyleDialogCommand { get; }
         public ICommand PreviewAudioCommand { get; }
+        public ICommand PreviewSceneCommand { get; }
         public ICommand StopPreviewCommand { get; }
         public ICommand ExportVideoCommand { get; }
         public ICommand AddOverlayCommand { get; }
         public ICommand RemoveOverlayCommand { get; }
         public ICommand AddCoverTemplateCommand { get; }
+        public ICommand SelectIntroCommand { get; }
+        public ICommand ClearIntroCommand { get; }
+        public ICommand SelectOutroCommand { get; }
+        public ICommand ClearOutroCommand { get; }
+        public ICommand SelectWatermarkCommand { get; }
+        public ICommand ClearWatermarkCommand { get; }
+        public ICommand SaveTemplateCommand { get; }
+        public ICommand LoadTemplateCommand { get; }
+        public ICommand OpenOutputFolderCommand { get; }
         public ICommand BgmSettingsCommand { get; }
         public ICommand ShowTutorialCommand { get; }
         public ICommand ShowFaqCommand { get; }
@@ -498,11 +559,21 @@ namespace InsightMovie.ViewModels
             ClearMediaCommand = new RelayCommand(ClearMedia);
             OpenStyleDialogCommand = new RelayCommand(OpenStyleDialog);
             PreviewAudioCommand = new AsyncRelayCommand(PreviewCurrentScene);
+            PreviewSceneCommand = new AsyncRelayCommand(PreviewCurrentSceneVideo);
             StopPreviewCommand = new RelayCommand(() => StopAudioRequested?.Invoke());
             ExportVideoCommand = new AsyncRelayCommand(ExportVideo);
             AddOverlayCommand = new RelayCommand(AddOverlay);
             RemoveOverlayCommand = new RelayCommand(RemoveOverlay);
             AddCoverTemplateCommand = new RelayCommand(AddCoverTemplate);
+            SelectIntroCommand = new RelayCommand(SelectIntro);
+            ClearIntroCommand = new RelayCommand(ClearIntro);
+            SelectOutroCommand = new RelayCommand(SelectOutro);
+            ClearOutroCommand = new RelayCommand(ClearOutro);
+            SelectWatermarkCommand = new RelayCommand(SelectWatermark);
+            ClearWatermarkCommand = new RelayCommand(ClearWatermark);
+            SaveTemplateCommand = new RelayCommand(SaveTemplate);
+            LoadTemplateCommand = new RelayCommand(LoadTemplate);
+            OpenOutputFolderCommand = new RelayCommand(OpenOutputFolder);
             BgmSettingsCommand = new RelayCommand(OpenBgmSettings);
             ShowTutorialCommand = new RelayCommand(ShowTutorial);
             ShowFaqCommand = new RelayCommand(ShowFaq);
@@ -1142,6 +1213,216 @@ namespace InsightMovie.ViewModels
 
         #endregion
 
+        #region Scene Preview
+
+        private async Task PreviewCurrentSceneVideo()
+        {
+            if (_currentScene == null)
+            {
+                _dialogService?.ShowInfo("シーンを選択してください。", "シーンプレビュー");
+                return;
+            }
+
+            if (_ffmpegWrapper == null || !_ffmpegWrapper.CheckAvailable())
+            {
+                _dialogService?.ShowError(
+                    "ffmpegが検出されていません。\nシーンプレビューにはffmpegが必要です。",
+                    "プレビューエラー");
+                return;
+            }
+
+            var previewDir = Path.Combine(Path.GetTempPath(), "insightmovie_cache", "preview");
+            Directory.CreateDirectory(previewDir);
+            var previewPath = Path.Combine(previewDir, $"preview_{Guid.NewGuid():N}.mp4");
+
+            string resolution = _selectedResolutionIndex == 1 ? "1920x1080" : "1080x1920";
+            int exportSpeakerId = _defaultSpeakerId;
+            if (_selectedExportSpeakerIndex >= 0 && _selectedExportSpeakerIndex < ExportSpeakers.Count)
+                exportSpeakerId = ExportSpeakers[_selectedExportSpeakerIndex].StyleId;
+
+            var style = GetStyleForScene(_currentScene);
+            var sceneSnapshot = _project.Clone().Scenes
+                .ElementAtOrDefault(_selectedSceneIndex) ?? _currentScene;
+
+            var progress = new Progress<string>(msg => _logger.Log(msg));
+
+            _logger.Log("シーンプレビューを生成中...");
+            ExportProgressVisible = true;
+
+            try
+            {
+                var exportService = new ExportService(_ffmpegWrapper, _voiceVoxClient, _audioCache);
+                var success = await Task.Run(() =>
+                    exportService.GeneratePreview(sceneSnapshot, previewPath, resolution, 30,
+                        exportSpeakerId, style, progress, CancellationToken.None));
+
+                if (success && File.Exists(previewPath))
+                {
+                    _logger.Log("シーンプレビュー完了");
+                    OpenFileRequested?.Invoke(previewPath);
+                }
+                else
+                {
+                    _dialogService?.ShowError("シーンプレビューの生成に失敗しました。", "プレビューエラー");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("シーンプレビューエラー", ex);
+                _dialogService?.ShowError($"プレビューエラー:\n{ex.Message}", "エラー");
+            }
+            finally
+            {
+                ExportProgressVisible = false;
+            }
+        }
+
+        #endregion
+
+        #region Intro/Outro/Watermark/Template
+
+        private void SelectIntro()
+        {
+            if (_dialogService == null) return;
+            var path = _dialogService.ShowOpenFileDialog(
+                "イントロ画像/動画を選択",
+                "メディアファイル|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|すべてのファイル|*.*");
+            if (!string.IsNullOrEmpty(path))
+            {
+                IntroFilePath = path;
+                _project.IntroMediaPath = path;
+                OnPropertyChanged(nameof(HasIntro));
+                OnPropertyChanged(nameof(IntroFileName));
+                _logger.Log($"イントロ設定: {Path.GetFileName(path)}");
+            }
+        }
+
+        private void ClearIntro()
+        {
+            IntroFilePath = string.Empty;
+            _project.IntroMediaPath = null;
+            OnPropertyChanged(nameof(HasIntro));
+            OnPropertyChanged(nameof(IntroFileName));
+        }
+
+        private void SelectOutro()
+        {
+            if (_dialogService == null) return;
+            var path = _dialogService.ShowOpenFileDialog(
+                "アウトロ画像/動画を選択",
+                "メディアファイル|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|すべてのファイル|*.*");
+            if (!string.IsNullOrEmpty(path))
+            {
+                OutroFilePath = path;
+                _project.OutroMediaPath = path;
+                OnPropertyChanged(nameof(HasOutro));
+                OnPropertyChanged(nameof(OutroFileName));
+                _logger.Log($"アウトロ設定: {Path.GetFileName(path)}");
+            }
+        }
+
+        private void ClearOutro()
+        {
+            OutroFilePath = string.Empty;
+            _project.OutroMediaPath = null;
+            OnPropertyChanged(nameof(HasOutro));
+            OnPropertyChanged(nameof(OutroFileName));
+        }
+
+        private void SelectWatermark()
+        {
+            if (_dialogService == null) return;
+            var path = _dialogService.ShowOpenFileDialog(
+                "ロゴ画像を選択",
+                "画像ファイル|*.png;*.jpg;*.jpeg;*.bmp;*.gif|すべてのファイル|*.*");
+            if (!string.IsNullOrEmpty(path))
+            {
+                WatermarkFilePath = path;
+                SyncWatermarkToProject();
+                OnPropertyChanged(nameof(HasWatermark));
+                OnPropertyChanged(nameof(WatermarkFileName));
+                _logger.Log($"ロゴ設定: {Path.GetFileName(path)}");
+            }
+        }
+
+        private void ClearWatermark()
+        {
+            WatermarkFilePath = string.Empty;
+            _project.Watermark = new WatermarkSettings();
+            OnPropertyChanged(nameof(HasWatermark));
+            OnPropertyChanged(nameof(WatermarkFileName));
+        }
+
+        private void SyncWatermarkToProject()
+        {
+            _project.Watermark.Enabled = true;
+            _project.Watermark.ImagePath = _watermarkFilePath;
+            _project.Watermark.Position = (_selectedWatermarkPosIndex >= 0 &&
+                _selectedWatermarkPosIndex < WatermarkPositionValues.Length)
+                ? WatermarkPositionValues[_selectedWatermarkPosIndex]
+                : "bottom-right";
+        }
+
+        private void OpenOutputFolder()
+        {
+            if (_dialogService == null) return;
+            var folder = _project.Output.OutputPath;
+            if (!string.IsNullOrEmpty(folder))
+            {
+                var dir = Path.GetDirectoryName(folder);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                    OpenFileRequested?.Invoke(dir);
+            }
+        }
+
+        private void SaveTemplate()
+        {
+            var name = $"テンプレート_{DateTime.Now:yyyyMMdd_HHmmss}";
+            if (HasWatermark) SyncWatermarkToProject();
+
+            var template = TemplateService.CreateFromProject(_project, name);
+            TemplateService.SaveTemplate(template);
+            _logger.Log($"テンプレート保存: {name}");
+        }
+
+        private void LoadTemplate()
+        {
+            var templates = TemplateService.LoadAllTemplates();
+            if (templates.Count == 0)
+            {
+                _dialogService?.ShowInfo("保存済みテンプレートがありません。", "テンプレート");
+                return;
+            }
+
+            var template = templates[0]; // Most recent
+            TemplateService.ApplyToProject(template, _project);
+
+            // Sync project settings back to UI
+            if (_project.HasIntro)
+            {
+                IntroFilePath = _project.IntroMediaPath!;
+                OnPropertyChanged(nameof(HasIntro));
+                OnPropertyChanged(nameof(IntroFileName));
+            }
+            if (_project.HasOutro)
+            {
+                OutroFilePath = _project.OutroMediaPath!;
+                OnPropertyChanged(nameof(HasOutro));
+                OnPropertyChanged(nameof(OutroFileName));
+            }
+            if (_project.Watermark.HasWatermark)
+            {
+                WatermarkFilePath = _project.Watermark.ImagePath!;
+                OnPropertyChanged(nameof(HasWatermark));
+                OnPropertyChanged(nameof(WatermarkFileName));
+            }
+
+            UpdateBgmStatus();
+            _logger.Log($"テンプレート適用: {template.Name}");
+        }
+
+        #endregion
+
         #region Export
 
         private async Task ExportVideo()
@@ -1190,6 +1471,9 @@ namespace InsightMovie.ViewModels
             var ct = _exportCts.Token;
 
             _logger.Log($"書き出しを開始: {outputPath}");
+
+            // Sync UI settings to project before snapshot
+            if (HasWatermark) SyncWatermarkToProject();
 
             // Snapshot project data to avoid race conditions with UI thread
             var projectSnapshot = _project.Clone();
@@ -1252,6 +1536,7 @@ namespace InsightMovie.ViewModels
         {
             if (success)
             {
+                _project.Output.OutputPath = message;
                 _logger.Log($"書き出し成功: {message}");
                 if (_dialogService?.ShowYesNo(
                     $"動画の書き出しが完了しました。\n\n{message}\n\nファイルを開きますか？",
@@ -1286,7 +1571,30 @@ namespace InsightMovie.ViewModels
             WindowTitle = $"InsightMovie - 取込プロジェクト";
             RefreshSceneList();
             UpdateBgmStatus();
+            SyncProjectToUI();
             _logger.Log($"プロジェクトを読み込みました ({project.Scenes.Count} シーン)");
+        }
+
+        private void SyncProjectToUI()
+        {
+            if (_project.HasIntro)
+            {
+                IntroFilePath = _project.IntroMediaPath!;
+                OnPropertyChanged(nameof(HasIntro));
+                OnPropertyChanged(nameof(IntroFileName));
+            }
+            if (_project.HasOutro)
+            {
+                OutroFilePath = _project.OutroMediaPath!;
+                OnPropertyChanged(nameof(HasOutro));
+                OnPropertyChanged(nameof(OutroFileName));
+            }
+            if (_project.Watermark.HasWatermark)
+            {
+                WatermarkFilePath = _project.Watermark.ImagePath!;
+                OnPropertyChanged(nameof(HasWatermark));
+                OnPropertyChanged(nameof(WatermarkFileName));
+            }
         }
 
         private void NewProject()
@@ -1301,6 +1609,15 @@ namespace InsightMovie.ViewModels
             _project = new Project();
             _project.InitializeDefaultScenes();
             _sceneSubtitleStyles.Clear();
+            IntroFilePath = string.Empty;
+            OutroFilePath = string.Empty;
+            WatermarkFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasIntro));
+            OnPropertyChanged(nameof(IntroFileName));
+            OnPropertyChanged(nameof(HasOutro));
+            OnPropertyChanged(nameof(OutroFileName));
+            OnPropertyChanged(nameof(HasWatermark));
+            OnPropertyChanged(nameof(WatermarkFileName));
             WindowTitle = "InsightMovie - 新規プロジェクト";
             RefreshSceneList();
             _logger.Log("新規プロジェクトを作成しました。");
@@ -1324,6 +1641,7 @@ namespace InsightMovie.ViewModels
                 WindowTitle = $"InsightMovie - {Path.GetFileNameWithoutExtension(path)}";
                 RefreshSceneList();
                 UpdateBgmStatus();
+                SyncProjectToUI();
                 _logger.Log($"プロジェクトを開きました: {path}");
             }
             catch (Exception ex)

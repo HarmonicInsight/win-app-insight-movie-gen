@@ -374,6 +374,10 @@
                             <Button Content="▶音声再生"
                                     Padding="8,3" Margin="2"
                                     Command="{Binding PreviewAudioCommand}"/>
+                            <Button Content="▶シーンプレビュー"
+                                    Padding="8,3" Margin="2"
+                                    Command="{Binding PreviewSceneCommand}"
+                                    ToolTip="現在のシーンを動画プレビュー生成"/>
                             <Button Content="■停止"
                                     Padding="8,3" Margin="2"
                                     Command="{Binding StopPreviewCommand}"/>
@@ -565,7 +569,73 @@
                                        Foreground="{DynamicResource TextTertiary}" FontSize="11"/>
                         </StackPanel>
 
-                        <!-- Row 8: Info label -->
+                        <!-- Row 8: Intro/Outro -->
+                        <StackPanel Margin="0,4,0,4">
+                            <TextBlock Text="イントロ / アウトロ:" Margin="0,0,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,8,0">
+                                    <TextBlock Text="イントロ:" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11"/>
+                                    <TextBlock Text="{Binding IntroFileName}" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" FontSize="11"
+                                               MinWidth="80" MaxWidth="140" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                                    <Button Content="選択" Padding="6,2" Margin="1"
+                                            Command="{Binding SelectIntroCommand}" FontSize="11"/>
+                                    <Button Content="✕" Padding="4,2" Margin="1"
+                                            Command="{Binding ClearIntroCommand}" FontSize="11"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <TextBlock Text="アウトロ:" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="11"/>
+                                    <TextBlock Text="{Binding OutroFileName}" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondary}" FontSize="11"
+                                               MinWidth="80" MaxWidth="140" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                                    <Button Content="選択" Padding="6,2" Margin="1"
+                                            Command="{Binding SelectOutroCommand}" FontSize="11"/>
+                                    <Button Content="✕" Padding="4,2" Margin="1"
+                                            Command="{Binding ClearOutroCommand}" FontSize="11"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Row 9: Watermark -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="ロゴ透かし:" VerticalAlignment="Center"
+                                       Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding WatermarkFileName}" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondary}" FontSize="11"
+                                       MinWidth="80" MaxWidth="140" TextTrimming="CharacterEllipsis" Margin="0,0,4,0"/>
+                            <Button Content="選択" Padding="6,2" Margin="1"
+                                    Command="{Binding SelectWatermarkCommand}"/>
+                            <Button Content="✕" Padding="4,2" Margin="1"
+                                    Command="{Binding ClearWatermarkCommand}"/>
+                            <TextBlock Text="位置:" VerticalAlignment="Center"
+                                       Margin="12,0,4,0"/>
+                            <ComboBox Width="80"
+                                      ItemsSource="{Binding WatermarkPositionOptions}"
+                                      SelectedIndex="{Binding SelectedWatermarkPosIndex}"/>
+                        </StackPanel>
+
+                        <!-- Row 10: Template save/load -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="テンプレート:" VerticalAlignment="Center"
+                                       Margin="0,0,8,0"/>
+                            <Button Content="保存" Padding="8,3" Margin="2"
+                                    Command="{Binding SaveTemplateCommand}"
+                                    ToolTip="現在の設定をテンプレートとして保存"/>
+                            <Button Content="読込" Padding="8,3" Margin="2"
+                                    Command="{Binding LoadTemplateCommand}"
+                                    ToolTip="最新のテンプレートを適用"/>
+                            <Button Content="出力フォルダを開く" Padding="8,3" Margin="12,2,2,2"
+                                    Command="{Binding OpenOutputFolderCommand}"
+                                    ToolTip="最後に書き出したフォルダを開く"/>
+                        </StackPanel>
+
+                        <!-- Row 11: Info label -->
                         <TextBlock Text="「自動」の場合、ナレーション音声の長さに応じてシーンの長さが自動的に決まります。素材がない場合は黒背景が使用されます。"
                                    TextWrapping="Wrap" Foreground="{DynamicResource TextTertiary}"
                                    FontSize="11" Margin="0,0,0,0"/>

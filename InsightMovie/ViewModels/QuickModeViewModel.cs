@@ -60,6 +60,12 @@ namespace InsightMovie.ViewModels
         private string _thumbnailPath = string.Empty;
         private string _metadataPath = string.Empty;
 
+        // Intro/Outro/Watermark
+        private string _introFilePath = string.Empty;
+        private string _outroFilePath = string.Empty;
+        private string _watermarkFilePath = string.Empty;
+        private int _selectedWatermarkPosIndex = 3; // bottom-right default
+
         public QuickModeViewModel(VoiceVoxClient voiceVoxClient, int speakerId,
                                    FFmpegWrapper? ffmpegWrapper, Config config)
         {
@@ -81,6 +87,15 @@ namespace InsightMovie.ViewModels
             SelectBgmCommand = new RelayCommand(SelectBgm);
             ClearBgmCommand = new RelayCommand(ClearBgm);
             BatchImportCommand = new AsyncRelayCommand(BatchImport);
+            SelectIntroCommand = new RelayCommand(SelectIntro);
+            ClearIntroCommand = new RelayCommand(ClearIntro);
+            SelectOutroCommand = new RelayCommand(SelectOutro);
+            ClearOutroCommand = new RelayCommand(ClearOutro);
+            SelectWatermarkCommand = new RelayCommand(SelectWatermark);
+            ClearWatermarkCommand = new RelayCommand(ClearWatermark);
+            OpenOutputFolderCommand = new RelayCommand(OpenOutputFolder);
+            SaveTemplateCommand = new RelayCommand(SaveTemplate);
+            LoadTemplateCommand = new RelayCommand(LoadTemplate);
         }
 
         public void SetDialogService(IDialogService dialogService) => _dialogService = dialogService;
@@ -258,6 +273,54 @@ namespace InsightMovie.ViewModels
 
         public bool HasExtraOutputs => !string.IsNullOrEmpty(_thumbnailPath) || !string.IsNullOrEmpty(_metadataPath);
 
+        // Intro/Outro
+        public string IntroFilePath
+        {
+            get => _introFilePath;
+            set => SetProperty(ref _introFilePath, value);
+        }
+
+        public string OutroFilePath
+        {
+            get => _outroFilePath;
+            set => SetProperty(ref _outroFilePath, value);
+        }
+
+        public bool HasIntro => !string.IsNullOrEmpty(_introFilePath);
+        public bool HasOutro => !string.IsNullOrEmpty(_outroFilePath);
+        public string IntroFileName => string.IsNullOrEmpty(_introFilePath)
+            ? "（なし）" : Path.GetFileName(_introFilePath);
+        public string OutroFileName => string.IsNullOrEmpty(_outroFilePath)
+            ? "（なし）" : Path.GetFileName(_outroFilePath);
+
+        // Watermark
+        public string WatermarkFilePath
+        {
+            get => _watermarkFilePath;
+            set => SetProperty(ref _watermarkFilePath, value);
+        }
+
+        public bool HasWatermark => !string.IsNullOrEmpty(_watermarkFilePath);
+        public string WatermarkFileName => string.IsNullOrEmpty(_watermarkFilePath)
+            ? "（なし）" : Path.GetFileName(_watermarkFilePath);
+
+        public int SelectedWatermarkPosIndex
+        {
+            get => _selectedWatermarkPosIndex;
+            set => SetProperty(ref _selectedWatermarkPosIndex, value);
+        }
+
+        public List<string> WatermarkPositionOptions { get; } = new()
+        {
+            "左上", "右上", "左下", "右下", "中央"
+        };
+
+        private static readonly string[] WatermarkPositionValues =
+            { "top-left", "top-right", "bottom-left", "bottom-right", "center" };
+
+        // Templates
+        public ObservableCollection<string> TemplateNames { get; } = new();
+
         #endregion
 
         #region Commands
@@ -272,6 +335,15 @@ namespace InsightMovie.ViewModels
         public ICommand SelectBgmCommand { get; }
         public ICommand ClearBgmCommand { get; }
         public ICommand BatchImportCommand { get; }
+        public ICommand SelectIntroCommand { get; }
+        public ICommand ClearIntroCommand { get; }
+        public ICommand SelectOutroCommand { get; }
+        public ICommand ClearOutroCommand { get; }
+        public ICommand SelectWatermarkCommand { get; }
+        public ICommand ClearWatermarkCommand { get; }
+        public ICommand OpenOutputFolderCommand { get; }
+        public ICommand SaveTemplateCommand { get; }
+        public ICommand LoadTemplateCommand { get; }
 
         #endregion
 
@@ -558,6 +630,157 @@ namespace InsightMovie.ViewModels
 
         #endregion
 
+        #region Intro/Outro/Watermark/Template
+
+        private void SelectIntro()
+        {
+            if (_dialogService == null) return;
+            var path = _dialogService.ShowOpenFileDialog(
+                "イントロ画像/動画を選択",
+                "メディアファイル|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|すべてのファイル|*.*");
+            if (!string.IsNullOrEmpty(path))
+            {
+                IntroFilePath = path;
+                OnPropertyChanged(nameof(HasIntro));
+                OnPropertyChanged(nameof(IntroFileName));
+                _logger.Log($"イントロ設定: {Path.GetFileName(path)}");
+            }
+        }
+
+        private void ClearIntro()
+        {
+            IntroFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasIntro));
+            OnPropertyChanged(nameof(IntroFileName));
+        }
+
+        private void SelectOutro()
+        {
+            if (_dialogService == null) return;
+            var path = _dialogService.ShowOpenFileDialog(
+                "アウトロ画像/動画を選択",
+                "メディアファイル|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|すべてのファイル|*.*");
+            if (!string.IsNullOrEmpty(path))
+            {
+                OutroFilePath = path;
+                OnPropertyChanged(nameof(HasOutro));
+                OnPropertyChanged(nameof(OutroFileName));
+                _logger.Log($"アウトロ設定: {Path.GetFileName(path)}");
+            }
+        }
+
+        private void ClearOutro()
+        {
+            OutroFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasOutro));
+            OnPropertyChanged(nameof(OutroFileName));
+        }
+
+        private void SelectWatermark()
+        {
+            if (_dialogService == null) return;
+            var path = _dialogService.ShowOpenFileDialog(
+                "ロゴ画像を選択",
+                "画像ファイル|*.png;*.jpg;*.jpeg;*.bmp;*.gif|すべてのファイル|*.*");
+            if (!string.IsNullOrEmpty(path))
+            {
+                WatermarkFilePath = path;
+                OnPropertyChanged(nameof(HasWatermark));
+                OnPropertyChanged(nameof(WatermarkFileName));
+                _logger.Log($"ロゴ設定: {Path.GetFileName(path)}");
+            }
+        }
+
+        private void ClearWatermark()
+        {
+            WatermarkFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasWatermark));
+            OnPropertyChanged(nameof(WatermarkFileName));
+        }
+
+        private void OpenOutputFolder()
+        {
+            if (string.IsNullOrEmpty(_outputPath)) return;
+            var folder = Path.GetDirectoryName(_outputPath);
+            if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
+            {
+                OpenFileRequested?.Invoke(folder);
+            }
+        }
+
+        private void SaveTemplate()
+        {
+            if (_project == null) return;
+
+            var name = $"テンプレート_{DateTime.Now:yyyyMMdd_HHmmss}";
+            // Apply current QuickMode settings to project before saving
+            ApplySettingsToProject();
+
+            var template = Services.TemplateService.CreateFromProject(_project, name,
+                $"話者: {((_selectedSpeakerIndex >= 0 && _selectedSpeakerIndex < Speakers.Count) ? Speakers[_selectedSpeakerIndex].DisplayName : "デフォルト")}");
+            Services.TemplateService.SaveTemplate(template);
+            RefreshTemplateList();
+            _logger.Log($"テンプレート保存: {name}");
+        }
+
+        private void LoadTemplate()
+        {
+            var templates = Services.TemplateService.LoadAllTemplates();
+            if (templates.Count == 0)
+            {
+                _logger.Log("保存済みテンプレートがありません。");
+                return;
+            }
+
+            if (_project == null)
+                _project = new Project();
+
+            // Apply the most recent template
+            var template = templates[0];
+            Services.TemplateService.ApplyToProject(template, _project);
+
+            // Sync template settings back to QuickMode UI
+            if (!string.IsNullOrEmpty(_project.Bgm.FilePath))
+            {
+                BgmFilePath = _project.Bgm.FilePath;
+                BgmVolume = _project.Bgm.Volume;
+                OnPropertyChanged(nameof(HasBgm));
+                OnPropertyChanged(nameof(BgmFileName));
+            }
+
+            if (_project.HasIntro)
+            {
+                IntroFilePath = _project.IntroMediaPath!;
+                OnPropertyChanged(nameof(HasIntro));
+                OnPropertyChanged(nameof(IntroFileName));
+            }
+
+            if (_project.HasOutro)
+            {
+                OutroFilePath = _project.OutroMediaPath!;
+                OnPropertyChanged(nameof(HasOutro));
+                OnPropertyChanged(nameof(OutroFileName));
+            }
+
+            if (_project.Watermark.HasWatermark)
+            {
+                WatermarkFilePath = _project.Watermark.ImagePath!;
+                OnPropertyChanged(nameof(HasWatermark));
+                OnPropertyChanged(nameof(WatermarkFileName));
+            }
+
+            _logger.Log($"テンプレート適用: {template.Name}");
+        }
+
+        private void RefreshTemplateList()
+        {
+            TemplateNames.Clear();
+            foreach (var t in Services.TemplateService.LoadAllTemplates())
+                TemplateNames.Add(t.Name);
+        }
+
+        #endregion
+
         #region BGM & Settings
 
         private void SelectBgm()
@@ -591,6 +814,53 @@ namespace InsightMovie.ViewModels
             if (paths != null && paths.Length > 0)
             {
                 await HandleFileDropAsync(paths);
+            }
+        }
+
+        private void ApplySettingsToProject()
+        {
+            if (_project == null) return;
+
+            var transition = GetSelectedTransition();
+            _project.DefaultTransition = transition;
+            _project.DefaultTransitionDuration = 0.5;
+
+            if (HasBgm)
+            {
+                _project.Bgm.FilePath = _bgmFilePath;
+                _project.Bgm.Volume = _bgmVolume;
+                _project.Bgm.DuckingEnabled = true;
+            }
+
+            _project.GenerateThumbnail = _generateThumbnail;
+            _project.GenerateChapters = true;
+
+            // Intro/Outro
+            if (HasIntro)
+                _project.IntroMediaPath = _introFilePath;
+            if (HasOutro)
+                _project.OutroMediaPath = _outroFilePath;
+
+            // Watermark
+            if (HasWatermark)
+            {
+                _project.Watermark.Enabled = true;
+                _project.Watermark.ImagePath = _watermarkFilePath;
+                _project.Watermark.Position = (_selectedWatermarkPosIndex >= 0 &&
+                    _selectedWatermarkPosIndex < WatermarkPositionValues.Length)
+                    ? WatermarkPositionValues[_selectedWatermarkPosIndex]
+                    : "bottom-right";
+            }
+
+            // Apply speech speed and transition to all scenes
+            foreach (var scene in _project.Scenes)
+            {
+                scene.SpeechSpeed = _speechSpeed;
+                if (scene.TransitionType == TransitionType.None && transition != TransitionType.None)
+                {
+                    scene.TransitionType = transition;
+                    scene.TransitionDuration = 0.5;
+                }
             }
         }
 
@@ -649,33 +919,8 @@ namespace InsightMovie.ViewModels
 
             string resolution = _selectedResolutionIndex == 1 ? "1920x1080" : "1080x1920";
 
-            // Apply QuickMode settings to project
-            var transition = GetSelectedTransition();
-            _project.DefaultTransition = transition;
-            _project.DefaultTransitionDuration = 0.5;
-
-            if (HasBgm)
-            {
-                _project.Bgm.FilePath = _bgmFilePath;
-                _project.Bgm.Volume = _bgmVolume;
-                _project.Bgm.DuckingEnabled = true;
-            }
-
-            _project.GenerateThumbnail = _generateThumbnail;
-            _project.GenerateChapters = true;
-
-            // Apply speech speed to all scenes
-            foreach (var scene in _project.Scenes)
-            {
-                scene.SpeechSpeed = _speechSpeed;
-
-                // Apply default transition to scenes that don't have one
-                if (scene.TransitionType == TransitionType.None && transition != TransitionType.None)
-                {
-                    scene.TransitionType = transition;
-                    scene.TransitionDuration = 0.5;
-                }
-            }
+            // Apply all QuickMode settings to project
+            ApplySettingsToProject();
 
             IsGenerating = true;
             ProgressVisible = true;

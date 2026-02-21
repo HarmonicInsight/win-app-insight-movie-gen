@@ -330,6 +330,98 @@
                                   shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                     </StackPanel>
                 </Grid>
+
+                <!-- Row 4: Intro/Outro -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="イントロ" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding ClearIntroCommand}"
+                                    Visibility="{Binding HasIntro, Converter={StaticResource SysBoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding IntroFileName}"
+                                    Height="24" FontSize="10"
+                                    HorizontalContentAlignment="Left" Padding="6,0"
+                                    Command="{Binding SelectIntroCommand}"
+                                    ToolTip="オープニング画像/動画を選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="アウトロ" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding ClearOutroCommand}"
+                                    Visibility="{Binding HasOutro, Converter={StaticResource SysBoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding OutroFileName}"
+                                    Height="24" FontSize="10"
+                                    HorizontalContentAlignment="Left" Padding="6,0"
+                                    Command="{Binding SelectOutroCommand}"
+                                    ToolTip="エンディング画像/動画を選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 5: Watermark + Template -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="ロゴ透かし" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <ComboBox DockPanel.Dock="Right" Width="56"
+                                      ItemsSource="{Binding WatermarkPositionOptions}"
+                                      SelectedIndex="{Binding SelectedWatermarkPosIndex}"
+                                      Margin="4,0,0,0"
+                                      Visibility="{Binding HasWatermark, Converter={StaticResource SysBoolToVis}}"
+                                      shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding ClearWatermarkCommand}"
+                                    Visibility="{Binding HasWatermark, Converter={StaticResource SysBoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding WatermarkFileName}"
+                                    Height="24" FontSize="10"
+                                    HorizontalContentAlignment="Left" Padding="6,0"
+                                    Command="{Binding SelectWatermarkCommand}"
+                                    ToolTip="ロゴ画像（PNG推奨）を選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="テンプレ保存"
+                            Height="24" FontSize="10" Padding="8,0"
+                            Margin="0,18,4,0"
+                            Command="{Binding SaveTemplateCommand}"
+                            ToolTip="現在の設定をテンプレートとして保存"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    <Button Grid.Column="2"
+                            Content="テンプレ読込"
+                            Height="24" FontSize="10" Padding="8,0"
+                            Margin="0,18,0,0"
+                            Command="{Binding LoadTemplateCommand}"
+                            ToolTip="保存済みテンプレートを適用"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                </Grid>
             </StackPanel>
 
             <!-- ── Action Buttons ── -->
@@ -365,15 +457,19 @@
                         Command="{Binding CancelCommand}"
                         shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                <!-- Fix 5: Complete buttons — "もう一度" keeps project, "別の資料" resets -->
+                <!-- Complete buttons with output folder access -->
                 <Grid Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0"
+                    <Button Grid.Row="0" Grid.Column="0"
                             Content="動画を開く"
                             Height="48" FontSize="13" FontWeight="Bold"
                             Style="{DynamicResource SuccessButton}"
@@ -381,7 +477,7 @@
                             Margin="0,0,4,0"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                    <Button Grid.Column="1"
+                    <Button Grid.Row="0" Grid.Column="1"
                             Content="設定変えて再生成"
                             Height="48" FontSize="13"
                             Command="{Binding GenerateAnotherCommand}"
@@ -389,11 +485,21 @@
                             ToolTip="話者や向きを変えてもう一度生成"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                    <Button Grid.Column="2"
+                    <Button Grid.Row="0" Grid.Column="2"
                             Content="別の資料で作る"
                             Height="48" FontSize="13"
                             Command="{Binding ResetAllCommand}"
                             Margin="4,0,0,0"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+
+                    <!-- Extra output access row -->
+                    <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                            Content="出力フォルダを開く（サムネイル・チャプター・メタデータ）"
+                            Height="30" FontSize="11"
+                            Margin="0,6,0,0"
+                            Command="{Binding OpenOutputFolderCommand}"
+                            ToolTip="サムネイル(.jpg)、チャプター(.chapters.txt)、メタデータ(.metadata.txt)が同フォルダに出力されています"
+                            Visibility="{Binding HasExtraOutputs, Converter={StaticResource SysBoolToVis}}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </Grid>
             </StackPanel>
