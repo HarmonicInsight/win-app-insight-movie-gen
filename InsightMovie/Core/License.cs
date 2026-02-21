@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using InsightMovie.Services;
 
 public enum PlanCode
 {
@@ -114,7 +115,7 @@ public static class License
             {
                 IsValid = false,
                 Plan = PlanCode.Free,
-                ErrorMessage = "ライセンスキーが入力されていません。"
+                ErrorMessage = LocalizationService.GetString("License.Error.Empty")
             };
         }
 
@@ -126,7 +127,7 @@ public static class License
             {
                 IsValid = false,
                 Plan = PlanCode.Free,
-                ErrorMessage = "ライセンスキーの形式が正しくありません。"
+                ErrorMessage = LocalizationService.GetString("License.Error.Format")
             };
         }
 
@@ -145,7 +146,7 @@ public static class License
                 IsValid = false,
                 ProductCode = productCode,
                 Plan = PlanCode.Free,
-                ErrorMessage = "このキーは InsightCast 用ではありません。InsightCast 用のキーを入力してください。"
+                ErrorMessage = LocalizationService.GetString("License.Error.Product")
             };
         }
 
@@ -159,7 +160,7 @@ public static class License
                 IsValid = false,
                 ProductCode = productCode,
                 Plan = PlanCode.Free,
-                ErrorMessage = "ライセンスキーが無効です。"
+                ErrorMessage = LocalizationService.GetString("License.Error.Invalid")
             };
         }
 
@@ -174,7 +175,7 @@ public static class License
                     IsValid = false,
                     ProductCode = productCode,
                     Plan = PlanCode.Free,
-                    ErrorMessage = "メールアドレスが一致しません。"
+                    ErrorMessage = LocalizationService.GetString("License.Error.Email")
                 };
             }
         }
@@ -205,7 +206,7 @@ public static class License
                     YearMonth = yymm,
                     ExpiresAt = expiresAt,
                     Email = email,
-                    ErrorMessage = $"ライセンスの有効期限が切れています（{expiresAt.Value:yyyy年MM月dd日}）。"
+                    ErrorMessage = LocalizationService.GetString("License.Error.Expired", expiresAt.Value.ToString("yyyy/MM/dd"))
                 };
             }
         }

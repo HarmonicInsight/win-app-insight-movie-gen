@@ -1,5 +1,6 @@
 using InsightMovie.Infrastructure;
 using InsightMovie.Models;
+using InsightMovie.Services;
 
 namespace InsightMovie.ViewModels
 {
@@ -23,7 +24,7 @@ namespace InsightMovie.ViewModels
 
         public void UpdateLabel(int index)
         {
-            var text = string.IsNullOrWhiteSpace(Overlay.Text) ? "(空)" : Overlay.Text;
+            var text = string.IsNullOrWhiteSpace(Overlay.Text) ? LocalizationService.GetString("Overlay.Empty") : Overlay.Text;
             if (text.Length > 15)
                 text = text[..15] + "...";
 

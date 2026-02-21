@@ -125,6 +125,14 @@
     <sys:String x:Key="Transition.Title">Transition:</sys:String>
     <sys:String x:Key="Transition.Duration">Duration:</sys:String>
     <sys:String x:Key="Transition.Range">sec (0.2-2.0)</sys:String>
+    <sys:String x:Key="Transition.Type.None">None</sys:String>
+    <sys:String x:Key="Transition.Type.Fade">Fade</sys:String>
+    <sys:String x:Key="Transition.Type.Dissolve">Dissolve</sys:String>
+    <sys:String x:Key="Transition.Type.WipeLeft">Wipe (Left)</sys:String>
+    <sys:String x:Key="Transition.Type.WipeRight">Wipe (Right)</sys:String>
+    <sys:String x:Key="Transition.Type.SlideLeft">Slide (Left)</sys:String>
+    <sys:String x:Key="Transition.Type.SlideRight">Slide (Right)</sys:String>
+    <sys:String x:Key="Transition.Type.ZoomIn">Zoom In</sys:String>
 
     <!-- Intro / Outro -->
     <sys:String x:Key="IntroOutro.Title">Intro / Outro:</sys:String>
@@ -246,6 +254,29 @@
     <sys:String x:Key="Style.TextColor">Text Color:</sys:String>
     <sys:String x:Key="Style.StrokeColor">Stroke Color:</sys:String>
     <sys:String x:Key="Style.StrokeWidth">Stroke Width:</sys:String>
+    <sys:String x:Key="Style.Preset.Default">Default</sys:String>
+    <sys:String x:Key="Style.Preset.News">News Style</sys:String>
+    <sys:String x:Key="Style.Preset.Cinema">Cinema Style</sys:String>
+    <sys:String x:Key="Style.Preset.Variety">Variety Style</sys:String>
+    <sys:String x:Key="Style.Preset.Documentary">Documentary Style</sys:String>
+    <sys:String x:Key="Style.Preset.Education">Education Style</sys:String>
+    <sys:String x:Key="Style.Preset.Horror">Horror Style</sys:String>
+    <sys:String x:Key="Style.Preset.Cute">Cute Style</sys:String>
+    <sys:String x:Key="Style.Preset.Tech">Tech Style</sys:String>
+    <sys:String x:Key="Style.Preset.Elegant">Elegant Style</sys:String>
+
+    <!-- Font Display Names -->
+    <sys:String x:Key="Font.YuGothicUI">Yu Gothic UI</sys:String>
+    <sys:String x:Key="Font.YuGothic">Yu Gothic</sys:String>
+    <sys:String x:Key="Font.YuMincho">Yu Mincho</sys:String>
+    <sys:String x:Key="Font.Meiryo">Meiryo</sys:String>
+    <sys:String x:Key="Font.MeiryoUI">Meiryo UI</sys:String>
+    <sys:String x:Key="Font.MSGothic">MS Gothic</sys:String>
+    <sys:String x:Key="Font.MSMincho">MS Mincho</sys:String>
+    <sys:String x:Key="Font.MSPGothic">MS PGothic</sys:String>
+    <sys:String x:Key="Font.MSPMincho">MS PMincho</sys:String>
+    <sys:String x:Key="Font.BIZUDGothic">BIZ UDGothic</sys:String>
+    <sys:String x:Key="Font.BIZUDMincho">BIZ UDMincho</sys:String>
 
     <!-- Setup Wizard -->
     <sys:String x:Key="Setup.Title">InsightCast - Initial Setup</sys:String>
@@ -459,5 +490,267 @@
     <sys:String x:Key="Meta.SceneCount">Scenes: {0}</sys:String>
     <sys:String x:Key="Meta.Resolution">Resolution: {0}</sys:String>
     <sys:String x:Key="Meta.GeneratedAt">Generated: {0}</sys:String>
+
+    <!-- Colors -->
+    <sys:String x:Key="Color.White">White</sys:String>
+    <sys:String x:Key="Color.Black">Black</sys:String>
+    <sys:String x:Key="Color.Red">Red</sys:String>
+    <sys:String x:Key="Color.Blue">Blue</sys:String>
+    <sys:String x:Key="Color.Yellow">Yellow</sys:String>
+    <sys:String x:Key="Color.Gold">Gold</sys:String>
+    <sys:String x:Key="Color.Pink">Pink</sys:String>
+    <sys:String x:Key="Color.LightBlue">Light Blue</sys:String>
+    <sys:String x:Key="Color.Green">Green</sys:String>
+    <sys:String x:Key="Color.Orange">Orange</sys:String>
+    <sys:String x:Key="Color.Navy">Navy</sys:String>
+    <sys:String x:Key="Color.Gray">Gray</sys:String>
+    <sys:String x:Key="Color.Brown">Brown</sys:String>
+    <sys:String x:Key="Color.Purple">Purple</sys:String>
+
+    <!-- VM Status -->
+    <sys:String x:Key="VM.VoiceVox.Connected">VOICEVOX: ✓Connected (v{0})</sys:String>
+    <sys:String x:Key="VM.VoiceVox.Disconnected">VOICEVOX: ✗Disconnected</sys:String>
+    <sys:String x:Key="VM.FFmpeg.Detected">ffmpeg: ✓Detected</sys:String>
+    <sys:String x:Key="VM.FFmpeg.NotDetected">ffmpeg: ✗Not found</sys:String>
+
+    <!-- VM Audio Preview -->
+    <sys:String x:Key="VM.Preview.NoNarration">Please enter narration text.</sys:String>
+    <sys:String x:Key="VM.Preview.Title">Audio Preview</sys:String>
+    <sys:String x:Key="VM.Preview.Generating">Generating audio...</sys:String>
+    <sys:String x:Key="VM.Preview.CacheLoaded">Loaded from cache</sys:String>
+    <sys:String x:Key="VM.Preview.Generated">Audio generated</sys:String>
+    <sys:String x:Key="VM.Preview.Playing">Playing audio</sys:String>
+    <sys:String x:Key="VM.Preview.Error">Audio preview error</sys:String>
+    <sys:String x:Key="VM.Preview.Failed">Failed to generate audio:\n{0}</sys:String>
+
+    <!-- VM Scene Preview -->
+    <sys:String x:Key="VM.ScenePreview.Generating">Generating scene preview...</sys:String>
+    <sys:String x:Key="VM.ScenePreview.Complete">Scene preview complete</sys:String>
+    <sys:String x:Key="VM.ScenePreview.Failed">Failed to generate scene preview.</sys:String>
+    <sys:String x:Key="VM.ScenePreview.Error">Scene preview error</sys:String>
+    <sys:String x:Key="VM.ScenePreview.ErrorDetail">Preview error:\n{0}</sys:String>
+    <sys:String x:Key="VM.ScenePreview.NoFFmpeg">FFmpeg not found.\nFFmpeg is required for scene preview.</sys:String>
+    <sys:String x:Key="VM.ScenePreview.Title">Preview Error</sys:String>
+
+    <!-- VM Intro/Outro/Watermark -->
+    <sys:String x:Key="VM.Intro.Select">Select intro image/video</sys:String>
+    <sys:String x:Key="VM.Outro.Select">Select outro image/video</sys:String>
+    <sys:String x:Key="VM.Media.FilterMedia">Media Files|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|All Files|*.*</sys:String>
+    <sys:String x:Key="VM.Watermark.Filter">Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All Files|*.*</sys:String>
+
+    <!-- VM Template -->
+    <sys:String x:Key="VM.Template.DefaultName">Template_{0}</sys:String>
+    <sys:String x:Key="VM.Template.CoverApplied">Applied cover template.</sys:String>
+    <sys:String x:Key="VM.Template.None">No saved templates.</sys:String>
+    <sys:String x:Key="VM.Template.Title">Templates</sys:String>
+    <sys:String x:Key="VM.Template.Select">Select Template</sys:String>
+
+    <!-- VM Export Extended -->
+    <sys:String x:Key="VM.Export.InProgress">Export is in progress.</sys:String>
+    <sys:String x:Key="VM.Export.InProgress.Title">Exporting</sys:String>
+    <sys:String x:Key="VM.Export.SaveTitle">Select video save location</sys:String>
+    <sys:String x:Key="VM.Export.NoFFmpeg">FFmpeg not found.\nFFmpeg is required for video export.</sys:String>
+    <sys:String x:Key="VM.Export.Thumbnail">Thumbnail: {0}</sys:String>
+    <sys:String x:Key="VM.Export.Chapter">Chapter: {0}</sys:String>
+    <sys:String x:Key="VM.Export.Metadata">Metadata: {0}</sys:String>
+    <sys:String x:Key="VM.Export.CompleteOpen">Video export completed.\n\n{0}\n\nWould you like to open the file?</sys:String>
+    <sys:String x:Key="VM.Export.ErrorDetail">Export error: {0}</sys:String>
+    <sys:String x:Key="VM.Export.FailedDetail">Video export failed:\n{0}</sys:String>
+
+    <!-- VM Project Extended -->
+    <sys:String x:Key="VM.Project.NewConfirm">Discard current project and create new?\nUnsaved changes will be lost.</sys:String>
+    <sys:String x:Key="VM.Project.NewTitle">New Project</sys:String>
+    <sys:String x:Key="VM.Project.OpenTitle">Open Project File</sys:String>
+    <sys:String x:Key="VM.Project.JsonFilter">JSON Files|*.json|All Files|*.*</sys:String>
+    <sys:String x:Key="VM.Project.LoadFailed">Failed to load project file:\n{0}</sys:String>
+    <sys:String x:Key="VM.Project.LoadError">Load Error</sys:String>
+    <sys:String x:Key="VM.Project.SaveFailed">Save failed:\n{0}</sys:String>
+    <sys:String x:Key="VM.Project.SaveAsTitle">Save Project File</sys:String>
+    <sys:String x:Key="VM.Project.FileNotFound">File not found:\n{0}</sys:String>
+    <sys:String x:Key="VM.Project.RecentFiles">Recent Files</sys:String>
+
+    <!-- VM PPTX Import -->
+    <sys:String x:Key="VM.Pptx.FeatureLimit">PPTX import is available with Trial/Pro plan or above.\nPlease upgrade your license.</sys:String>
+    <sys:String x:Key="VM.Pptx.PlanRequired">Feature Restricted</sys:String>
+    <sys:String x:Key="VM.Pptx.Select">Select PowerPoint File</sys:String>
+    <sys:String x:Key="VM.Pptx.Filter">PowerPoint Files|*.pptx|All Files|*.*</sys:String>
+    <sys:String x:Key="VM.Pptx.Started">PPTX import started: {0}</sys:String>
+    <sys:String x:Key="VM.Pptx.NoSlides">No slides found.</sys:String>
+    <sys:String x:Key="VM.Pptx.Result">Import Result</sys:String>
+    <sys:String x:Key="VM.Pptx.Imported">Imported from PPTX ({0} slides, {1} images): {2}</sys:String>
+    <sys:String x:Key="VM.Pptx.NotesOnly">Imported notes from {0} slides.\nPowerPoint installation required for slide images.</sys:String>
+    <sys:String x:Key="VM.Pptx.Error">PPTX import failed:\n{0}</sys:String>
+    <sys:String x:Key="VM.Pptx.Failed">Import Error</sys:String>
+
+    <!-- VM Tutorial / FAQ / About / Shortcuts -->
+    <sys:String x:Key="VM.Tutorial">InsightCast Tutorial
+─────────────────────
+
+■ Quick Mode
+  1. Drag &amp; drop files or use the file select button to import materials
+  2. Set speaker, resolution, speed, etc.
+  3. Click "Generate" to auto-create video
+
+■ Detailed Editor (Main Window)
+  1. Click "+ Add" in the left panel to add scenes
+  2. Click "Select" to set images/videos
+  3. Enter narration text
+  4. Click "Play Audio" to preview
+  5. Set subtitle text and style
+  6. Click "Export Video" to generate
+
+■ Text Overlay
+  Place custom text on each scene.
+  Set position (X/Y%), size, color, and alignment individually.
+  Use "Cover Template" to add title + subtitle at once.
+
+■ Templates
+  Save and load settings like BGM, watermark, and resolution as templates.
+
+■ PPTX Import
+  Drop a PowerPoint file to auto-create scenes from slides.
+  (Requires Trial plan or above)</sys:String>
+    <sys:String x:Key="VM.Tutorial.Title">Tutorial</sys:String>
+    <sys:String x:Key="VM.FAQ">Frequently Asked Questions (FAQ)
+─────────────────────
+
+Q: Cannot connect to VOICEVOX.
+A: Make sure the VOICEVOX engine is running.
+   Connection is configured during the initial setup wizard.
+
+Q: Video export fails.
+A: Ensure FFmpeg is installed and included in your PATH.
+   A warning is shown at startup if FFmpeg is not found.
+
+Q: How do I enter a license key?
+A: Go to menu "Help" → "License Manager".
+
+Q: Subtitles and transitions are unavailable.
+A: These require a Trial plan or above. Go to "Help" → "License Manager"
+   to activate your license.
+
+Q: What file formats are supported?
+A: Images: PNG, JPG, BMP, GIF / Videos: MP4, AVI, MOV, WMV, MKV
+   Audio (BGM): MP3, WAV, OGG, FLAC, AAC, M4A
+   Other: PPTX, TXT, MD
+
+Q: How do I cancel an export?
+A: Click the "Cancel" button next to the progress bar.
+
+Q: Where are templates saved?
+A: In %LOCALAPPDATA%\InsightCast\Templates.
+
+Q: How do I contact support?
+A: Email support@h-insight.jp.</sys:String>
+    <sys:String x:Key="VM.FAQ.Title">FAQ</sys:String>
+    <sys:String x:Key="VM.About">InsightCast v{0}
+
+Auto video generation tool using VOICEVOX voice engine
+
+Simply enter text to easily create narrated videos.
+
+Developer: Harmonic Insight Inc.
+Support: support@h-insight.jp</sys:String>
+    <sys:String x:Key="VM.About.Title">About InsightCast</sys:String>
+    <sys:String x:Key="VM.Shortcuts">Keyboard Shortcuts
+─────────────────────
+
+Ctrl+N          New project
+Ctrl+O          Open project
+Ctrl+S          Save project
+Ctrl+Shift+S    Save as
+Ctrl+T          Add scene
+Delete          Remove scene
+Ctrl+Up         Move scene up
+Ctrl+Down       Move scene down
+F1              Show tutorial</sys:String>
+    <sys:String x:Key="VM.Shortcuts.Title">Keyboard Shortcuts</sys:String>
+    <sys:String x:Key="VM.License.Title">License Info</sys:String>
+    <sys:String x:Key="VM.License.Header">License Info\n─────────────────────\n\nPlan: {0}\nStatus: {1}\nExpires: {2}</sys:String>
+    <sys:String x:Key="VM.Terms.Fallback">Please review the Terms of Service at:\nhttps://h-insight.jp/terms\n\nContact: info@h-insight.jp</sys:String>
+    <sys:String x:Key="VM.Terms.Title">Terms of Service</sys:String>
+    <sys:String x:Key="VM.Privacy.Fallback">Please review the Privacy Policy at:\nhttps://h-insight.jp/privacy\n\nContact: info@h-insight.jp</sys:String>
+    <sys:String x:Key="VM.Privacy.Title">Privacy Policy</sys:String>
+
+    <!-- QVM Extended -->
+    <sys:String x:Key="QVM.Speaker.LoadFailed">Failed to load speakers</sys:String>
+    <sys:String x:Key="QVM.Speaker.Normal">Normal</sys:String>
+    <sys:String x:Key="QVM.Intro.Set">Intro set: {0}</sys:String>
+    <sys:String x:Key="QVM.Outro.Set">Outro set: {0}</sys:String>
+    <sys:String x:Key="QVM.Watermark.Set">Logo set: {0}</sys:String>
+    <sys:String x:Key="QVM.BGM.Select">Select BGM File</sys:String>
+    <sys:String x:Key="QVM.BGM.Filter">Audio Files|*.mp3;*.wav;*.ogg;*.flac;*.aac;*.m4a|All Files|*.*</sys:String>
+    <sys:String x:Key="QVM.BGM.Set">BGM selected: {0}</sys:String>
+    <sys:String x:Key="QVM.MediaFilter">Media Files|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|All Files|*.*</sys:String>
+    <sys:String x:Key="QVM.ImageFilter">Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.gif|All Files|*.*</sys:String>
+    <sys:String x:Key="QVM.Template.Name">Template_{0}</sys:String>
+    <sys:String x:Key="QVM.Template.Default">Default</sys:String>
+    <sys:String x:Key="QVM.Template.Saved">Template saved: {0}</sys:String>
+    <sys:String x:Key="QVM.Template.None">No saved templates.</sys:String>
+    <sys:String x:Key="QVM.Template.Select">Select Template</sys:String>
+    <sys:String x:Key="QVM.Template.Applied">Template applied: {0}</sys:String>
+    <sys:String x:Key="QVM.Generate.NoFFmpeg">FFmpeg not found. FFmpeg is required for video generation.</sys:String>
+    <sys:String x:Key="QVM.Generate.SaveDialog">Select video save location</sys:String>
+    <sys:String x:Key="QVM.Generate.SaveFilter">MP4 Files|*.mp4|All Files|*.*</sys:String>
+    <sys:String x:Key="QVM.Generate.ExportSuccess">Export success: {0}</sys:String>
+    <sys:String x:Key="QVM.Generate.Thumbnail">Thumbnail</sys:String>
+    <sys:String x:Key="QVM.Generate.Chapter">Chapter</sys:String>
+    <sys:String x:Key="QVM.Generate.MetadataLabel">Metadata</sys:String>
+    <sys:String x:Key="QVM.Exit.Confirm">Export is in progress. Cancel and exit?</sys:String>
+    <sys:String x:Key="QVM.Exit.Title">Confirm Exit</sys:String>
+    <sys:String x:Key="Overlay.Empty">(Empty)</sys:String>
+
+    <!-- DialogService -->
+    <sys:String x:Key="Dialog.Feature.Subtitle">Subtitles</sys:String>
+    <sys:String x:Key="Dialog.Feature.SubtitleStyle">Subtitle Style</sys:String>
+    <sys:String x:Key="Dialog.Feature.Transition">Transition Effects</sys:String>
+    <sys:String x:Key="Dialog.Feature.PptxImport">PPTX Import</sys:String>
+
+    <!-- Additional keys from agents -->
+    <sys:String x:Key="Common.Dot">, </sys:String>
+    <sys:String x:Key="Common.ErrorWithMessage">Error: {0}</sys:String>
+    <sys:String x:Key="Common.Separator">, </sys:String>
+    <sys:String x:Key="Export.Chapter.Short">Chapter</sys:String>
+    <sys:String x:Key="Export.ChapterEnding">Ending</sys:String>
+    <sys:String x:Key="Export.ChapterIntro">Intro</sys:String>
+    <sys:String x:Key="Export.Combining.Short">Combining</sys:String>
+    <sys:String x:Key="Export.Complete.Short">Complete</sys:String>
+    <sys:String x:Key="Export.Metadata.Short">Metadata</sys:String>
+    <sys:String x:Key="Export.Thumbnail.Short">Thumbnail</sys:String>
+    <sys:String x:Key="Meta.DefaultTitle">InsightCast Video</sys:String>
+    <sys:String x:Key="QVM.BGM.Selected">BGM selected: {0}</sys:String>
+    <sys:String x:Key="QVM.BatchImport.Title">Select Files (Multiple)</sys:String>
+    <sys:String x:Key="QVM.BatchImport.Filter">Supported Files|*.pptx;*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.mp4;*.avi;*.mov;*.wmv;*.mkv;*.webm;*.txt|All Files|*.*</sys:String>
+    <sys:String x:Key="QVM.Generate.CancelledLog">Generation cancelled</sys:String>
+    <sys:String x:Key="QVM.Generate.Done">Video is ready!</sys:String>
+    <sys:String x:Key="QVM.Generate.ReadyAgain">Change settings and click "Generate Video"</sys:String>
+    <sys:String x:Key="QVM.Generate.SaveTitle">Select video save location</sys:String>
+    <sys:String x:Key="QVM.Import.PptxCount">{0} slides</sys:String>
+    <sys:String x:Key="QVM.Import.ImageCount">{0} images</sys:String>
+    <sys:String x:Key="QVM.Import.VideoCount">{0} videos</sys:String>
+    <sys:String x:Key="QVM.Import.TextCount">{0} texts</sys:String>
+    <sys:String x:Key="QVM.Import.ReadyToGenerate">Review settings and click "Generate Video"</sys:String>
+    <sys:String x:Key="QVM.Import.Summary">Scenes ({0}) — {1}</sys:String>
+    <sys:String x:Key="QVM.Pptx.Complete">PPTX import complete: {0} slides</sys:String>
+    <sys:String x:Key="QVM.Pptx.Error">PPTX Import Error</sys:String>
+    <sys:String x:Key="QVM.Pptx.Loading">Loading PowerPoint... {0}</sys:String>
+    <sys:String x:Key="QVM.Pptx.Reading">Loading PPTX: {0}</sys:String>
+    <sys:String x:Key="QVM.Template.SpeakerInfo">Speaker: {0}</sys:String>
+    <sys:String x:Key="QVM.Text.Imported">Text import: {0} paragraphs</sys:String>
+    <sys:String x:Key="VM.Close.ExportRunning">Export is in progress. Cancel and exit?</sys:String>
+    <sys:String x:Key="VM.Close.Confirm">Confirm Exit</sys:String>
+
+    <!-- Scene / Overlay defaults -->
+    <sys:String x:Key="Scene.Label">Scene {0}</sys:String>
+    <sys:String x:Key="Overlay.DefaultTitle">Title</sys:String>
+    <sys:String x:Key="Overlay.DefaultSubtitle">Subtitle</sys:String>
+
+    <!-- License errors -->
+    <sys:String x:Key="License.Error.Empty">License key is empty.</sys:String>
+    <sys:String x:Key="License.Error.Format">Invalid license key format.</sys:String>
+    <sys:String x:Key="License.Error.Product">This key is not for InsightCast. Please enter an InsightCast key.</sys:String>
+    <sys:String x:Key="License.Error.Invalid">Invalid license key.</sys:String>
+    <sys:String x:Key="License.Error.Email">Email address does not match.</sys:String>
+    <sys:String x:Key="License.Error.Expired">License has expired ({0}).</sys:String>
 
 </ResourceDictionary>

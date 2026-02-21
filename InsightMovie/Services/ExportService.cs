@@ -59,17 +59,17 @@ namespace InsightMovie.Services
             CancellationToken ct)
         {
             var result = new ExportResult();
-            progress.Report("動画生成を準備中...");
+            progress.Report(LocalizationService.GetString("Export.Preparing"));
 
             if (!_ffmpeg.CheckAvailable())
             {
-                progress.Report("エラー: ffmpegが検出されていません。");
+                progress.Report(LocalizationService.GetString("Export.NoFFmpeg"));
                 return result;
             }
 
             if (project.Scenes.Count == 0 || !project.Scenes.Any(s => s.HasMedia || s.HasNarration))
             {
-                progress.Report("エラー: 有効なシーンがありません。素材またはナレーションを設定してください。");
+                progress.Report(LocalizationService.GetString("Export.NoScenes"));
                 return result;
             }
 
@@ -93,7 +93,7 @@ namespace InsightMovie.Services
             if (project.HasIntro && File.Exists(project.IntroMediaPath))
             {
                 currentStep++;
-                progress.Report($"[{currentStep}/{totalSteps}] イントロを生成中...");
+                progress.Report($"[{currentStep}/{totalSteps}] {LocalizationService.GetString("Export.GeneratingIntro")}");
                 ct.ThrowIfCancellationRequested();
 
                 var introScene = new Scene
@@ -111,7 +111,7 @@ namespace InsightMovie.Services
                 if (introSuccess)
                 {
                     scenePaths.Add(introPath);
-                    chapterTimes.Add((0, "イントロ"));
+                    chapterTimes.Add((0, LocalizationService.GetString("Export.ChapterIntro")));
                     cumulativeDuration += project.IntroDuration;
                     // Transition to next scene will be added by the content scene loop
                 }
@@ -123,7 +123,7 @@ namespace InsightMovie.Services
                 ct.ThrowIfCancellationRequested();
                 currentStep++;
                 var scene = project.Scenes[i];
-                progress.Report($"[{currentStep}/{totalSteps}] シーン {i + 1}/{project.Scenes.Count}: 音声を生成中...");
+                progress.Report($"[{currentStep}/{totalSteps}] {LocalizationService.GetString("Export.SceneAudio", i + 1, project.Scenes.Count)}");
 
                 string? audioPath = null;
                 if (scene.HasNarration && !scene.KeepOriginalAudio)
@@ -150,7 +150,7 @@ namespace InsightMovie.Services
                     scene.AudioCachePath = audioPath;
                 }
 
-                progress.Report($"[{currentStep}/{totalSteps}] シーン {i + 1}/{project.Scenes.Count}: 動画を生成中...");
+                progress.Report($"[{currentStep}/{totalSteps}] {LocalizationService.GetString("Export.SceneVideo", i + 1, project.Scenes.Count)}");
 
                 double duration = scene.DurationMode == DurationMode.Fixed
                     ? scene.FixedSeconds
@@ -167,7 +167,7 @@ namespace InsightMovie.Services
                     ? (scene.NarrationText!.Length > 30
                         ? scene.NarrationText![..30] + "..."
                         : scene.NarrationText!)
-                    : $"シーン {i + 1}";
+                    : LocalizationService.GetString("Export.SceneLabel", i + 1);
                 chapterTimes.Add((cumulativeDuration, chapterTitle));
 
                 var scenePath = Path.Combine(tempDir, $"scene_{i:D4}.mp4");
@@ -178,7 +178,7 @@ namespace InsightMovie.Services
 
                 if (!success)
                 {
-                    progress.Report($"シーン {i + 1} の生成に失敗しました。");
+                    progress.Report(LocalizationService.GetString("Export.SceneFailed", i + 1));
                     return result;
                 }
 
@@ -202,7 +202,7 @@ namespace InsightMovie.Services
             if (project.HasOutro && File.Exists(project.OutroMediaPath))
             {
                 currentStep++;
-                progress.Report($"[{currentStep}/{totalSteps}] アウトロを生成中...");
+                progress.Report($"[{currentStep}/{totalSteps}] {LocalizationService.GetString("Export.GeneratingOutro")}");
                 ct.ThrowIfCancellationRequested();
 
                 var outroScene = new Scene
@@ -219,7 +219,7 @@ namespace InsightMovie.Services
 
                 if (outroSuccess)
                 {
-                    chapterTimes.Add((cumulativeDuration, "エンディング"));
+                    chapterTimes.Add((cumulativeDuration, LocalizationService.GetString("Export.ChapterEnding")));
                     transitions.Add((project.DefaultTransition, project.DefaultTransitionDuration));
                     scenePaths.Add(outroPath);
                     cumulativeDuration += project.OutroDuration;
@@ -228,7 +228,7 @@ namespace InsightMovie.Services
 
             // Step: Concatenate all scenes
             currentStep++;
-            progress.Report($"[{currentStep}/{totalSteps}] 動画を結合中...");
+            progress.Report($"[{currentStep}/{totalSteps}] {LocalizationService.GetString("Export.Combining")}");
             ct.ThrowIfCancellationRequested();
 
             bool concatOk;
@@ -243,14 +243,14 @@ namespace InsightMovie.Services
 
             if (!concatOk)
             {
-                progress.Report("動画の結合に失敗しました。");
+                progress.Report(LocalizationService.GetString("Export.CombineFailed"));
                 return result;
             }
 
             // Step: Add BGM
             if (project.Bgm?.HasBgm == true)
             {
-                progress.Report("BGMを追加中...");
+                progress.Report(LocalizationService.GetString("Export.AddingBGM"));
                 var withBgm = outputPath + ".bgm.mp4";
                 var bgmOk = composer.AddBgm(outputPath, withBgm, project.Bgm);
                 if (bgmOk)
@@ -266,7 +266,7 @@ namespace InsightMovie.Services
             // Step: Generate thumbnail
             if (project.GenerateThumbnail)
             {
-                progress.Report("サムネイルを生成中...");
+                progress.Report(LocalizationService.GetString("Export.GeneratingThumbnail"));
                 var thumbPath = Path.ChangeExtension(outputPath, ".jpg");
                 if (sceneGen.ExtractThumbnail(outputPath, thumbPath, 1.0))
                 {
@@ -277,14 +277,14 @@ namespace InsightMovie.Services
             // Step: Generate chapter file
             if (project.GenerateChapters && chapterTimes.Count > 1)
             {
-                progress.Report("チャプターファイルを生成中...");
+                progress.Report(LocalizationService.GetString("Export.GeneratingChapters"));
                 var chapterPath = Path.ChangeExtension(outputPath, ".chapters.txt");
                 WriteChapterFile(chapterPath, chapterTimes);
                 result.ChapterFilePath = chapterPath;
             }
 
             // Step: Generate YouTube metadata
-            progress.Report("メタデータを生成中...");
+            progress.Report(LocalizationService.GetString("Export.GeneratingMetadata"));
             var metadataPath = Path.ChangeExtension(outputPath, ".metadata.txt");
             WriteYouTubeMetadata(metadataPath, project, chapterTimes);
             result.MetadataFilePath = metadataPath;
@@ -297,7 +297,7 @@ namespace InsightMovie.Services
             }
             catch { /* Best-effort cleanup */ }
 
-            progress.Report("書き出し完了");
+            progress.Report(LocalizationService.GetString("Export.Done"));
             return result;
         }
 
@@ -314,11 +314,11 @@ namespace InsightMovie.Services
             IProgress<string> progress,
             CancellationToken ct)
         {
-            progress.Report("プレビューを生成中...");
+            progress.Report(LocalizationService.GetString("Export.Preview.Generating"));
 
             if (!_ffmpeg.CheckAvailable())
             {
-                progress.Report("エラー: ffmpegが検出されていません。");
+                progress.Report(LocalizationService.GetString("Export.NoFFmpeg"));
                 return false;
             }
 
@@ -335,7 +335,7 @@ namespace InsightMovie.Services
 
                 if (!_audioCache.Exists(cacheKey, sid))
                 {
-                    progress.Report("音声を生成中...");
+                    progress.Report(LocalizationService.GetString("Export.Preview.Audio"));
                     var audioData = _voiceVoxClient
                         .GenerateAudioAsync(scene.NarrationText!, sid, speed)
                         .GetAwaiter().GetResult();
@@ -357,14 +357,14 @@ namespace InsightMovie.Services
                            scene.SpeakerId ?? defaultSpeakerId) ?? 1.0) + 2.0
                     : 3.0);
 
-            progress.Report("シーンを生成中...");
+            progress.Report(LocalizationService.GetString("Export.Preview.Scene"));
             var success = sceneGen.GenerateScene(scene, outputPath, duration,
                 resolution, fps, audioPath, textStyle);
 
             if (success)
-                progress.Report("プレビュー完了");
+                progress.Report(LocalizationService.GetString("Export.Preview.Done"));
             else
-                progress.Report("プレビュー生成に失敗しました。");
+                progress.Report(LocalizationService.GetString("Export.Preview.Failed"));
 
             return success;
         }
@@ -384,29 +384,29 @@ namespace InsightMovie.Services
             string path, Project project, List<(double StartTime, string Title)> chapters)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("=== YouTube メタデータ ===");
+            sb.AppendLine(LocalizationService.GetString("Meta.Header"));
             sb.AppendLine();
 
             // Title suggestion
             var firstNarration = project.Scenes
                 .Where(s => s.HasNarration)
                 .Select(s => s.NarrationText!)
-                .FirstOrDefault() ?? "動画タイトル";
+                .FirstOrDefault() ?? LocalizationService.GetString("Meta.DefaultTitle");
             if (firstNarration.Length > 60)
                 firstNarration = firstNarration[..60];
-            sb.AppendLine($"【タイトル案】");
+            sb.AppendLine(LocalizationService.GetString("Meta.TitleSuggestion"));
             sb.AppendLine(firstNarration);
             sb.AppendLine();
 
             // Description
-            sb.AppendLine("【説明文】");
-            sb.AppendLine("この動画はInsightCastで自動生成されました。");
+            sb.AppendLine(LocalizationService.GetString("Meta.Description"));
+            sb.AppendLine(LocalizationService.GetString("Meta.AutoGenerated"));
             sb.AppendLine();
 
             // Chapter markers for YouTube
             if (chapters.Count > 1)
             {
-                sb.AppendLine("【チャプター（説明欄に貼り付け）】");
+                sb.AppendLine(LocalizationService.GetString("Meta.Chapters"));
                 foreach (var (startTime, title) in chapters)
                 {
                     var ts = TimeSpan.FromSeconds(startTime);
@@ -416,8 +416,8 @@ namespace InsightMovie.Services
             }
 
             // Tags
-            sb.AppendLine("【タグ候補】");
-            var tags = new List<string> { "教育", "研修", "解説" };
+            sb.AppendLine(LocalizationService.GetString("Meta.Tags"));
+            var tags = new List<string> { LocalizationService.GetString("Meta.Tag.Education"), LocalizationService.GetString("Meta.Tag.Training"), LocalizationService.GetString("Meta.Tag.Tutorial") };
             var narrations = project.Scenes.Where(s => s.HasNarration)
                 .SelectMany(s => s.NarrationText!.Split(new[] { '、', '。', '！', '？', ' ' },
                     StringSplitOptions.RemoveEmptyEntries))
@@ -428,10 +428,10 @@ namespace InsightMovie.Services
             sb.AppendLine(string.Join(", ", tags));
             sb.AppendLine();
 
-            sb.AppendLine($"【動画情報】");
-            sb.AppendLine($"シーン数: {project.Scenes.Count}");
-            sb.AppendLine($"解像度: {project.Output.Resolution}");
-            sb.AppendLine($"生成日時: {DateTime.Now:yyyy-MM-dd HH:mm}");
+            sb.AppendLine(LocalizationService.GetString("Meta.VideoInfo"));
+            sb.AppendLine(LocalizationService.GetString("Meta.SceneCount", project.Scenes.Count));
+            sb.AppendLine(LocalizationService.GetString("Meta.Resolution", project.Output.Resolution));
+            sb.AppendLine(LocalizationService.GetString("Meta.GeneratedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm")));
 
             File.WriteAllText(path, sb.ToString(), Encoding.UTF8);
         }

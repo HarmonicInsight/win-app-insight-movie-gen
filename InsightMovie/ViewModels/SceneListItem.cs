@@ -1,5 +1,6 @@
 using InsightMovie.Infrastructure;
 using InsightMovie.Models;
+using InsightMovie.Services;
 
 namespace InsightMovie.ViewModels
 {
@@ -23,7 +24,7 @@ namespace InsightMovie.ViewModels
 
         public void UpdateLabel(int index)
         {
-            var label = $"シーン {index + 1}";
+            var label = LocalizationService.GetString("Scene.Label", index + 1);
             if (!string.IsNullOrEmpty(Scene.NarrationText))
             {
                 var preview = Scene.NarrationText.Length > 12

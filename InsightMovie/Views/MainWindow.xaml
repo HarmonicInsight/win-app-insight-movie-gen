@@ -99,7 +99,8 @@
                                 FontSize="11"
                                 Background="{DynamicResource BgPrimary}" Foreground="{DynamicResource TextPrimary}"
                                 BorderBrush="{DynamicResource BorderDark}"
-                                Click="LanguageSwitchButton_Click"
+                                x:Name="LangSwitchButton"
+                                Click="LangSwitchButton_Click"
                                 shell:WindowChrome.IsHitTestVisibleInChrome="True">
                             <TextBlock Text="{DynamicResource Lang.SwitchTo}" VerticalAlignment="Center"/>
                         </Button>
@@ -677,8 +678,8 @@
                         <TextBlock Text="{DynamicResource Export.Resolution}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                         <ComboBox Width="180"
                                   SelectedIndex="{Binding SelectedResolutionIndex}">
-                            <ComboBoxItem Content="1080x1920 (縦動画)" Tag="1080x1920"/>
-                            <ComboBoxItem Content="1920x1080 (横動画)" Tag="1920x1080"/>
+                            <ComboBoxItem Content="{DynamicResource Export.Res.Portrait}" Tag="1080x1920"/>
+                            <ComboBoxItem Content="{DynamicResource Export.Res.Landscape}" Tag="1920x1080"/>
                         </ComboBox>
                     </StackPanel>
 
@@ -694,7 +695,7 @@
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource TextTertiary}"
                                    Margin="0,0,6,0"/>
-                        <Button Content="BGM設定..."
+                        <Button Content="{DynamicResource Export.BGM.Settings}"
                                 Padding="8,3"
                                 Command="{Binding BgmSettingsCommand}"/>
                     </StackPanel>
@@ -702,12 +703,12 @@
 
                 <!-- Right: Export button -->
                 <Button Grid.Column="1"
-                        Content="動画を書き出し"
+                        Content="{DynamicResource Export.Button}"
                         Width="150" Height="44"
                         FontSize="12" FontWeight="Bold"
                         Style="{DynamicResource PrimaryButton}"
                         Command="{Binding ExportVideoCommand}"
-                        ToolTip="プロジェクトを動画ファイルとして書き出します"/>
+                        ToolTip="{DynamicResource Export.Button.Tooltip}"/>
             </Grid>
         </GroupBox>
 
@@ -716,10 +717,10 @@
         <!-- ================================================================ -->
         <DockPanel Grid.Row="4" Margin="4,0,4,2"
                    Visibility="{Binding ExportProgressVisible, Converter={StaticResource BoolToVis}}">
-            <Button DockPanel.Dock="Right" Content="キャンセル"
+            <Button DockPanel.Dock="Right" Content="{DynamicResource Export.Cancel}"
                     Padding="12,2" Margin="4,0,0,0"
                     Command="{Binding CancelExportCommand}"
-                    ToolTip="書き出し/プレビューをキャンセル"/>
+                    ToolTip="{DynamicResource Export.Cancel.Tooltip}"/>
             <ProgressBar Height="6" Minimum="0" Maximum="100"
                          Value="{Binding ExportProgressValue, Mode=OneWay}"/>
         </DockPanel>
@@ -728,7 +729,7 @@
         <!-- F) Log Area                                                       -->
         <!-- ================================================================ -->
         <DockPanel Grid.Row="5" Height="120" Margin="4,0,4,4">
-            <TextBlock Text="ログ:" DockPanel.Dock="Top" FontSize="11"
+            <TextBlock Text="{DynamicResource Export.Log}" DockPanel.Dock="Top" FontSize="11"
                        Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,2"/>
             <TextBox x:Name="LogTextBox" IsReadOnly="True"
                      VerticalScrollBarVisibility="Auto"

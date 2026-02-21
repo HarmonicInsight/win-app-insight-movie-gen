@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using InsightMovie.Services;
 
 namespace InsightMovie.Models
 {
@@ -76,12 +77,12 @@ namespace InsightMovie.Models
 
         // --- Presets ---
 
-        public static readonly IReadOnlyList<TextStyle> PRESET_STYLES = new List<TextStyle>()
+        public static IReadOnlyList<TextStyle> PRESET_STYLES => new List<TextStyle>()
         {
             new TextStyle
             {
                 Id = "default",
-                Name = "デフォルト",
+                Name = LocalizationService.GetString("Style.Preset.Default"),
                 FontFamily = "Yu Gothic UI",
                 FontSize = 48,
                 FontBold = true,
@@ -97,7 +98,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "news",
-                Name = "ニュース風",
+                Name = LocalizationService.GetString("Style.Preset.News"),
                 FontFamily = "Yu Gothic UI",
                 FontSize = 42,
                 FontBold = true,
@@ -113,7 +114,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "cinema",
-                Name = "映画風",
+                Name = LocalizationService.GetString("Style.Preset.Cinema"),
                 FontFamily = "Yu Mincho",
                 FontSize = 52,
                 FontBold = false,
@@ -129,7 +130,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "variety",
-                Name = "バラエティ風",
+                Name = LocalizationService.GetString("Style.Preset.Variety"),
                 FontFamily = "Yu Gothic UI",
                 FontSize = 56,
                 FontBold = true,
@@ -145,7 +146,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "documentary",
-                Name = "ドキュメンタリー風",
+                Name = LocalizationService.GetString("Style.Preset.Documentary"),
                 FontFamily = "Yu Gothic UI",
                 FontSize = 44,
                 FontBold = false,
@@ -161,7 +162,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "education",
-                Name = "教育・解説風",
+                Name = LocalizationService.GetString("Style.Preset.Education"),
                 FontFamily = "Yu Gothic UI",
                 FontSize = 46,
                 FontBold = true,
@@ -177,7 +178,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "horror",
-                Name = "ホラー風",
+                Name = LocalizationService.GetString("Style.Preset.Horror"),
                 FontFamily = "Yu Mincho",
                 FontSize = 50,
                 FontBold = true,
@@ -193,7 +194,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "cute",
-                Name = "かわいい風",
+                Name = LocalizationService.GetString("Style.Preset.Cute"),
                 FontFamily = "Yu Gothic UI",
                 FontSize = 44,
                 FontBold = true,
@@ -209,7 +210,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "tech",
-                Name = "テック風",
+                Name = LocalizationService.GetString("Style.Preset.Tech"),
                 FontFamily = "Consolas",
                 FontSize = 40,
                 FontBold = false,
@@ -225,7 +226,7 @@ namespace InsightMovie.Models
             new TextStyle
             {
                 Id = "elegant",
-                Name = "エレガント風",
+                Name = LocalizationService.GetString("Style.Preset.Elegant"),
                 FontFamily = "Yu Mincho",
                 FontSize = 46,
                 FontBold = false,
@@ -240,48 +241,48 @@ namespace InsightMovie.Models
             }
         };
 
-        public static readonly List<(string FontName, string DisplayName)> AVAILABLE_FONTS = new()
+        public static List<(string FontName, string DisplayName)> AVAILABLE_FONTS => new()
         {
-            ("Yu Gothic UI", "游ゴシック UI"),
-            ("Yu Gothic", "游ゴシック"),
-            ("Yu Mincho", "游明朝"),
-            ("Meiryo", "メイリオ"),
-            ("Meiryo UI", "メイリオ UI"),
-            ("MS Gothic", "ＭＳ ゴシック"),
-            ("MS Mincho", "ＭＳ 明朝"),
-            ("MS PGothic", "ＭＳ Ｐゴシック"),
-            ("MS PMincho", "ＭＳ Ｐ明朝"),
-            ("BIZ UDGothic", "BIZ UDゴシック"),
-            ("BIZ UDMincho", "BIZ UD明朝"),
+            ("Yu Gothic UI", LocalizationService.GetString("Font.YuGothicUI")),
+            ("Yu Gothic", LocalizationService.GetString("Font.YuGothic")),
+            ("Yu Mincho", LocalizationService.GetString("Font.YuMincho")),
+            ("Meiryo", LocalizationService.GetString("Font.Meiryo")),
+            ("Meiryo UI", LocalizationService.GetString("Font.MeiryoUI")),
+            ("MS Gothic", LocalizationService.GetString("Font.MSGothic")),
+            ("MS Mincho", LocalizationService.GetString("Font.MSMincho")),
+            ("MS PGothic", LocalizationService.GetString("Font.MSPGothic")),
+            ("MS PMincho", LocalizationService.GetString("Font.MSPMincho")),
+            ("BIZ UDGothic", LocalizationService.GetString("Font.BIZUDGothic")),
+            ("BIZ UDMincho", LocalizationService.GetString("Font.BIZUDMincho")),
             ("Consolas", "Consolas"),
             ("Arial", "Arial"),
             ("Segoe UI", "Segoe UI")
         };
 
-        public static readonly List<(string Name, int[] Color)> PRESET_TEXT_COLORS = new()
+        public static List<(string Name, int[] Color)> PRESET_TEXT_COLORS => new()
         {
-            ("白", new[] { 255, 255, 255 }),
-            ("黒", new[] { 0, 0, 0 }),
-            ("赤", new[] { 255, 0, 0 }),
-            ("青", new[] { 0, 0, 255 }),
-            ("黄", new[] { 255, 255, 0 }),
-            ("緑", new[] { 0, 128, 0 }),
-            ("ピンク", new[] { 255, 105, 180 }),
-            ("オレンジ", new[] { 255, 165, 0 }),
-            ("金", new[] { 212, 175, 55 }),
-            ("水色", new[] { 0, 191, 255 })
+            (LocalizationService.GetString("Color.White"), new[] { 255, 255, 255 }),
+            (LocalizationService.GetString("Color.Black"), new[] { 0, 0, 0 }),
+            (LocalizationService.GetString("Color.Red"), new[] { 255, 0, 0 }),
+            (LocalizationService.GetString("Color.Blue"), new[] { 0, 0, 255 }),
+            (LocalizationService.GetString("Color.Yellow"), new[] { 255, 255, 0 }),
+            (LocalizationService.GetString("Color.Green"), new[] { 0, 128, 0 }),
+            (LocalizationService.GetString("Color.Pink"), new[] { 255, 105, 180 }),
+            (LocalizationService.GetString("Color.Orange"), new[] { 255, 165, 0 }),
+            (LocalizationService.GetString("Color.Gold"), new[] { 212, 175, 55 }),
+            (LocalizationService.GetString("Color.LightBlue"), new[] { 0, 191, 255 })
         };
 
-        public static readonly List<(string Name, int[] Color)> PRESET_STROKE_COLORS = new()
+        public static List<(string Name, int[] Color)> PRESET_STROKE_COLORS => new()
         {
-            ("黒", new[] { 0, 0, 0 }),
-            ("白", new[] { 255, 255, 255 }),
-            ("紺", new[] { 0, 0, 128 }),
-            ("赤", new[] { 255, 0, 0 }),
-            ("緑", new[] { 0, 128, 0 }),
-            ("灰色", new[] { 128, 128, 128 }),
-            ("茶色", new[] { 139, 69, 19 }),
-            ("紫", new[] { 128, 0, 128 })
+            (LocalizationService.GetString("Color.Black"), new[] { 0, 0, 0 }),
+            (LocalizationService.GetString("Color.White"), new[] { 255, 255, 255 }),
+            (LocalizationService.GetString("Color.Navy"), new[] { 0, 0, 128 }),
+            (LocalizationService.GetString("Color.Red"), new[] { 255, 0, 0 }),
+            (LocalizationService.GetString("Color.Green"), new[] { 0, 128, 0 }),
+            (LocalizationService.GetString("Color.Gray"), new[] { 128, 128, 128 }),
+            (LocalizationService.GetString("Color.Brown"), new[] { 139, 69, 19 }),
+            (LocalizationService.GetString("Color.Purple"), new[] { 128, 0, 128 })
         };
     }
 }

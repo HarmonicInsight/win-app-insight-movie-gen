@@ -418,9 +418,9 @@ namespace InsightMovie.ViewModels
         public bool HasIntro => !string.IsNullOrEmpty(_introFilePath);
         public bool HasOutro => !string.IsNullOrEmpty(_outroFilePath);
         public string IntroFileName => string.IsNullOrEmpty(_introFilePath)
-            ? "（なし）" : Path.GetFileName(_introFilePath);
+            ? LocalizationService.GetString("Common.None") : Path.GetFileName(_introFilePath);
         public string OutroFileName => string.IsNullOrEmpty(_outroFilePath)
-            ? "（なし）" : Path.GetFileName(_outroFilePath);
+            ? LocalizationService.GetString("Common.None") : Path.GetFileName(_outroFilePath);
 
         // Watermark properties
         public string WatermarkFilePath
@@ -431,7 +431,7 @@ namespace InsightMovie.ViewModels
 
         public bool HasWatermark => !string.IsNullOrEmpty(_watermarkFilePath);
         public string WatermarkFileName => string.IsNullOrEmpty(_watermarkFilePath)
-            ? "（なし）" : Path.GetFileName(_watermarkFilePath);
+            ? LocalizationService.GetString("Common.None") : Path.GetFileName(_watermarkFilePath);
 
         public int SelectedWatermarkPosIndex
         {
@@ -441,7 +441,7 @@ namespace InsightMovie.ViewModels
 
         public List<string> WatermarkPositionOptions { get; } = new()
         {
-            "左上", "右上", "左下", "右下", "中央"
+            LocalizationService.GetString("WmPos.TopLeft"), LocalizationService.GetString("WmPos.TopRight"), LocalizationService.GetString("WmPos.BottomLeft"), LocalizationService.GetString("WmPos.BottomRight"), LocalizationService.GetString("Align.Center")
         };
 
         private static readonly string[] WatermarkPositionValues =
@@ -635,7 +635,7 @@ namespace InsightMovie.ViewModels
         {
             await LoadSpeakers();
             LoadSceneSpeakers();
-            _logger.Log("初期化完了");
+            _logger.Log(LocalizationService.GetString("VM.Initialized"));
         }
 
         #endregion
@@ -648,16 +648,16 @@ namespace InsightMovie.ViewModels
             try
             {
                 var version = await _voiceVoxClient.CheckConnectionAsync();
-                vvStatus = version != null ? $"VOICEVOX: ✓接続OK (v{version})" : "VOICEVOX: ✗未接続";
+                vvStatus = version != null ? LocalizationService.GetString("VM.VoiceVox.Connected", version) : LocalizationService.GetString("VM.VoiceVox.Disconnected");
             }
             catch
             {
-                vvStatus = "VOICEVOX: ✗未接続";
+                vvStatus = LocalizationService.GetString("VM.VoiceVox.Disconnected");
             }
 
             var ffStatus = _ffmpegWrapper?.CheckAvailable() == true
-                ? "ffmpeg: ✓検出OK"
-                : "ffmpeg: ✗未検出";
+                ? LocalizationService.GetString("VM.FFmpeg.Detected")
+                : LocalizationService.GetString("VM.FFmpeg.NotDetected");
             StatusText = $"{vvStatus} • {ffStatus}";
         }
 
@@ -703,7 +703,7 @@ namespace InsightMovie.ViewModels
             }
             else
             {
-                MediaName = "（未選択）";
+                MediaName = LocalizationService.GetString("Common.Unselected");
                 ThumbnailUpdateRequested?.Invoke(null);
             }
 
@@ -752,7 +752,7 @@ namespace InsightMovie.ViewModels
             _project.AddScene();
             RefreshSceneList();
             SelectedSceneIndex = _project.Scenes.Count - 1;
-            _logger.Log($"シーン {_project.Scenes.Count} を追加しました。");
+            _logger.Log(LocalizationService.GetString("VM.Scene.Added", _project.Scenes.Count));
         }
 
         private void RemoveScene()
@@ -760,7 +760,7 @@ namespace InsightMovie.ViewModels
             _isDirty = true;
             if (_project.Scenes.Count <= 1)
             {
-                _dialogService?.ShowWarning("最低1つのシーンが必要です。", "削除不可");
+                _dialogService?.ShowWarning(LocalizationService.GetString("VM.Scene.MinRequired"), LocalizationService.GetString("VM.Scene.MinRequired.Title"));
                 return;
             }
 
@@ -769,7 +769,7 @@ namespace InsightMovie.ViewModels
 
             _project.RemoveScene(idx);
             RefreshSceneList();
-            _logger.Log($"シーン {idx + 1} を削除しました。");
+            _logger.Log(LocalizationService.GetString("VM.Scene.Removed", idx + 1));
         }
 
         private void MoveSceneUp() => MoveScene(-1);
@@ -821,11 +821,8 @@ namespace InsightMovie.ViewModels
             if (_currentScene == null || _dialogService == null) return;
 
             var path = _dialogService.ShowOpenFileDialog(
-                "素材ファイルを選択",
-                "画像・動画ファイル|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.mp4;*.avi;*.mov;*.wmv;*.mkv|" +
-                "画像ファイル|*.png;*.jpg;*.jpeg;*.bmp;*.gif|" +
-                "動画ファイル|*.mp4;*.avi;*.mov;*.wmv;*.mkv|" +
-                "すべてのファイル|*.*");
+                LocalizationService.GetString("VM.Media.Select"),
+                LocalizationService.GetString("VM.Media.Filter"));
 
             if (path == null) return;
 
@@ -846,7 +843,7 @@ namespace InsightMovie.ViewModels
             else
                 ThumbnailUpdateRequested?.Invoke(null);
 
-            _logger.Log($"素材を設定: {Path.GetFileName(path)}");
+            _logger.Log(LocalizationService.GetString("VM.Media.Set", Path.GetFileName(path)));
         }
 
         private void ClearMedia()
@@ -854,10 +851,10 @@ namespace InsightMovie.ViewModels
             if (_currentScene == null) return;
             _currentScene.MediaPath = null;
             _currentScene.MediaType = MediaType.None;
-            MediaName = "（未選択）";
+            MediaName = LocalizationService.GetString("Common.Unselected");
             _isDirty = true;
             ThumbnailUpdateRequested?.Invoke(null);
-            _logger.Log("素材をクリアしました。");
+            _logger.Log(LocalizationService.GetString("VM.Media.Cleared"));
         }
 
         private void OnDurationModeChanged()
@@ -935,7 +932,7 @@ namespace InsightMovie.ViewModels
                         if (!style.TryGetProperty("id", out var idProp)) continue;
                         var styleId = idProp.GetInt32();
                         var styleName = style.TryGetProperty("name", out var snProp)
-                            ? snProp.GetString() ?? "ノーマル" : "ノーマル";
+                            ? snProp.GetString() ?? LocalizationService.GetString("VM.Speaker.Normal") : LocalizationService.GetString("VM.Speaker.Normal");
                         var displayName = $"{speakerName} ({styleName})";
                         _speakerStyles[styleId] = displayName;
                         ExportSpeakers.Add(new SpeakerItem { DisplayName = displayName, StyleId = styleId });
@@ -954,11 +951,11 @@ namespace InsightMovie.ViewModels
                 if (_selectedExportSpeakerIndex < 0 && ExportSpeakers.Count > 0)
                     SelectedExportSpeakerIndex = 0;
 
-                _logger.Log($"話者一覧を読み込みました ({ExportSpeakers.Count} スタイル)。");
+                _logger.Log(LocalizationService.GetString("VM.Speaker.Loaded", ExportSpeakers.Count));
             }
             catch (Exception ex)
             {
-                _logger.LogError("話者一覧の読み込みに失敗", ex);
+                _logger.LogError(LocalizationService.GetString("VM.Speaker.LoadFailed"), ex);
             }
         }
 
@@ -967,7 +964,7 @@ namespace InsightMovie.ViewModels
             SceneSpeakers.Clear();
             SceneSpeakers.Add(new SpeakerItem
             {
-                DisplayName = "デフォルト（プロジェクト設定を使用）",
+                DisplayName = LocalizationService.GetString("VM.Speaker.Default"),
                 StyleId = -1
             });
 
@@ -1021,7 +1018,7 @@ namespace InsightMovie.ViewModels
                 _currentScene.SubtitleStyleId = selectedStyle.Id;
                 _sceneSubtitleStyles[_currentScene.Id] = selectedStyle;
                 UpdateStylePreview();
-                _logger.Log($"字幕スタイルを「{selectedStyle.Name}」に変更しました。");
+                _logger.Log(LocalizationService.GetString("VM.Style.Changed", selectedStyle.Name));
             }
         }
 
@@ -1068,11 +1065,11 @@ namespace InsightMovie.ViewModels
         {
             if (_currentScene == null) return;
 
-            var overlay = new TextOverlay { Text = "テキスト" };
+            var overlay = new TextOverlay { Text = LocalizationService.GetString("Overlay.DefaultText") };
             _currentScene.TextOverlays.Add(overlay);
             RefreshOverlayList();
             SelectedOverlayIndex = _currentScene.TextOverlays.Count - 1;
-            _logger.Log("テキストオーバーレイを追加しました。");
+            _logger.Log(LocalizationService.GetString("VM.Overlay.Added"));
         }
 
         private void RemoveOverlay()
@@ -1089,7 +1086,7 @@ namespace InsightMovie.ViewModels
             else
                 SelectedOverlayIndex = -1;
 
-            _logger.Log("テキストオーバーレイを削除しました。");
+            _logger.Log(LocalizationService.GetString("VM.Overlay.Removed"));
         }
 
         private void AddCoverTemplate()
@@ -1102,7 +1099,7 @@ namespace InsightMovie.ViewModels
 
             RefreshOverlayList();
             SelectedOverlayIndex = 0;
-            _logger.Log("表紙テンプレートを適用しました。");
+            _logger.Log(LocalizationService.GetString("VM.Template.CoverApplied"));
         }
 
         private void OnOverlaySelected()
@@ -1222,7 +1219,7 @@ namespace InsightMovie.ViewModels
         {
             if (_currentScene == null || string.IsNullOrWhiteSpace(_currentScene.NarrationText))
             {
-                _dialogService?.ShowInfo("ナレーションテキストを入力してください。", "音声プレビュー");
+                _dialogService?.ShowInfo(LocalizationService.GetString("VM.Preview.NoNarration"), LocalizationService.GetString("VM.Preview.Title"));
                 return;
             }
 
@@ -1231,29 +1228,29 @@ namespace InsightMovie.ViewModels
 
             try
             {
-                _logger.Log("音声を生成中...");
+                _logger.Log(LocalizationService.GetString("VM.Preview.Generating"));
 
                 string audioPath;
                 if (_audioCache.Exists(text, speakerId))
                 {
                     audioPath = _audioCache.GetCachePath(text, speakerId);
-                    _logger.Log("キャッシュから音声を読み込みました。");
+                    _logger.Log(LocalizationService.GetString("VM.Preview.CacheLoaded"));
                 }
                 else
                 {
                     var audioData = await _voiceVoxClient.GenerateAudioAsync(text, speakerId);
                     audioPath = _audioCache.Save(text, speakerId, audioData);
-                    _logger.Log("音声を生成しました。");
+                    _logger.Log(LocalizationService.GetString("VM.Preview.Generated"));
                 }
 
                 _currentScene.AudioCachePath = audioPath;
                 PlayAudioRequested?.Invoke(audioPath, _currentScene.SpeechSpeed);
-                _logger.Log("再生中...");
+                _logger.Log(LocalizationService.GetString("VM.Preview.Playing"));
             }
             catch (Exception ex)
             {
-                _logger.LogError("音声プレビューエラー", ex);
-                _dialogService?.ShowError($"音声の生成に失敗しました:\n{ex.Message}", "エラー");
+                _logger.LogError(LocalizationService.GetString("VM.Preview.Error"), ex);
+                _dialogService?.ShowError(LocalizationService.GetString("VM.Preview.Failed", ex.Message), LocalizationService.GetString("Common.Error"));
             }
         }
 
@@ -1265,15 +1262,15 @@ namespace InsightMovie.ViewModels
         {
             if (_currentScene == null)
             {
-                _dialogService?.ShowInfo("シーンを選択してください。", "シーンプレビュー");
+                _dialogService?.ShowInfo(LocalizationService.GetString("VM.ScenePreview.NoScene"), LocalizationService.GetString("VM.ScenePreview.Title"));
                 return;
             }
 
             if (_ffmpegWrapper == null || !_ffmpegWrapper.CheckAvailable())
             {
                 _dialogService?.ShowError(
-                    "ffmpegが検出されていません。\nシーンプレビューにはffmpegが必要です。",
-                    "プレビューエラー");
+                    LocalizationService.GetString("VM.ScenePreview.NoFFmpeg"),
+                    LocalizationService.GetString("VM.ScenePreview.Error"));
                 return;
             }
 
@@ -1301,7 +1298,7 @@ namespace InsightMovie.ViewModels
 
             var progress = new Progress<string>(msg => _logger.Log(msg));
 
-            _logger.Log("シーンプレビューを生成中...");
+            _logger.Log(LocalizationService.GetString("VM.ScenePreview.Generating"));
             ExportProgressVisible = true;
 
             try
@@ -1313,18 +1310,18 @@ namespace InsightMovie.ViewModels
 
                 if (success && File.Exists(previewPath))
                 {
-                    _logger.Log("シーンプレビュー完了");
+                    _logger.Log(LocalizationService.GetString("VM.ScenePreview.Complete"));
                     PreviewVideoReady?.Invoke(previewPath);
                 }
                 else
                 {
-                    _dialogService?.ShowError("シーンプレビューの生成に失敗しました。", "プレビューエラー");
+                    _dialogService?.ShowError(LocalizationService.GetString("VM.ScenePreview.Failed"), LocalizationService.GetString("VM.ScenePreview.Error"));
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError("シーンプレビューエラー", ex);
-                _dialogService?.ShowError($"プレビューエラー:\n{ex.Message}", "エラー");
+                _logger.LogError(LocalizationService.GetString("VM.ScenePreview.Error"), ex);
+                _dialogService?.ShowError(LocalizationService.GetString("VM.ScenePreview.ErrorDetail", ex.Message), LocalizationService.GetString("Common.Error"));
             }
             finally
             {
@@ -1340,15 +1337,15 @@ namespace InsightMovie.ViewModels
         {
             if (_dialogService == null) return;
             var path = _dialogService.ShowOpenFileDialog(
-                "イントロ画像/動画を選択",
-                "メディアファイル|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|すべてのファイル|*.*");
+                LocalizationService.GetString("VM.Intro.Select"),
+                LocalizationService.GetString("VM.Media.FilterMedia"));
             if (!string.IsNullOrEmpty(path))
             {
                 IntroFilePath = path;
                 _project.IntroMediaPath = path;
                 OnPropertyChanged(nameof(HasIntro));
                 OnPropertyChanged(nameof(IntroFileName));
-                _logger.Log($"イントロ設定: {Path.GetFileName(path)}");
+                _logger.Log(LocalizationService.GetString("VM.Intro.Set", Path.GetFileName(path)));
             }
         }
 
@@ -1364,15 +1361,15 @@ namespace InsightMovie.ViewModels
         {
             if (_dialogService == null) return;
             var path = _dialogService.ShowOpenFileDialog(
-                "アウトロ画像/動画を選択",
-                "メディアファイル|*.png;*.jpg;*.jpeg;*.bmp;*.mp4;*.mov|すべてのファイル|*.*");
+                LocalizationService.GetString("VM.Outro.Select"),
+                LocalizationService.GetString("VM.Media.FilterMedia"));
             if (!string.IsNullOrEmpty(path))
             {
                 OutroFilePath = path;
                 _project.OutroMediaPath = path;
                 OnPropertyChanged(nameof(HasOutro));
                 OnPropertyChanged(nameof(OutroFileName));
-                _logger.Log($"アウトロ設定: {Path.GetFileName(path)}");
+                _logger.Log(LocalizationService.GetString("VM.Outro.Set", Path.GetFileName(path)));
             }
         }
 
@@ -1388,15 +1385,15 @@ namespace InsightMovie.ViewModels
         {
             if (_dialogService == null) return;
             var path = _dialogService.ShowOpenFileDialog(
-                "ロゴ画像を選択",
-                "画像ファイル|*.png;*.jpg;*.jpeg;*.bmp;*.gif|すべてのファイル|*.*");
+                LocalizationService.GetString("VM.Watermark.Select"),
+                LocalizationService.GetString("VM.Watermark.Filter"));
             if (!string.IsNullOrEmpty(path))
             {
                 WatermarkFilePath = path;
                 SyncWatermarkToProject();
                 OnPropertyChanged(nameof(HasWatermark));
                 OnPropertyChanged(nameof(WatermarkFileName));
-                _logger.Log($"ロゴ設定: {Path.GetFileName(path)}");
+                _logger.Log(LocalizationService.GetString("VM.Watermark.Set", Path.GetFileName(path)));
             }
         }
 
@@ -1432,12 +1429,12 @@ namespace InsightMovie.ViewModels
 
         private void SaveTemplate()
         {
-            var name = $"テンプレート_{DateTime.Now:yyyyMMdd_HHmmss}";
+            var name = LocalizationService.GetString("VM.Template.DefaultName", DateTime.Now.ToString("yyyyMMdd_HHmmss"));
             if (HasWatermark) SyncWatermarkToProject();
 
             var template = TemplateService.CreateFromProject(_project, name);
             TemplateService.SaveTemplate(template);
-            _logger.Log($"テンプレート保存: {name}");
+            _logger.Log(LocalizationService.GetString("VM.Template.Saved", name));
         }
 
         private void LoadTemplate()
@@ -1445,7 +1442,7 @@ namespace InsightMovie.ViewModels
             var templates = TemplateService.LoadAllTemplates();
             if (templates.Count == 0)
             {
-                _dialogService?.ShowInfo("保存済みテンプレートがありません。", "テンプレート");
+                _dialogService?.ShowInfo(LocalizationService.GetString("VM.Template.None"), LocalizationService.GetString("VM.Template.Title"));
                 return;
             }
 
@@ -1457,7 +1454,7 @@ namespace InsightMovie.ViewModels
             else
             {
                 var names = templates.Select(t => $"{t.Name}  ({t.CreatedAt:yyyy/MM/dd HH:mm})").ToArray();
-                var idx = _dialogService?.ShowListSelectDialog("テンプレートを選択", names) ?? -1;
+                var idx = _dialogService?.ShowListSelectDialog(LocalizationService.GetString("VM.Template.Select"), names) ?? -1;
                 if (idx < 0) return;
                 template = templates[idx];
             }
@@ -1485,7 +1482,7 @@ namespace InsightMovie.ViewModels
             }
 
             UpdateBgmStatus();
-            _logger.Log($"テンプレート適用: {template.Name}");
+            _logger.Log(LocalizationService.GetString("VM.Template.Applied", template.Name));
         }
 
         #endregion
@@ -1496,15 +1493,15 @@ namespace InsightMovie.ViewModels
         {
             if (_isExporting)
             {
-                _dialogService?.ShowWarning("書き出し処理が実行中です。", "書き出し中");
+                _dialogService?.ShowWarning(LocalizationService.GetString("VM.Export.InProgress"), LocalizationService.GetString("VM.Export.InProgress.Title"));
                 return;
             }
 
             if (_dialogService == null) return;
 
             var outputPath = _dialogService.ShowSaveFileDialog(
-                "動画ファイルの保存先を選択",
-                "MP4ファイル|*.mp4|すべてのファイル|*.*",
+                LocalizationService.GetString("VM.Export.SaveTitle"),
+                LocalizationService.GetString("VM.Export.SaveFilter"),
                 ".mp4",
                 "InsightCast.mp4");
 
@@ -1513,8 +1510,8 @@ namespace InsightMovie.ViewModels
             if (_ffmpegWrapper == null || !_ffmpegWrapper.CheckAvailable())
             {
                 _dialogService.ShowError(
-                    "ffmpegが検出されていません。\n動画の書き出しにはffmpegが必要です。",
-                    "書き出しエラー");
+                    LocalizationService.GetString("VM.Export.NoFFmpeg"),
+                    LocalizationService.GetString("VM.Export.Error"));
                 return;
             }
 
@@ -1557,7 +1554,7 @@ namespace InsightMovie.ViewModels
             });
             var ct = _exportCts.Token;
 
-            _logger.Log($"書き出しを開始: {outputPath}");
+            _logger.Log(LocalizationService.GetString("VM.Export.Started", outputPath));
 
             // Sync UI settings to project before snapshot
             if (HasWatermark) SyncWatermarkToProject();
@@ -1592,11 +1589,11 @@ namespace InsightMovie.ViewModels
                 {
                     var extras = new List<string>();
                     if (!string.IsNullOrEmpty(exportResult.ThumbnailPath))
-                        extras.Add($"サムネイル: {exportResult.ThumbnailPath}");
+                        extras.Add(LocalizationService.GetString("VM.Export.Thumbnail", exportResult.ThumbnailPath));
                     if (!string.IsNullOrEmpty(exportResult.ChapterFilePath))
-                        extras.Add($"チャプター: {exportResult.ChapterFilePath}");
+                        extras.Add(LocalizationService.GetString("VM.Export.Chapter", exportResult.ChapterFilePath));
                     if (!string.IsNullOrEmpty(exportResult.MetadataFilePath))
-                        extras.Add($"メタデータ: {exportResult.MetadataFilePath}");
+                        extras.Add(LocalizationService.GetString("VM.Export.Metadata", exportResult.MetadataFilePath));
                     foreach (var extra in extras) _logger.Log(extra);
                 }
 
@@ -1604,11 +1601,11 @@ namespace InsightMovie.ViewModels
             }
             catch (OperationCanceledException)
             {
-                OnExportFinished(false, "書き出しがキャンセルされました。");
+                OnExportFinished(false, LocalizationService.GetString("VM.Export.Cancelled"));
             }
             catch (Exception ex)
             {
-                OnExportFinished(false, $"書き出しエラー: {ex.Message}");
+                OnExportFinished(false, LocalizationService.GetString("VM.Export.ErrorDetail", ex.Message));
             }
             finally
             {
@@ -1624,18 +1621,18 @@ namespace InsightMovie.ViewModels
             if (success)
             {
                 _project.Output.OutputPath = message;
-                _logger.Log($"書き出し成功: {message}");
+                _logger.Log(LocalizationService.GetString("VM.Export.Success", message));
                 if (_dialogService?.ShowYesNo(
-                    $"動画の書き出しが完了しました。\n\n{message}\n\nファイルを開きますか？",
-                    "書き出し完了") == true)
+                    LocalizationService.GetString("VM.Export.CompleteOpen", message),
+                    LocalizationService.GetString("VM.Export.Complete")) == true)
                 {
                     OpenFileRequested?.Invoke(message);
                 }
             }
             else
             {
-                _logger.Log($"書き出し失敗: {message}");
-                _dialogService?.ShowError($"動画の書き出しに失敗しました:\n{message}", "書き出しエラー");
+                _logger.Log(LocalizationService.GetString("VM.Export.Failed", message));
+                _dialogService?.ShowError(LocalizationService.GetString("VM.Export.FailedDetail", message), LocalizationService.GetString("VM.Export.Error"));
             }
         }
 
@@ -1655,11 +1652,11 @@ namespace InsightMovie.ViewModels
         {
             _project = project;
             _sceneSubtitleStyles.Clear();
-            WindowTitle = "InsightCast - 取込プロジェクト";
+            WindowTitle = LocalizationService.GetString("VM.ImportProject");
             RefreshSceneList();
             UpdateBgmStatus();
             SyncProjectToUI();
-            _logger.Log($"プロジェクトを読み込みました ({project.Scenes.Count} シーン)");
+            _logger.Log(LocalizationService.GetString("VM.Project.Loaded", project.Scenes.Count));
         }
 
         private void SyncProjectToUI()
@@ -1689,8 +1686,8 @@ namespace InsightMovie.ViewModels
             if (_dialogService == null) return;
 
             if (!_dialogService.ShowConfirmation(
-                "現在のプロジェクトを破棄して新規作成しますか？\n保存されていない変更は失われます。",
-                "新規プロジェクト"))
+                LocalizationService.GetString("VM.Project.NewConfirm"),
+                LocalizationService.GetString("VM.Project.NewTitle")))
                 return;
 
             _project = new Project();
@@ -1705,9 +1702,9 @@ namespace InsightMovie.ViewModels
             OnPropertyChanged(nameof(OutroFileName));
             OnPropertyChanged(nameof(HasWatermark));
             OnPropertyChanged(nameof(WatermarkFileName));
-            WindowTitle = "InsightCast - 新規プロジェクト";
+            WindowTitle = LocalizationService.GetString("VM.NewProject");
             RefreshSceneList();
-            _logger.Log("新規プロジェクトを作成しました。");
+            _logger.Log(LocalizationService.GetString("VM.Project.Created"));
         }
 
         private void OpenProject()
@@ -1715,8 +1712,8 @@ namespace InsightMovie.ViewModels
             if (_dialogService == null) return;
 
             var path = _dialogService.ShowOpenFileDialog(
-                "プロジェクトファイルを開く",
-                "JSONファイル|*.json|すべてのファイル|*.*",
+                LocalizationService.GetString("VM.Project.OpenTitle"),
+                LocalizationService.GetString("VM.Project.JsonFilter"),
                 ".json");
 
             if (path == null) return;
@@ -1730,11 +1727,11 @@ namespace InsightMovie.ViewModels
                 RefreshSceneList();
                 UpdateBgmStatus();
                 SyncProjectToUI();
-                _logger.Log($"プロジェクトを開きました: {path}");
+                _logger.Log(LocalizationService.GetString("VM.Project.Opened", path));
             }
             catch (Exception ex)
             {
-                _dialogService.ShowError($"プロジェクトファイルの読み込みに失敗しました:\n{ex.Message}", "読み込みエラー");
+                _dialogService.ShowError(LocalizationService.GetString("VM.Project.LoadFailed", ex.Message), LocalizationService.GetString("VM.Project.LoadError"));
             }
         }
 
@@ -1751,11 +1748,11 @@ namespace InsightMovie.ViewModels
                 _project.Save();
                 _isDirty = false;
                 _config.AddRecentFile(_project.ProjectPath!);
-                _logger.Log($"プロジェクトを保存しました: {_project.ProjectPath}");
+                _logger.Log(LocalizationService.GetString("VM.Project.Saved", _project.ProjectPath));
             }
             catch (Exception ex)
             {
-                _dialogService?.ShowError($"保存に失敗しました:\n{ex.Message}", "保存エラー");
+                _dialogService?.ShowError(LocalizationService.GetString("VM.Project.SaveFailed", ex.Message), LocalizationService.GetString("VM.Project.SaveError"));
             }
         }
 
@@ -1765,7 +1762,7 @@ namespace InsightMovie.ViewModels
         {
             if (!File.Exists(path))
             {
-                _dialogService?.ShowWarning($"ファイルが見つかりません:\n{path}", "最近使ったファイル");
+                _dialogService?.ShowWarning(LocalizationService.GetString("VM.Project.FileNotFound", path), LocalizationService.GetString("VM.Project.RecentFiles"));
                 return;
             }
 
@@ -1778,11 +1775,11 @@ namespace InsightMovie.ViewModels
                 RefreshSceneList();
                 UpdateBgmStatus();
                 SyncProjectToUI();
-                _logger.Log($"プロジェクトを開きました: {path}");
+                _logger.Log(LocalizationService.GetString("VM.Project.Opened", path));
             }
             catch (Exception ex)
             {
-                _dialogService?.ShowError($"プロジェクトファイルの読み込みに失敗しました:\n{ex.Message}", "読み込みエラー");
+                _dialogService?.ShowError(LocalizationService.GetString("VM.Project.LoadFailed", ex.Message), LocalizationService.GetString("VM.Project.LoadError"));
             }
         }
 
@@ -1817,8 +1814,8 @@ namespace InsightMovie.ViewModels
             if (_dialogService == null) return;
 
             var path = _dialogService.ShowSaveFileDialog(
-                "プロジェクトファイルを保存",
-                "JSONファイル|*.json|すべてのファイル|*.*",
+                LocalizationService.GetString("VM.Project.SaveAsTitle"),
+                LocalizationService.GetString("VM.Project.JsonFilter"),
                 ".json",
                 "InsightCast.json");
 
@@ -1830,11 +1827,11 @@ namespace InsightMovie.ViewModels
                 _isDirty = false;
                 _config.AddRecentFile(path);
                 WindowTitle = $"InsightCast - {Path.GetFileNameWithoutExtension(path)}";
-                _logger.Log($"プロジェクトを保存しました: {path}");
+                _logger.Log(LocalizationService.GetString("VM.Project.Saved", path));
             }
             catch (Exception ex)
             {
-                _dialogService?.ShowError($"保存に失敗しました:\n{ex.Message}", "保存エラー");
+                _dialogService?.ShowError(LocalizationService.GetString("VM.Project.SaveFailed", ex.Message), LocalizationService.GetString("VM.Project.SaveError"));
             }
         }
 
@@ -1845,21 +1842,21 @@ namespace InsightMovie.ViewModels
             if (!License.CanUseFeature(_currentPlan, "pptx_import"))
             {
                 _dialogService.ShowInfo(
-                    "PPTX取込機能はTrial・Proプラン以上でご利用いただけます。\nライセンスをアップグレードしてください。",
-                    "機能制限");
+                    LocalizationService.GetString("VM.Pptx.FeatureLimit"),
+                    LocalizationService.GetString("VM.Pptx.PlanRequired"));
                 return;
             }
 
             var path = _dialogService.ShowOpenFileDialog(
-                "PowerPointファイルを選択",
-                "PowerPointファイル|*.pptx|すべてのファイル|*.*",
+                LocalizationService.GetString("VM.Pptx.Select"),
+                LocalizationService.GetString("VM.Pptx.Filter"),
                 ".pptx");
 
             if (path == null) return;
 
             try
             {
-                _logger.Log($"PPTX取込を開始: {path}");
+                _logger.Log(LocalizationService.GetString("VM.Pptx.Started", path));
 
                 var outputDir = Path.Combine(
                     Path.GetTempPath(),
@@ -1874,7 +1871,7 @@ namespace InsightMovie.ViewModels
 
                 if (slides.Count == 0)
                 {
-                    _dialogService.ShowInfo("スライドが見つかりませんでした。", "取込結果");
+                    _dialogService.ShowInfo(LocalizationService.GetString("VM.Pptx.NoSlides"), LocalizationService.GetString("VM.Pptx.Result"));
                     return;
                 }
 
@@ -1896,19 +1893,18 @@ namespace InsightMovie.ViewModels
                 RefreshSceneList();
 
                 int imageCount = slides.Count(s => !string.IsNullOrEmpty(s.ImagePath) && File.Exists(s.ImagePath));
-                _logger.Log($"PPTXからシーンを取り込みました ({slides.Count} スライド, {imageCount} 画像): {path}");
+                _logger.Log(LocalizationService.GetString("VM.Pptx.Imported", slides.Count, imageCount, path));
 
                 if (imageCount == 0)
                 {
                     _dialogService.ShowInfo(
-                        $"{slides.Count} 件のスライドのノートを取り込みました。\n" +
-                        "スライド画像の取込にはPowerPointのインストールが必要です。",
-                        "取込結果");
+                        LocalizationService.GetString("VM.Pptx.NotesOnly", slides.Count),
+                        LocalizationService.GetString("VM.Pptx.Result"));
                 }
             }
             catch (Exception ex)
             {
-                _dialogService.ShowError($"PPTX取込に失敗しました:\n{ex.Message}", "取込エラー");
+                _dialogService.ShowError(LocalizationService.GetString("VM.Pptx.Error", ex.Message), LocalizationService.GetString("VM.Pptx.Failed"));
             }
         }
 
@@ -1925,7 +1921,7 @@ namespace InsightMovie.ViewModels
             {
                 _project.Bgm = result;
                 UpdateBgmStatus();
-                _logger.Log("BGM設定を更新しました。");
+                _logger.Log(LocalizationService.GetString("VM.BGM.Updated"));
             }
         }
 
@@ -1938,7 +1934,7 @@ namespace InsightMovie.ViewModels
             }
             else
             {
-                BgmStatusText = "BGM: 未設定";
+                BgmStatusText = LocalizationService.GetString("BGM.NotSet");
                 BgmActive = false;
             }
         }
@@ -1964,8 +1960,8 @@ namespace InsightMovie.ViewModels
             CanPptx = License.CanUseFeature(_currentPlan, "pptx_import");
 
             SubtitlePlaceholder = _canSubtitle
-                ? "画面下部に表示される字幕"
-                : "字幕機能はTrial・Proプラン以上で利用可能です";
+                ? LocalizationService.GetString("Scene.Subtitle.Default")
+                : LocalizationService.GetString("VM.Subtitle.ProRequired");
         }
 
         #endregion
@@ -1975,56 +1971,15 @@ namespace InsightMovie.ViewModels
         private void ShowTutorial()
         {
             _dialogService?.ShowInfo(
-                "InsightCast チュートリアル\n─────────────────────\n\n" +
-                "■ かんたんモード（QuickMode）\n" +
-                "  1. ファイルをドラッグ＆ドロップ、またはファイル選択ボタンで素材を取り込み\n" +
-                "  2. 話者・解像度・速度などを設定\n" +
-                "  3.「生成」ボタンで動画を自動生成\n\n" +
-                "■ 詳細エディタ（MainWindow）\n" +
-                "  1. 左パネルの「＋追加」でシーンを追加\n" +
-                "  2.「選択」ボタンで画像・動画を設定\n" +
-                "  3. ナレーション欄にテキストを入力\n" +
-                "  4.「▶音声再生」でプレビュー確認\n" +
-                "  5. 字幕テキスト・スタイルを設定\n" +
-                "  6.「動画を書き出し」で生成\n\n" +
-                "■ テキストオーバーレイ\n" +
-                "  各シーンに自由なテキストを配置できます。\n" +
-                "  位置（X/Y%）、サイズ、色、配置を個別設定可能。\n" +
-                "  「表紙テンプレート」ボタンでタイトル＋サブタイトルを一括追加。\n\n" +
-                "■ テンプレート\n" +
-                "  BGM・透かし・解像度などの設定をテンプレートとして保存・読込可能。\n\n" +
-                "■ PPTX取込\n" +
-                "  PowerPointファイルをドロップすると、スライドごとにシーンが自動作成されます。\n" +
-                "  （Trial以上のプランが必要）",
-                "チュートリアル");
+                LocalizationService.GetString("VM.Tutorial"),
+                LocalizationService.GetString("VM.Tutorial.Title"));
         }
 
         private void ShowFaq()
         {
             _dialogService?.ShowInfo(
-                "よくある質問 (FAQ)\n─────────────────────\n\n" +
-                "Q: VOICEVOXが接続できません。\n" +
-                "A: VOICEVOXエンジンが起動しているか確認してください。\n" +
-                "   初回起動時にセットアップウィザードで接続設定を行います。\n\n" +
-                "Q: 動画の書き出しに失敗します。\n" +
-                "A: FFmpegがインストールされ、PATHに含まれているか確認してください。\n" +
-                "   起動時にFFmpegが見つからない場合は警告が表示されます。\n\n" +
-                "Q: ライセンスキーの入力方法は？\n" +
-                "A: メニュー「ヘルプ」→「ライセンス管理」から入力してください。\n\n" +
-                "Q: 字幕やトランジションが使えません。\n" +
-                "A: Trial以上のプランが必要です。「ヘルプ」→「ライセンス管理」から\n" +
-                "   ライセンスをアクティベートしてください。\n\n" +
-                "Q: 対応ファイル形式は？\n" +
-                "A: 画像: PNG, JPG, BMP, GIF / 動画: MP4, AVI, MOV, WMV, MKV\n" +
-                "   音声(BGM): MP3, WAV, OGG, FLAC, AAC, M4A\n" +
-                "   その他: PPTX, TXT, MD\n\n" +
-                "Q: 書き出しをキャンセルしたい。\n" +
-                "A: 進捗バー横の「キャンセル」ボタンをクリックしてください。\n\n" +
-                "Q: テンプレートはどこに保存されますか？\n" +
-                "A: %LOCALAPPDATA%\\InsightCast\\Templates に保存されます。\n\n" +
-                "Q: お問い合わせ先は？\n" +
-                "A: support@h-insight.jp までご連絡ください。",
-                "FAQ");
+                LocalizationService.GetString("VM.FAQ"),
+                LocalizationService.GetString("VM.FAQ.Title"));
         }
 
         private void ShowLicenseManager()
@@ -2037,12 +1992,11 @@ namespace InsightMovie.ViewModels
         {
             var planName = License.GetPlanDisplayName(_currentPlan);
             var expiry = _licenseInfo?.ExpiresAt?.ToString("yyyy-MM-dd") ?? "N/A";
-            var status = _licenseInfo?.IsValid == true ? "有効" : "無効/未登録";
+            var status = _licenseInfo?.IsValid == true ? LocalizationService.GetString("VM.License.Active") : LocalizationService.GetString("VM.License.Inactive");
 
             _dialogService?.ShowInfo(
-                $"ライセンス情報\n─────────────────────\n\n" +
-                $"プラン: {planName}\n状態: {status}\n有効期限: {expiry}",
-                "ライセンス情報");
+                LocalizationService.GetString("VM.License.Info", planName, status, expiry),
+                LocalizationService.GetString("VM.License.Title"));
         }
 
         private void ShowAbout()
@@ -2051,30 +2005,15 @@ namespace InsightMovie.ViewModels
             var versionStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v1.0.0";
 
             _dialogService?.ShowInfo(
-                $"InsightCast {versionStr}\n\n" +
-                "VOICEVOX音声エンジンを使用した動画自動生成ツール\n\n" +
-                "テキストを入力するだけで、ナレーション付き動画を\n簡単に作成できます。\n\n" +
-                "開発元: Harmonic Insight Inc.\n" +
-                "Web: https://h-insight.jp\n" +
-                "サポート: support@h-insight.jp\n\n" +
-                "Copyright (C) 2024-2026 Harmonic Insight Inc.\nAll rights reserved.",
-                "InsightCastについて");
+                LocalizationService.GetString("VM.About", versionStr),
+                LocalizationService.GetString("VM.About.Title"));
         }
 
         private void ShowShortcuts()
         {
             _dialogService?.ShowInfo(
-                "キーボードショートカット一覧\n─────────────────────\n\n" +
-                "Ctrl+N          新規プロジェクト\n" +
-                "Ctrl+O          プロジェクトを開く\n" +
-                "Ctrl+S          プロジェクトを保存\n" +
-                "Ctrl+Shift+S    名前を付けて保存\n" +
-                "Ctrl+T          シーンを追加\n" +
-                "Delete          シーンを削除\n" +
-                "Ctrl+Up         シーンを上へ移動\n" +
-                "Ctrl+Down       シーンを下へ移動\n" +
-                "F1              チュートリアルを表示",
-                "キーボードショートカット");
+                LocalizationService.GetString("VM.Shortcuts"),
+                LocalizationService.GetString("VM.Shortcuts.Title"));
         }
 
         private void ShowTerms()
@@ -2090,9 +2029,8 @@ namespace InsightMovie.ViewModels
             catch
             {
                 _dialogService?.ShowInfo(
-                    "利用規約は以下のURLからご確認ください:\nhttps://h-insight.jp/terms\n\n" +
-                    "お問い合わせ: info@h-insight.jp",
-                    "利用規約");
+                    LocalizationService.GetString("VM.Terms.Fallback"),
+                    LocalizationService.GetString("VM.Terms.Title"));
             }
         }
 
@@ -2109,9 +2047,8 @@ namespace InsightMovie.ViewModels
             catch
             {
                 _dialogService?.ShowInfo(
-                    "プライバシーポリシーは以下のURLからご確認ください:\nhttps://h-insight.jp/privacy\n\n" +
-                    "お問い合わせ: info@h-insight.jp",
-                    "プライバシーポリシー");
+                    LocalizationService.GetString("VM.Privacy.Fallback"),
+                    LocalizationService.GetString("VM.Privacy.Title"));
             }
         }
 
@@ -2124,8 +2061,8 @@ namespace InsightMovie.ViewModels
             if (_isExporting)
             {
                 if (_dialogService?.ShowConfirmation(
-                    "書き出し処理が実行中です。中断して終了しますか？",
-                    "終了確認") == true)
+                    LocalizationService.GetString("VM.Exit.Confirm"),
+                    LocalizationService.GetString("VM.Exit.Confirm.Title")) == true)
                 {
                     _exportCts?.Cancel();
                     return true;
@@ -2136,8 +2073,8 @@ namespace InsightMovie.ViewModels
             if (_isDirty)
             {
                 if (_dialogService?.ShowConfirmation(
-                    "変更が保存されていません。保存せずに終了しますか？",
-                    "未保存の変更") != true)
+                    LocalizationService.GetString("VM.Exit.Unsaved"),
+                    LocalizationService.GetString("VM.Exit.Unsaved.Title")) != true)
                 {
                     return false;
                 }
