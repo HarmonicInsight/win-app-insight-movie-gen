@@ -120,6 +120,15 @@
                             HorizontalAlignment="Center"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             Click="SelectFile_Click"/>
+
+                    <Button Content="複数ファイルを一括取込"
+                            Padding="16,8"
+                            FontSize="11" Margin="0,8,0,0"
+                            HorizontalAlignment="Center"
+                            Foreground="{DynamicResource TextSecondary}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                            Command="{Binding BatchImportCommand}"
+                            ToolTip="ファイルダイアログから複数ファイルをまとめて取り込みます"/>
                 </StackPanel>
             </Border>
 

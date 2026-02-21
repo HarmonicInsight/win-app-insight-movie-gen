@@ -15,5 +15,7 @@ namespace InsightMovie.Services
         BGMSettings? ShowBgmDialog(BGMSettings? currentSettings);
         TextStyle? ShowTextStyleDialog(TextStyle? currentStyle);
         void ShowLicenseDialog(Core.Config config);
+        /// <summary>Shows a selection dialog for a list of items. Returns the selected index or -1 if cancelled.</summary>
+        int ShowListSelectDialog(string title, string[] items);
     }
 }

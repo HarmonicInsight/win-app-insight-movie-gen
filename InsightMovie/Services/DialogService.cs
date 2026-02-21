@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Win32;
 using InsightMovie.Core;
 using InsightMovie.Models;
@@ -78,6 +79,48 @@ namespace InsightMovie.Services
         {
             var dlg = new TextStyleDialog(currentStyle) { Owner = _owner };
             return dlg.ShowDialog() == true ? dlg.GetSelectedStyle() : null;
+        }
+
+        public int ShowListSelectDialog(string title, string[] items)
+        {
+            var dlg = new Window
+            {
+                Title = title,
+                Width = 380,
+                Height = 320,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = _owner,
+                ResizeMode = ResizeMode.NoResize
+            };
+
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var listBox = new ListBox { Margin = new Thickness(8) };
+            foreach (var item in items)
+                listBox.Items.Add(item);
+            if (items.Length > 0) listBox.SelectedIndex = 0;
+            listBox.MouseDoubleClick += (_, _) => { if (listBox.SelectedIndex >= 0) dlg.DialogResult = true; };
+            Grid.SetRow(listBox, 0);
+            grid.Children.Add(listBox);
+
+            var btnPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(8, 4, 8, 8)
+            };
+            var okBtn = new Button { Content = "OK", Width = 80, Height = 28, Margin = new Thickness(4, 0, 0, 0), IsDefault = true };
+            var cancelBtn = new Button { Content = "キャンセル", Width = 80, Height = 28, Margin = new Thickness(4, 0, 0, 0), IsCancel = true };
+            okBtn.Click += (_, _) => { if (listBox.SelectedIndex >= 0) dlg.DialogResult = true; };
+            btnPanel.Children.Add(okBtn);
+            btnPanel.Children.Add(cancelBtn);
+            Grid.SetRow(btnPanel, 1);
+            grid.Children.Add(btnPanel);
+
+            dlg.Content = grid;
+            return dlg.ShowDialog() == true ? listBox.SelectedIndex : -1;
         }
 
         public void ShowLicenseDialog(Config config)

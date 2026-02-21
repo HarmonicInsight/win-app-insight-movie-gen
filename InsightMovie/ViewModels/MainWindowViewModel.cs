@@ -487,6 +487,9 @@ namespace InsightMovie.ViewModels
         /// <summary>Raised when user wants to open exported file. Args: file path.</summary>
         public event Action<string>? OpenFileRequested;
 
+        /// <summary>Raised when scene preview video is ready. Args: video file path.</summary>
+        public event Action<string>? PreviewVideoReady;
+
         #endregion
 
         #region Commands
@@ -525,6 +528,7 @@ namespace InsightMovie.ViewModels
         public ICommand ShowLicenseManagerCommand { get; }
         public ICommand ShowLicenseInfoCommand { get; }
         public ICommand ShowAboutCommand { get; }
+        public ICommand CancelExportCommand { get; }
         public ICommand ExitCommand { get; }
 
         #endregion
@@ -580,6 +584,7 @@ namespace InsightMovie.ViewModels
             ShowLicenseManagerCommand = new RelayCommand(ShowLicenseManager);
             ShowLicenseInfoCommand = new RelayCommand(ShowLicenseInfo);
             ShowAboutCommand = new RelayCommand(ShowAbout);
+            CancelExportCommand = new RelayCommand(CancelExport, () => _isExporting);
             ExitCommand = new RelayCommand(() => ExitRequested?.Invoke());
 
             UpdateStatusText();
@@ -1259,7 +1264,7 @@ namespace InsightMovie.ViewModels
                 if (success && File.Exists(previewPath))
                 {
                     _logger.Log("シーンプレビュー完了");
-                    OpenFileRequested?.Invoke(previewPath);
+                    PreviewVideoReady?.Invoke(previewPath);
                 }
                 else
                 {
@@ -1394,7 +1399,19 @@ namespace InsightMovie.ViewModels
                 return;
             }
 
-            var template = templates[0]; // Most recent
+            ProjectTemplate template;
+            if (templates.Count == 1)
+            {
+                template = templates[0];
+            }
+            else
+            {
+                var names = templates.Select(t => $"{t.Name}  ({t.CreatedAt:yyyy/MM/dd HH:mm})").ToArray();
+                var idx = _dialogService?.ShowListSelectDialog("テンプレートを選択", names) ?? -1;
+                if (idx < 0) return;
+                template = templates[idx];
+            }
+
             TemplateService.ApplyToProject(template, _project);
 
             // Sync project settings back to UI

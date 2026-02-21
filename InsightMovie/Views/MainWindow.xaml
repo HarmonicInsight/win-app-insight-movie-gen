@@ -703,12 +703,16 @@
         </GroupBox>
 
         <!-- ================================================================ -->
-        <!-- E) ProgressBar                                                    -->
+        <!-- E) ProgressBar + Cancel                                           -->
         <!-- ================================================================ -->
-        <ProgressBar Grid.Row="4"
-                     Height="6" Margin="4,0,4,2"
-                     Visibility="{Binding ExportProgressVisible, Converter={StaticResource BoolToVis}}"
-                     IsIndeterminate="True"/>
+        <DockPanel Grid.Row="4" Margin="4,0,4,2"
+                   Visibility="{Binding ExportProgressVisible, Converter={StaticResource BoolToVis}}">
+            <Button DockPanel.Dock="Right" Content="キャンセル"
+                    Padding="12,2" Margin="4,0,0,0"
+                    Command="{Binding CancelExportCommand}"
+                    ToolTip="書き出し/プレビューをキャンセル"/>
+            <ProgressBar Height="6" IsIndeterminate="True"/>
+        </DockPanel>
 
         <!-- ================================================================ -->
         <!-- F) Log Area                                                       -->

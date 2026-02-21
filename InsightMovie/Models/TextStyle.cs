@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace InsightMovie.Models
@@ -72,115 +69,6 @@ namespace InsightMovie.Models
         public string GetHexStrokeColor()
         {
             return $"#{StrokeColor[0]:X2}{StrokeColor[1]:X2}{StrokeColor[2]:X2}";
-        }
-
-        public Dictionary<string, object?> ToDict()
-        {
-            return new Dictionary<string, object?>
-            {
-                { "id", Id },
-                { "name", Name },
-                { "fontFamily", FontFamily },
-                { "fontSize", FontSize },
-                { "fontBold", FontBold },
-                { "textColor", TextColor },
-                { "strokeColor", StrokeColor },
-                { "strokeWidth", StrokeWidth },
-                { "backgroundColor", BackgroundColor },
-                { "backgroundOpacity", BackgroundOpacity },
-                { "shadowEnabled", ShadowEnabled },
-                { "shadowColor", ShadowColor },
-                { "shadowOffset", ShadowOffset }
-            };
-        }
-
-        public static TextStyle FromDict(Dictionary<string, object?> dict)
-        {
-            var style = new TextStyle();
-
-            if (dict.TryGetValue("id", out var id) && id != null)
-                style.Id = id.ToString()!;
-
-            if (dict.TryGetValue("name", out var name) && name != null)
-                style.Name = name.ToString()!;
-
-            if (dict.TryGetValue("fontFamily", out var fontFamily) && fontFamily != null)
-                style.FontFamily = fontFamily.ToString()!;
-
-            if (dict.TryGetValue("fontSize", out var fontSize) && fontSize != null)
-            {
-                if (fontSize is JsonElement fsElem)
-                    style.FontSize = fsElem.GetInt32();
-                else if (int.TryParse(fontSize.ToString(), out var fs))
-                    style.FontSize = fs;
-            }
-
-            if (dict.TryGetValue("fontBold", out var fontBold) && fontBold != null)
-            {
-                if (fontBold is JsonElement fbElem)
-                    style.FontBold = fbElem.GetBoolean();
-                else if (bool.TryParse(fontBold.ToString(), out var fb))
-                    style.FontBold = fb;
-            }
-
-            style.TextColor = ParseIntArray(dict, "textColor", new[] { 255, 255, 255 });
-            style.StrokeColor = ParseIntArray(dict, "strokeColor", new[] { 0, 0, 0 });
-
-            if (dict.TryGetValue("strokeWidth", out var strokeWidth) && strokeWidth != null)
-            {
-                if (strokeWidth is JsonElement swElem)
-                    style.StrokeWidth = swElem.GetInt32();
-                else if (int.TryParse(strokeWidth.ToString(), out var sw))
-                    style.StrokeWidth = sw;
-            }
-
-            style.BackgroundColor = ParseIntArray(dict, "backgroundColor", new[] { 0, 0, 0 });
-
-            if (dict.TryGetValue("backgroundOpacity", out var bgOpacity) && bgOpacity != null)
-            {
-                if (bgOpacity is JsonElement boElem)
-                    style.BackgroundOpacity = boElem.GetDouble();
-                else if (double.TryParse(bgOpacity.ToString(), out var bo))
-                    style.BackgroundOpacity = bo;
-            }
-
-            if (dict.TryGetValue("shadowEnabled", out var shadowEnabled) && shadowEnabled != null)
-            {
-                if (shadowEnabled is JsonElement seElem)
-                    style.ShadowEnabled = seElem.GetBoolean();
-                else if (bool.TryParse(shadowEnabled.ToString(), out var se))
-                    style.ShadowEnabled = se;
-            }
-
-            style.ShadowColor = ParseIntArray(dict, "shadowColor", new[] { 0, 0, 0 });
-            style.ShadowOffset = ParseIntArray(dict, "shadowOffset", new[] { 2, 2 });
-
-            return style;
-        }
-
-        private static int[] ParseIntArray(Dictionary<string, object?> dict, string key, int[] defaultValue)
-        {
-            if (!dict.TryGetValue(key, out var val) || val == null)
-                return defaultValue;
-
-            if (val is JsonElement jsonElem && jsonElem.ValueKind == JsonValueKind.Array)
-            {
-                return jsonElem.EnumerateArray().Select(e => e.GetInt32()).ToArray();
-            }
-
-            if (val is int[] intArr)
-                return intArr;
-
-            if (val is object[] objArr)
-            {
-                return objArr.Select(o =>
-                {
-                    if (o is JsonElement je) return je.GetInt32();
-                    return int.Parse(o?.ToString() ?? "0");
-                }).ToArray();
-            }
-
-            return defaultValue;
         }
 
         // --- Presets ---

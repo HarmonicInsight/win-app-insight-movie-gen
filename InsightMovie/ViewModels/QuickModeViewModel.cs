@@ -48,7 +48,6 @@ namespace InsightMovie.ViewModels
         private string _progressText = string.Empty;
         private bool _isComplete;
         private string _outputPath = string.Empty;
-        private bool _isDragOver;
         private CancellationTokenSource? _exportCts;
 
         // Enhanced settings
@@ -77,8 +76,11 @@ namespace InsightMovie.ViewModels
             _logger = new AppLogger();
 
             GenerateCommand = new AsyncRelayCommand(GenerateVideo, () => _hasProject && !_isGenerating);
-            OpenEditorCommand = new RelayCommand(() => OpenEditorRequested?.Invoke(_project!),
-                () => _hasProject);
+            OpenEditorCommand = new RelayCommand(() =>
+            {
+                ApplySettingsToProject();
+                OpenEditorRequested?.Invoke(_project!);
+            }, () => _hasProject);
             OpenOutputCommand = new RelayCommand(OpenOutput, () => _isComplete);
             GenerateAnotherCommand = new RelayCommand(ResetForRegenerate);
             ResetAllCommand = new RelayCommand(ResetAll);
@@ -181,12 +183,6 @@ namespace InsightMovie.ViewModels
                 if (SetProperty(ref _isComplete, value))
                     OnPropertyChanged(nameof(ShowSettings));
             }
-        }
-
-        public bool IsDragOver
-        {
-            get => _isDragOver;
-            set => SetProperty(ref _isDragOver, value);
         }
 
         /// <summary>True when settings + generate button should be visible.</summary>
@@ -735,8 +731,19 @@ namespace InsightMovie.ViewModels
             if (_project == null)
                 _project = new Project();
 
-            // Apply the most recent template
-            var template = templates[0];
+            ProjectTemplate template;
+            if (templates.Count == 1)
+            {
+                template = templates[0];
+            }
+            else
+            {
+                var names = templates.Select(t => $"{t.Name}  ({t.CreatedAt:yyyy/MM/dd HH:mm})").ToArray();
+                var idx = _dialogService?.ShowListSelectDialog("テンプレートを選択", names) ?? -1;
+                if (idx < 0) return;
+                template = templates[idx];
+            }
+
             Services.TemplateService.ApplyToProject(template, _project);
 
             // Sync template settings back to QuickMode UI

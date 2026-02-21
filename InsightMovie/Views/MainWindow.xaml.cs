@@ -32,6 +32,7 @@ namespace InsightMovie.Views
             _vm.ThumbnailUpdateRequested += OnThumbnailUpdateRequested;
             _vm.StylePreviewUpdateRequested += OnStylePreviewUpdateRequested;
             _vm.OpenFileRequested += OnOpenFileRequested;
+            _vm.PreviewVideoReady += OnPreviewVideoReady;
             _vm.ExitRequested += () => Close();
 
             // Wire up logger to log TextBox
@@ -140,6 +141,23 @@ namespace InsightMovie.Views
             {
                 _vm.Logger.LogError("ファイルを開けませんでした", ex);
             }
+        }
+
+        private void OnPreviewVideoReady(string videoPath)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    var dialog = new PreviewPlayerDialog(videoPath);
+                    dialog.Owner = this;
+                    dialog.ShowDialog();
+                }
+                catch (Exception ex)
+                {
+                    _vm.Logger.LogError("プレビュープレイヤーを開けませんでした", ex);
+                }
+            });
         }
 
         private void OnLogReceived(string message)
