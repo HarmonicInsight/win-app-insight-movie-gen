@@ -406,17 +406,17 @@
                                         <StackPanel Orientation="Horizontal" Margin="0,0,8,0">
                                             <TextBlock Text="X:" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                             <TextBox Text="{Binding OverlayXPercent, UpdateSourceTrigger=PropertyChanged}"
-                                                     Width="45" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                                     Width="60" TextAlignment="Center" VerticalContentAlignment="Center"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,8,0">
                                             <TextBlock Text="Y:" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                             <TextBox Text="{Binding OverlayYPercent, UpdateSourceTrigger=PropertyChanged}"
-                                                     Width="45" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                                     Width="60" TextAlignment="Center" VerticalContentAlignment="Center"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,8,0">
                                             <TextBlock Text="{DynamicResource Overlay.FontSize}" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                             <TextBox Text="{Binding OverlayFontSize, UpdateSourceTrigger=PropertyChanged}"
-                                                     Width="40" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                                     Width="60" TextAlignment="Center" VerticalContentAlignment="Center"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,8,0">
                                             <TextBlock Text="{DynamicResource Overlay.Alignment}" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
@@ -543,14 +543,6 @@
 
                 <WrapPanel Grid.Column="0" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="0,2,12,2">
-                        <TextBlock Text="{DynamicResource Export.Speaker}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                        <ComboBox MinWidth="200"
-                                  ItemsSource="{Binding ExportSpeakers}"
-                                  SelectedIndex="{Binding SelectedExportSpeakerIndex}"
-                                  DisplayMemberPath="DisplayName"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,2,12,2">
                         <TextBlock Text="{DynamicResource Export.Resolution}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                         <ComboBox Width="180" SelectedIndex="{Binding SelectedResolutionIndex}">
                             <ComboBoxItem Content="{DynamicResource Export.Res.Portrait}" Tag="1080x1920"/>
@@ -563,7 +555,7 @@
                                 Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVis}}">
                         <TextBlock Text="FPS:" VerticalAlignment="Center" Margin="0,0,4,0"/>
                         <TextBox Text="{Binding FpsText, UpdateSourceTrigger=PropertyChanged}"
-                                 Width="50" TextAlignment="Center"/>
+                                 Width="60" TextAlignment="Center"/>
                     </StackPanel>
 
                     <!-- BGM: Detail mode only -->
