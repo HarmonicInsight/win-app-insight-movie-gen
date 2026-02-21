@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>InsightCast</RootNamespace>
+    <AssemblyName>InsightCast</AssemblyName>
+    <ApplicationIcon />
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Description>InsightCast - 教育・プレゼンテーション動画生成ツール</Description>
+    <Company>HARMONIC insight</Company>
+    <Product>InsightCast</Product>
+    <Copyright>Copyright (C) 2026 HARMONIC insight</Copyright>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\insight-common\csharp\InsightCommon\InsightCommon.csproj" />
+  </ItemGroup>
+
+</Project>
