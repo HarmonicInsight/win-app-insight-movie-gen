@@ -883,8 +883,8 @@ namespace InsightMovie.ViewModels
             if (_isLoadingScene || _currentScene == null) return;
             if (_selectedTransitionIndex >= 0)
             {
-                var types = ((TransitionType[])Enum.GetValues(typeof(TransitionType))).ToList();
-                if (_selectedTransitionIndex < types.Count)
+                var types = TransitionNames.DisplayNames.Keys.ToArray();
+                if (_selectedTransitionIndex < types.Length)
                     _currentScene.TransitionType = types[_selectedTransitionIndex];
                 _isDirty = true;
             }
@@ -1277,7 +1277,7 @@ namespace InsightMovie.ViewModels
                 return;
             }
 
-            var previewDir = Path.Combine(Path.GetTempPath(), "insightmovie_cache", "preview");
+            var previewDir = Path.Combine(Path.GetTempPath(), "insightcast_cache", "preview");
             Directory.CreateDirectory(previewDir);
 
             // Clean up old preview files to prevent disk bloat
@@ -1863,7 +1863,7 @@ namespace InsightMovie.ViewModels
 
                 var outputDir = Path.Combine(
                     Path.GetTempPath(),
-                    "insightmovie_cache",
+                    "insightcast_cache",
                     "pptx_slides",
                     $"import_{Guid.NewGuid():N}");
 
@@ -2150,7 +2150,7 @@ namespace InsightMovie.ViewModels
             // Clean up preview files and PPTX temp directories
             try
             {
-                var cacheBase = Path.Combine(Path.GetTempPath(), "insightmovie_cache");
+                var cacheBase = Path.Combine(Path.GetTempPath(), "insightcast_cache");
                 var previewDir = Path.Combine(cacheBase, "preview");
                 if (Directory.Exists(previewDir))
                     Directory.Delete(previewDir, true);

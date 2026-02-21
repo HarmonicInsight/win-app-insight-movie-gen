@@ -557,7 +557,7 @@ namespace InsightMovie.ViewModels
 
                 var outputDir = Path.Combine(
                     Path.GetTempPath(),
-                    "insightmovie_cache",
+                    "insightcast_cache",
                     "pptx_slides",
                     $"import_{Guid.NewGuid():N}");
 

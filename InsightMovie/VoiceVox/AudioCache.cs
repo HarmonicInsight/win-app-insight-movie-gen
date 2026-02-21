@@ -20,7 +20,7 @@ public class AudioCache
     /// Creates a new AudioCache.
     /// </summary>
     /// <param name="cacheDir">
-    /// Optional cache directory path. Defaults to %TEMP%\insightmovie_cache\audio.
+    /// Optional cache directory path. Defaults to %TEMP%\insightcast_cache\audio.
     /// The directory is created automatically if it does not exist.
     /// </param>
     public AudioCache(string? cacheDir = null)

@@ -80,7 +80,7 @@ public class EngineLauncher : IDisposable
         if (File.Exists(appRelative))
             return appRelative;
 
-        // 2. LOCALAPPDATA\InsightMovie\voicevox\run.exe
+        // 2. LOCALAPPDATA\InsightCast\voicevox\run.exe
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         if (!string.IsNullOrEmpty(localAppData))
         {
