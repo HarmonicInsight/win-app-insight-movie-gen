@@ -151,8 +151,12 @@ public class SceneGenerator
         {
             // Parse resolution
             string[] resParts = resolution.Split('x');
-            int width = int.Parse(resParts[0]);
-            int height = int.Parse(resParts[1]);
+            if (resParts.Length != 2
+                || !int.TryParse(resParts[0], out int width) || width <= 0
+                || !int.TryParse(resParts[1], out int height) || height <= 0)
+            {
+                return false;
+            }
 
             // Step 1: Generate base video (from image, video, or blank)
             string tempBase = Path.Combine(

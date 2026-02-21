@@ -17,6 +17,11 @@ public class Config
     private int _batchDepth;
     private bool _dirty;
 
+    /// <summary>
+    /// True if the config file existed but could not be parsed (corrupted).
+    /// </summary>
+    public bool LoadFailed { get; private set; }
+
     public Config()
     {
         Load();
@@ -36,9 +41,11 @@ public class Config
             _data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)
                     ?? new Dictionary<string, JsonElement>();
         }
-        catch
+        catch (Exception ex)
         {
             _data = new Dictionary<string, JsonElement>();
+            Debug.WriteLine($"Config.Load failed (file may be corrupted): {ex.Message}");
+            LoadFailed = true;
         }
     }
 

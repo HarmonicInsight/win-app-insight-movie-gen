@@ -67,6 +67,7 @@ namespace InsightMovie.ViewModels
         private int _selectedResolutionIndex;
         private int _selectedExportSpeakerIndex;
         private bool _exportProgressVisible;
+        private double _exportProgressValue;
 
         // License state
         private LicenseInfo? _licenseInfo;
@@ -275,6 +276,12 @@ namespace InsightMovie.ViewModels
         {
             get => _exportProgressVisible;
             set => SetProperty(ref _exportProgressVisible, value);
+        }
+
+        public double ExportProgressValue
+        {
+            get => _exportProgressValue;
+            set => SetProperty(ref _exportProgressValue, value);
         }
 
         // License feature flags
@@ -1517,9 +1524,29 @@ namespace InsightMovie.ViewModels
 
             IsExporting = true;
             _exportCts = new CancellationTokenSource();
+            ExportProgressValue = 0;
             ExportProgressVisible = true;
 
-            var progress = new Progress<string>(msg => _logger.Log(msg));
+            var progress = new Progress<string>(msg =>
+            {
+                _logger.Log(msg);
+                // Parse "[N/M]" progress format to update progress bar
+                if (msg.StartsWith("[") && msg.Contains('/'))
+                {
+                    var bracket = msg.IndexOf(']');
+                    if (bracket > 0)
+                    {
+                        var parts = msg[1..bracket].Split('/');
+                        if (parts.Length == 2
+                            && int.TryParse(parts[0], out int current)
+                            && int.TryParse(parts[1], out int total)
+                            && total > 0)
+                        {
+                            ExportProgressValue = (double)current / total * 100;
+                        }
+                    }
+                }
+            });
             var ct = _exportCts.Token;
 
             _logger.Log($"書き出しを開始: {outputPath}");
@@ -2103,12 +2130,17 @@ namespace InsightMovie.ViewModels
             _autoSaveTimer?.Dispose();
             _autoSaveTimer = null;
 
-            // Clean up preview files
+            // Clean up preview files and PPTX temp directories
             try
             {
-                var previewDir = Path.Combine(Path.GetTempPath(), "insightmovie_cache", "preview");
+                var cacheBase = Path.Combine(Path.GetTempPath(), "insightmovie_cache");
+                var previewDir = Path.Combine(cacheBase, "preview");
                 if (Directory.Exists(previewDir))
                     Directory.Delete(previewDir, true);
+
+                var pptxDir = Path.Combine(cacheBase, "pptx_slides");
+                if (Directory.Exists(pptxDir))
+                    Directory.Delete(pptxDir, true);
             }
             catch { /* best-effort */ }
 

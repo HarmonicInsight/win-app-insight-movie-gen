@@ -1,7 +1,9 @@
 namespace InsightMovie.VoiceVox;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -84,11 +86,42 @@ public class AudioCache
     /// <param name="speakerId">The speaker/style ID used to generate the audio.</param>
     /// <param name="audioData">The WAV audio data to cache.</param>
     /// <returns>The full path to the saved cache file.</returns>
+    /// <summary>Maximum cache size in bytes (500 MB).</summary>
+    private const long MaxCacheSizeBytes = 500L * 1024 * 1024;
+
     public string Save(string text, int speakerId, byte[] audioData)
     {
         var path = GetCachePath(text, speakerId);
         File.WriteAllBytes(path, audioData);
+        TrimCacheIfNeeded();
         return path;
+    }
+
+    /// <summary>
+    /// Removes oldest cache files when total size exceeds the limit.
+    /// </summary>
+    private void TrimCacheIfNeeded()
+    {
+        try
+        {
+            if (!Directory.Exists(_cacheDir)) return;
+
+            var files = new DirectoryInfo(_cacheDir)
+                .GetFiles("*.wav")
+                .OrderBy(f => f.LastAccessTime)
+                .ToList();
+
+            long totalSize = files.Sum(f => f.Length);
+
+            while (totalSize > MaxCacheSizeBytes && files.Count > 1)
+            {
+                var oldest = files[0];
+                totalSize -= oldest.Length;
+                oldest.Delete();
+                files.RemoveAt(0);
+            }
+        }
+        catch { /* best-effort cache trimming */ }
     }
 
     /// <summary>

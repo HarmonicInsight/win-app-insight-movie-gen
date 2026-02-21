@@ -344,14 +344,32 @@ public class VoiceVoxClient : IDisposable
     /// <returns>The synthesized audio data as a WAV byte array.</returns>
     public async Task<byte[]> GenerateAudioAsync(string text, int speakerId, double speedScale = 1.0)
     {
-        var query = await CreateAudioQueryAsync(text, speakerId);
+        const int maxRetries = 3;
 
-        if (Math.Abs(speedScale - 1.0) > 0.01)
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
         {
-            query = ModifyQuerySpeed(query, speedScale);
+            try
+            {
+                var query = await CreateAudioQueryAsync(text, speakerId);
+
+                if (Math.Abs(speedScale - 1.0) > 0.01)
+                {
+                    query = ModifyQuerySpeed(query, speedScale);
+                }
+
+                return await SynthesizeAsync(query, speakerId);
+            }
+            catch (Exception) when (attempt < maxRetries)
+            {
+                await Task.Delay(1000 * attempt); // backoff: 1s, 2s
+            }
         }
 
-        return await SynthesizeAsync(query, speakerId);
+        // Final attempt without catch — let exception propagate
+        var finalQuery = await CreateAudioQueryAsync(text, speakerId);
+        if (Math.Abs(speedScale - 1.0) > 0.01)
+            finalQuery = ModifyQuerySpeed(finalQuery, speedScale);
+        return await SynthesizeAsync(finalQuery, speakerId);
     }
 
     /// <summary>

@@ -720,7 +720,8 @@
                     Padding="12,2" Margin="4,0,0,0"
                     Command="{Binding CancelExportCommand}"
                     ToolTip="書き出し/プレビューをキャンセル"/>
-            <ProgressBar Height="6" IsIndeterminate="True"/>
+            <ProgressBar Height="6" Minimum="0" Maximum="100"
+                         Value="{Binding ExportProgressValue, Mode=OneWay}"/>
         </DockPanel>
 
         <!-- ================================================================ -->

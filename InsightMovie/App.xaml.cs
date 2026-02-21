@@ -45,6 +45,16 @@ public partial class App : Application
         // ── 1. Load configuration ──────────────────────────────────
         var config = new Config();
 
+        if (config.LoadFailed)
+        {
+            MessageBox.Show(
+                "設定ファイルが破損していたため、デフォルト設定で起動します。\n" +
+                "エンジンURL、話者ID、ライセンス情報の再設定が必要な場合があります。",
+                "InsightMovie - 設定ファイル警告",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+
         // ── 2. First-run setup wizard ──────────────────────────────
         VoiceVoxClient? wizardClient = null;
 
