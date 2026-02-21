@@ -71,7 +71,7 @@ namespace InsightMovie.Services
             {
                 var dir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "InsightMovie", "Templates");
+                    "InsightCast", "Templates");
                 Directory.CreateDirectory(dir);
                 return dir;
             }

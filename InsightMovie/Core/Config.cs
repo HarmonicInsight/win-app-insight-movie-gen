@@ -9,7 +9,7 @@ using System.Text.Json;
 public class Config
 {
     private static readonly string ConfigDir =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InsightMovie");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InsightCast");
 
     private static readonly string ConfigPath = Path.Combine(ConfigDir, "config.json");
 

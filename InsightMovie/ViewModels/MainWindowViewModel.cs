@@ -49,7 +49,7 @@ namespace InsightMovie.ViewModels
         private bool _isExporting;
         private CancellationTokenSource? _exportCts;
 
-        private string _windowTitle = "InsightMovie - 新規プロジェクト";
+        private string _windowTitle = "InsightCast - 新規プロジェクト";
         private string _statusText = string.Empty;
         private string _mediaName = "（未選択）";
         private string _narrationText = string.Empty;
@@ -1498,7 +1498,7 @@ namespace InsightMovie.ViewModels
                 "動画ファイルの保存先を選択",
                 "MP4ファイル|*.mp4|すべてのファイル|*.*",
                 ".mp4",
-                "InsightMovie.mp4");
+                "InsightCast.mp4");
 
             if (outputPath == null) return;
 
@@ -1647,7 +1647,7 @@ namespace InsightMovie.ViewModels
         {
             _project = project;
             _sceneSubtitleStyles.Clear();
-            WindowTitle = $"InsightMovie - 取込プロジェクト";
+            WindowTitle = "InsightCast - 取込プロジェクト";
             RefreshSceneList();
             UpdateBgmStatus();
             SyncProjectToUI();
@@ -1697,7 +1697,7 @@ namespace InsightMovie.ViewModels
             OnPropertyChanged(nameof(OutroFileName));
             OnPropertyChanged(nameof(HasWatermark));
             OnPropertyChanged(nameof(WatermarkFileName));
-            WindowTitle = "InsightMovie - 新規プロジェクト";
+            WindowTitle = "InsightCast - 新規プロジェクト";
             RefreshSceneList();
             _logger.Log("新規プロジェクトを作成しました。");
         }
@@ -1718,7 +1718,7 @@ namespace InsightMovie.ViewModels
                 _project = Project.Load(path);
                 _config.AddRecentFile(path);
                 _sceneSubtitleStyles.Clear();
-                WindowTitle = $"InsightMovie - {Path.GetFileNameWithoutExtension(path)}";
+                WindowTitle = $"InsightCast - {Path.GetFileNameWithoutExtension(path)}";
                 RefreshSceneList();
                 UpdateBgmStatus();
                 SyncProjectToUI();
@@ -1766,7 +1766,7 @@ namespace InsightMovie.ViewModels
                 _project = Project.Load(path);
                 _config.AddRecentFile(path);
                 _sceneSubtitleStyles.Clear();
-                WindowTitle = $"InsightMovie - {Path.GetFileNameWithoutExtension(path)}";
+                WindowTitle = $"InsightCast - {Path.GetFileNameWithoutExtension(path)}";
                 RefreshSceneList();
                 UpdateBgmStatus();
                 SyncProjectToUI();
@@ -1784,7 +1784,7 @@ namespace InsightMovie.ViewModels
             {
                 var autoSaveDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "InsightMovie", "AutoSave");
+                    "InsightCast", "AutoSave");
                 Directory.CreateDirectory(autoSaveDir);
                 var autoSavePath = Path.Combine(autoSaveDir, "autosave.json");
                 _project.Save(autoSavePath);
@@ -1803,7 +1803,7 @@ namespace InsightMovie.ViewModels
                 "プロジェクトファイルを保存",
                 "JSONファイル|*.json|すべてのファイル|*.*",
                 ".json",
-                "InsightMovie.json");
+                "InsightCast.json");
 
             if (path == null) return;
 
@@ -1812,7 +1812,7 @@ namespace InsightMovie.ViewModels
                 _project.Save(path);
                 _isDirty = false;
                 _config.AddRecentFile(path);
-                WindowTitle = $"InsightMovie - {Path.GetFileNameWithoutExtension(path)}";
+                WindowTitle = $"InsightCast - {Path.GetFileNameWithoutExtension(path)}";
                 _logger.Log($"プロジェクトを保存しました: {path}");
             }
             catch (Exception ex)
@@ -1958,7 +1958,7 @@ namespace InsightMovie.ViewModels
         private void ShowTutorial()
         {
             _dialogService?.ShowInfo(
-                "InsightMovie チュートリアル\n─────────────────────\n\n" +
+                "InsightCast チュートリアル\n─────────────────────\n\n" +
                 "■ かんたんモード（QuickMode）\n" +
                 "  1. ファイルをドラッグ＆ドロップ、またはファイル選択ボタンで素材を取り込み\n" +
                 "  2. 話者・解像度・速度などを設定\n" +
@@ -2004,7 +2004,7 @@ namespace InsightMovie.ViewModels
                 "Q: 書き出しをキャンセルしたい。\n" +
                 "A: 進捗バー横の「キャンセル」ボタンをクリックしてください。\n\n" +
                 "Q: テンプレートはどこに保存されますか？\n" +
-                "A: %LOCALAPPDATA%\\InsightMovie\\Templates に保存されます。\n\n" +
+                "A: %LOCALAPPDATA%\\InsightCast\\Templates に保存されます。\n\n" +
                 "Q: お問い合わせ先は？\n" +
                 "A: support@h-insight.jp までご連絡ください。",
                 "FAQ");
@@ -2034,14 +2034,14 @@ namespace InsightMovie.ViewModels
             var versionStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v1.0.0";
 
             _dialogService?.ShowInfo(
-                $"InsightMovie {versionStr}\n\n" +
+                $"InsightCast {versionStr}\n\n" +
                 "VOICEVOX音声エンジンを使用した動画自動生成ツール\n\n" +
                 "テキストを入力するだけで、ナレーション付き動画を\n簡単に作成できます。\n\n" +
                 "開発元: Harmonic Insight Inc.\n" +
                 "Web: https://h-insight.jp\n" +
                 "サポート: support@h-insight.jp\n\n" +
                 "Copyright (C) 2024-2026 Harmonic Insight Inc.\nAll rights reserved.",
-                "InsightMovieについて");
+                "InsightCastについて");
         }
 
         private void ShowShortcuts()

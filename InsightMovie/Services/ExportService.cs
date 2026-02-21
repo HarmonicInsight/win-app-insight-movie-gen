@@ -400,7 +400,7 @@ namespace InsightMovie.Services
 
             // Description
             sb.AppendLine("【説明文】");
-            sb.AppendLine("この動画はInsightMovieで自動生成されました。");
+            sb.AppendLine("この動画はInsightCastで自動生成されました。");
             sb.AppendLine();
 
             // Chapter markers for YouTube

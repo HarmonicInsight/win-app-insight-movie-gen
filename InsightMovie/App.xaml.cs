@@ -25,7 +25,7 @@ public partial class App : Application
             MessageBox.Show(
                 $"予期しないエラーが発生しました。\n\n{args.Exception.Message}\n\n" +
                 "アプリケーションの動作が不安定になる可能性があります。",
-                "InsightMovie - エラー",
+                "InsightCast - エラー",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             args.Handled = true;
@@ -36,7 +36,7 @@ public partial class App : Application
             {
                 MessageBox.Show(
                     $"致命的なエラーが発生しました。\n\n{ex.Message}",
-                    "InsightMovie - 致命的エラー",
+                    "InsightCast - 致命的エラー",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -50,7 +50,7 @@ public partial class App : Application
             MessageBox.Show(
                 "設定ファイルが破損していたため、デフォルト設定で起動します。\n" +
                 "エンジンURL、話者ID、ライセンス情報の再設定が必要な場合があります。",
-                "InsightMovie - 設定ファイル警告",
+                "InsightCast - 設定ファイル警告",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -120,7 +120,7 @@ public partial class App : Application
                 "• PATH環境変数にffmpeg.exeのあるフォルダを追加\n" +
                 "• アプリフォルダ内に tools\\ffmpeg\\bin\\ffmpeg.exe を配置\n" +
                 "• build.ps1 を実行して自動ダウンロード",
-                "InsightMovie",
+                "InsightCast",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }

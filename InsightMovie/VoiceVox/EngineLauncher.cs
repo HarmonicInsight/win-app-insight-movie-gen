@@ -81,7 +81,7 @@ public class EngineLauncher : IDisposable
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         if (!string.IsNullOrEmpty(localAppData))
         {
-            var localPath = Path.Combine(localAppData, "InsightMovie", "voicevox", "run.exe");
+            var localPath = Path.Combine(localAppData, "InsightCast", "voicevox", "run.exe");
             if (File.Exists(localPath))
                 return localPath;
         }

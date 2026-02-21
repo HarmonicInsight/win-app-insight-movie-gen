@@ -126,11 +126,11 @@ namespace InsightMovie.Services
         public void ShowLicenseDialog(Config config)
         {
             // InsightCommon 共通ライセンスダイアログを使用
-            var licenseManager = new InsightLicenseManager("INMV", "InsightMovie");
+            var licenseManager = new InsightLicenseManager("INMV", "InsightCast");
             var dialog = new InsightLicenseDialog(new LicenseDialogOptions
             {
                 ProductCode = "INMV",
-                ProductName = "InsightMovie",
+                ProductName = "InsightCast",
                 ThemeMode = InsightThemeMode.Light,
                 Locale = "ja",
                 LicenseManager = licenseManager,
