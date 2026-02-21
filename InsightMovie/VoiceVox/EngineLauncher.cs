@@ -15,6 +15,7 @@ public class EngineLauncher : IDisposable
     private const int STARTUP_TIMEOUT_SECONDS = 10;
     private const int KILL_WAIT_MILLISECONDS = 5000;
 
+    private readonly object _processLock = new();
     private string? _enginePath;
     private Process? _process;
 
@@ -46,17 +47,19 @@ public class EngineLauncher : IDisposable
     {
         get
         {
-            if (_process == null)
-                return false;
+            lock (_processLock)
+            {
+                if (_process == null)
+                    return false;
 
-            try
-            {
-                return !_process.HasExited;
-            }
-            catch (InvalidOperationException)
-            {
-                // Process object is not associated with a running process
-                return false;
+                try
+                {
+                    return !_process.HasExited;
+                }
+                catch (InvalidOperationException)
+                {
+                    return false;
+                }
             }
         }
     }
@@ -64,7 +67,7 @@ public class EngineLauncher : IDisposable
     /// <summary>
     /// Searches well-known locations for the VOICEVOX engine executable.
     /// Search order:
-    /// 1. %LOCALAPPDATA%\InsightMovie\voicevox\run.exe
+    /// 1. %LOCALAPPDATA%\InsightCast\voicevox\run.exe
     /// 2. Relative path from the application directory: voicevox\run.exe
     /// 3. %ProgramFiles%\VOICEVOX\run.exe
     /// </summary>
@@ -81,7 +84,7 @@ public class EngineLauncher : IDisposable
         var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         if (!string.IsNullOrEmpty(localAppData))
         {
-            var localPath = Path.Combine(localAppData, "InsightMovie", "voicevox", "run.exe");
+            var localPath = Path.Combine(localAppData, "InsightCast", "voicevox", "run.exe");
             if (File.Exists(localPath))
                 return localPath;
         }
@@ -190,36 +193,37 @@ public class EngineLauncher : IDisposable
     /// </summary>
     public void Stop()
     {
-        if (_process == null)
-            return;
-
-        try
+        lock (_processLock)
         {
-            if (!_process.HasExited)
-            {
-                // Attempt graceful shutdown first
-                _process.CloseMainWindow();
+            if (_process == null)
+                return;
 
-                if (!_process.WaitForExit(KILL_WAIT_MILLISECONDS))
+            try
+            {
+                if (!_process.HasExited)
                 {
-                    // Force kill if graceful shutdown fails
-                    _process.Kill(entireProcessTree: true);
-                    _process.WaitForExit(KILL_WAIT_MILLISECONDS);
+                    _process.CloseMainWindow();
+
+                    if (!_process.WaitForExit(KILL_WAIT_MILLISECONDS))
+                    {
+                        _process.Kill(entireProcessTree: true);
+                        _process.WaitForExit(KILL_WAIT_MILLISECONDS);
+                    }
                 }
             }
-        }
-        catch (InvalidOperationException)
-        {
-            // Process already exited
-        }
-        catch (Exception)
-        {
-            // Best effort cleanup - swallow errors during shutdown
-        }
-        finally
-        {
-            _process.Dispose();
-            _process = null;
+            catch (InvalidOperationException)
+            {
+                // Process already exited
+            }
+            catch (Exception)
+            {
+                // Best effort cleanup
+            }
+            finally
+            {
+                _process.Dispose();
+                _process = null;
+            }
         }
     }
 

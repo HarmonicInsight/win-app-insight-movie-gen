@@ -70,7 +70,7 @@ namespace InsightMovie.Views
 
             try
             {
-                MediaPlayer.Source = new Uri(_videoFiles[index]);
+                MediaPlayer.Source = new Uri(_videoFiles[index], UriKind.Absolute);
                 UpdateSceneLabel();
             }
             catch (Exception ex)

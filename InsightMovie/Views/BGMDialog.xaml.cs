@@ -127,7 +127,7 @@ namespace InsightMovie.Views
                 Title = "BGMファイルを選択",
                 Filter = "音声ファイル|*.mp3;*.wav;*.ogg;*.m4a;*.aac;*.flac;*.wma|すべてのファイル|*.*"
             };
-            if (dialog.ShowDialog() == true)
+            if (dialog.ShowDialog(this) == true)
             {
                 _settings.FilePath = dialog.FileName;
                 FilePathLabel.Text = dialog.FileName;

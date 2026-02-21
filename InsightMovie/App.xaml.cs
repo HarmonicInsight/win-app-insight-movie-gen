@@ -13,6 +13,8 @@ using InsightMovie.VoiceVox;
 /// </summary>
 public partial class App : Application
 {
+    private VoiceVoxClient? _voiceVoxClient;
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -23,7 +25,7 @@ public partial class App : Application
             MessageBox.Show(
                 $"予期しないエラーが発生しました。\n\n{args.Exception.Message}\n\n" +
                 "アプリケーションの動作が不安定になる可能性があります。",
-                "InsightMovie - エラー",
+                "InsightCast - エラー",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             args.Handled = true;
@@ -34,14 +36,42 @@ public partial class App : Application
             {
                 MessageBox.Show(
                     $"致命的なエラーが発生しました。\n\n{ex.Message}",
-                    "InsightMovie - 致命的エラー",
+                    "InsightCast - 致命的エラー",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
         };
 
+        try
+        {
+            await StartupAsync(e);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"起動中にエラーが発生しました。\n\n{ex.Message}",
+                "InsightCast - 起動エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            Shutdown();
+        }
+    }
+
+    private async Task StartupAsync(StartupEventArgs e)
+    {
+
         // ── 1. Load configuration ──────────────────────────────────
         var config = new Config();
+
+        if (config.LoadFailed)
+        {
+            MessageBox.Show(
+                "設定ファイルが破損していたため、デフォルト設定で起動します。\n" +
+                "エンジンURL、話者ID、ライセンス情報の再設定が必要な場合があります。",
+                "InsightCast - 設定ファイル警告",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
 
         // ── 2. First-run setup wizard ──────────────────────────────
         VoiceVoxClient? wizardClient = null;
@@ -78,6 +108,7 @@ public partial class App : Application
         // ── 3. Create VOICEVOX client ──────────────────────────────
         // Reuse the client from the wizard when available; otherwise create a new one.
         var client = wizardClient ?? new VoiceVoxClient(config.EngineUrl);
+        _voiceVoxClient = client;
 
         if (!config.IsFirstRun)
         {
@@ -88,7 +119,9 @@ public partial class App : Application
                 var discovered = await client.DiscoverEngineAsync();
                 if (discovered != null)
                 {
+                    config.BeginUpdate();
                     config.EngineUrl = discovered.BaseUrl;
+                    config.EndUpdate();
                 }
             }
         }
@@ -107,7 +140,7 @@ public partial class App : Application
                 "• PATH環境変数にffmpeg.exeのあるフォルダを追加\n" +
                 "• アプリフォルダ内に tools\\ffmpeg\\bin\\ffmpeg.exe を配置\n" +
                 "• build.ps1 を実行して自動ダウンロード",
-                "InsightMovie",
+                "InsightCast",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -118,5 +151,11 @@ public partial class App : Application
         // ── 6. Show quick mode (default) or main window ─────────────
         var quickMode = new QuickModeWindow(client, speakerId, ffmpeg, config);
         quickMode.Show();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _voiceVoxClient?.Dispose();
+        base.OnExit(e);
     }
 }

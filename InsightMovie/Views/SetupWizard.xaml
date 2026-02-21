@@ -1,7 +1,7 @@
 <Window x:Class="InsightMovie.Views.SetupWizard"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="InsightMovie - 初回セットアップ"
+        Title="InsightCast - 初回セットアップ"
         MinWidth="700" MinHeight="500"
         Width="750" Height="530"
         WindowStartupLocation="CenterScreen"
@@ -141,7 +141,7 @@
             <TabItem>
                 <Border Padding="50,40">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="InsightMovie へようこそ" Style="{StaticResource PageTitle}"/>
+                        <TextBlock Text="InsightCast へようこそ" Style="{StaticResource PageTitle}"/>
                         <TextBlock Text="初回セットアップを開始します" Style="{StaticResource PageSubtitle}"/>
 
                         <Border Background="{DynamicResource BgCard}"
@@ -149,7 +149,7 @@
                                 CornerRadius="8" Padding="24,20" Margin="0,10,0,0">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,16">
-                                    InsightMovie は、VOICEVOX エンジンを使用してナレーション付き動画を自動生成するツールです。
+                                    InsightCast は、VOICEVOX エンジンを使用してナレーション付き動画を自動生成するツールです。
                                 </TextBlock>
                                 <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,8">
                                     このセットアップでは以下の設定を行います:
@@ -272,7 +272,7 @@
                                            FontWeight="SemiBold"
                                            HorizontalAlignment="Center"
                                            Margin="0,0,0,12"/>
-                                <TextBlock Text="InsightMovie を使い始める準備ができました。"
+                                <TextBlock Text="InsightCast を使い始める準備ができました。"
                                            Foreground="{DynamicResource TextSecondary}"
                                            FontSize="14"
                                            HorizontalAlignment="Center"

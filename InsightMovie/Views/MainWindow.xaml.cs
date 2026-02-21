@@ -32,15 +32,22 @@ namespace InsightMovie.Views
             _vm.ThumbnailUpdateRequested += OnThumbnailUpdateRequested;
             _vm.StylePreviewUpdateRequested += OnStylePreviewUpdateRequested;
             _vm.OpenFileRequested += OnOpenFileRequested;
-            _vm.ExitRequested += () => Close();
+            _vm.PreviewVideoReady += OnPreviewVideoReady;
+            _vm.ExitRequested += OnExitRequested;
 
             // Wire up logger to log TextBox
             _vm.Logger.LogReceived += OnLogReceived;
+
+            // Set version label dynamically
+            var version = typeof(MainWindow).Assembly.GetName().Version;
+            if (version != null)
+                VersionLabel.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
 
             Loaded += async (_, _) =>
             {
                 _vm.SetDialogService(new DialogService(this));
                 await _vm.InitializeAsync();
+                PopulateRecentFiles();
             };
         }
 
@@ -54,17 +61,13 @@ namespace InsightMovie.Views
 
         #region ViewModel Event Handlers (UI-specific)
 
+        private void OnExitRequested() => Close();
+
         private void OnPlayAudioRequested(string path, double speed)
         {
             Dispatcher.Invoke(() =>
             {
-                double actualSpeed = speed;
-                if (SpeedComboBox.SelectedItem is ComboBoxItem speedItem &&
-                    speedItem.Tag is string tagStr &&
-                    double.TryParse(tagStr, out var parsed))
-                    actualSpeed = parsed;
-
-                AudioPlayer.SpeedRatio = actualSpeed;
+                AudioPlayer.SpeedRatio = speed;
                 AudioPlayer.Source = new Uri(path, UriKind.Absolute);
                 AudioPlayer.Play();
             });
@@ -142,10 +145,34 @@ namespace InsightMovie.Views
             }
         }
 
+        private void OnPreviewVideoReady(string videoPath)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                try
+                {
+                    var dialog = new PreviewPlayerDialog(videoPath);
+                    dialog.Owner = this;
+                    dialog.ShowDialog();
+                }
+                catch (Exception ex)
+                {
+                    _vm.Logger.LogError("プレビュープレイヤーを開けませんでした", ex);
+                }
+            });
+        }
+
+        private const int MaxLogLength = 100_000;
+
         private void OnLogReceived(string message)
         {
             Dispatcher.Invoke(() =>
             {
+                if (LogTextBox.Text.Length > MaxLogLength)
+                {
+                    // Trim to last half when exceeding limit
+                    LogTextBox.Text = LogTextBox.Text[^(MaxLogLength / 2)..];
+                }
                 if (LogTextBox.Text.Length > 0) LogTextBox.AppendText(Environment.NewLine);
                 LogTextBox.AppendText(message);
                 LogTextBox.ScrollToEnd();
@@ -257,6 +284,39 @@ namespace InsightMovie.Views
 
         #endregion
 
+        #region Recent Files
+
+        private void RecentFilesMenu_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            PopulateRecentFiles();
+        }
+
+        private void PopulateRecentFiles()
+        {
+            RecentFilesMenu.Items.Clear();
+            var files = _vm.RecentFiles;
+            if (files.Count == 0)
+            {
+                var empty = new MenuItem { Header = "(なし)", IsEnabled = false };
+                RecentFilesMenu.Items.Add(empty);
+                return;
+            }
+
+            foreach (var file in files)
+            {
+                var item = new MenuItem
+                {
+                    Header = Path.GetFileName(file),
+                    ToolTip = file,
+                    CommandParameter = file,
+                    Command = _vm.OpenRecentFileCommand
+                };
+                RecentFilesMenu.Items.Add(item);
+            }
+        }
+
+        #endregion
+
         #region Window Lifecycle
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -267,6 +327,16 @@ namespace InsightMovie.Views
                 return;
             }
             OnStopAudioRequested();
+
+            // Unsubscribe event handlers to prevent memory leaks
+            _vm.PlayAudioRequested -= OnPlayAudioRequested;
+            _vm.StopAudioRequested -= OnStopAudioRequested;
+            _vm.ThumbnailUpdateRequested -= OnThumbnailUpdateRequested;
+            _vm.StylePreviewUpdateRequested -= OnStylePreviewUpdateRequested;
+            _vm.OpenFileRequested -= OnOpenFileRequested;
+            _vm.PreviewVideoReady -= OnPreviewVideoReady;
+            _vm.ExitRequested -= OnExitRequested;
+            _vm.Logger.LogReceived -= OnLogReceived;
         }
 
         #endregion

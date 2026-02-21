@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:conv="clr-namespace:InsightMovie.Converters"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="InsightMovie"
+        Title="InsightCast"
         Width="720" Height="680"
         MinWidth="600" MinHeight="520"
         WindowStartupLocation="CenterScreen"
@@ -23,7 +23,6 @@
 
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
-        <BooleanToVisibilityConverter x:Key="SysBoolToVis"/>
     </Window.Resources>
 
     <Grid>
@@ -70,9 +69,9 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,6,0,6">
-                    <TextBlock Text="InsightMovie" FontSize="18" FontWeight="Bold"
+                    <TextBlock Text="InsightCast" FontSize="18" FontWeight="Bold"
                                Foreground="{DynamicResource TitlebarFg}" VerticalAlignment="Center"/>
-                    <TextBlock Text="v1.0.0" Foreground="{DynamicResource TitlebarSecondary}" FontSize="11"
+                    <TextBlock x:Name="VersionLabel" Text="v1.0.0" Foreground="{DynamicResource TitlebarSecondary}" FontSize="11"
                                VerticalAlignment="Bottom" Margin="8,0,0,4"/>
                 </StackPanel>
             </DockPanel>
@@ -120,6 +119,15 @@
                             HorizontalAlignment="Center"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"
                             Click="SelectFile_Click"/>
+
+                    <Button Content="複数ファイルを一括取込"
+                            Padding="16,8"
+                            FontSize="11" Margin="0,8,0,0"
+                            HorizontalAlignment="Center"
+                            Foreground="{DynamicResource TextSecondary}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"
+                            Command="{Binding BatchImportCommand}"
+                            ToolTip="ファイルダイアログから複数ファイルをまとめて取り込みます"/>
                 </StackPanel>
             </Border>
 
@@ -143,7 +151,7 @@
                               Fill="{DynamicResource ActionUpdate}"
                               Width="24" Height="24" Stretch="Uniform"
                               VerticalAlignment="Center" Margin="0,0,8,0"
-                              Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}"/>
+                              Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}}"/>
                         <!-- Doc icon for pre-complete -->
                         <Path Data="M6,2 C4.9,2 4,2.9 4,4 V20 C4,21.1 4.9,22 6,22 H18 C19.1,22 20,21.1 20,20 V8 L14,2 H6 Z M13,9 V3.5 L18.5,9 H13 Z"
                               Fill="{DynamicResource BrandPrimary}"
@@ -168,7 +176,7 @@
                                TextTrimming="CharacterEllipsis"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Bottom" Margin="0,0,0,-4"
-                               Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}"/>
+                               Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}}"/>
 
                     <!-- Fix 1: Thumbnail strip -->
                     <ScrollViewer Grid.Row="1"
@@ -197,7 +205,7 @@
                                                    Stretch="UniformToFill"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center"
-                                                   Visibility="{Binding HasImage, Converter={StaticResource SysBoolToVis}}"/>
+                                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}"/>
                                             <!-- Text-only scenes: show label -->
                                             <TextBlock Text="{Binding Label}"
                                                        FontSize="10"
@@ -227,47 +235,202 @@
                 </Grid>
             </Border>
 
-            <!-- ── Settings (speaker + resolution) ── -->
-            <Grid Grid.Row="1" Margin="0,0,0,12"
-                  Visibility="{Binding ShowSettings, Converter={StaticResource BoolToVis}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>  <!-- Fix 2: preview button -->
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <!-- ── Settings (speaker + resolution + extras) ── -->
+            <StackPanel Grid.Row="1" Margin="0,0,0,12"
+                        Visibility="{Binding ShowSettings, Converter={StaticResource BoolToVis}}">
 
-                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                    <TextBlock Text="話者" FontSize="12" FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding Speakers}"
-                              SelectedIndex="{Binding SelectedSpeakerIndex}"
-                              DisplayMemberPath="DisplayName"
-                              shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
-                </StackPanel>
+                <!-- Row 1: Speaker + Resolution -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Fix 2: Speaker preview button -->
-                <Button Grid.Column="1" VerticalAlignment="Bottom"
-                        Width="36" Height="30"
-                        Margin="0,0,8,0"
-                        ToolTip="試聴"
-                        Command="{Binding PreviewSpeakerCommand}"
-                        shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Path Data="M8,5 V19 L19,12 Z"
-                          Fill="{DynamicResource TextPrimary}"
-                          Width="12" Height="12" Stretch="Uniform"
-                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Button>
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="話者" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding Speakers}"
+                                  SelectedIndex="{Binding SelectedSpeakerIndex}"
+                                  DisplayMemberPath="DisplayName"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
 
-                <StackPanel Grid.Column="2" Margin="0,0,0,0">
-                    <TextBlock Text="向き" FontSize="12" FontWeight="SemiBold"
-                               Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
-                    <ComboBox SelectedIndex="{Binding SelectedResolutionIndex}"
-                              shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                        <ComboBoxItem Content="縦動画 (9:16)" Tag="1080x1920"/>
-                        <ComboBoxItem Content="横動画 (16:9)" Tag="1920x1080"/>
-                    </ComboBox>
-                </StackPanel>
-            </Grid>
+                    <Button Grid.Column="1" VerticalAlignment="Bottom"
+                            Width="36" Height="30"
+                            Margin="0,0,8,0"
+                            ToolTip="試聴"
+                            Command="{Binding PreviewSpeakerCommand}"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Path Data="M8,5 V19 L19,12 Z"
+                              Fill="{DynamicResource TextPrimary}"
+                              Width="12" Height="12" Stretch="Uniform"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+
+                    <StackPanel Grid.Column="2" Margin="0,0,0,0">
+                        <TextBlock Text="向き" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox SelectedIndex="{Binding SelectedResolutionIndex}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                            <ComboBoxItem Content="縦動画 (9:16)" Tag="1080x1920"/>
+                            <ComboBoxItem Content="横動画 (16:9)" Tag="1920x1080"/>
+                        </ComboBox>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 2: Transition + Speech Speed -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="切り替え効果" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding TransitionOptions}"
+                                  SelectedIndex="{Binding SelectedTransitionIndex}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="話す速さ" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <ComboBox ItemsSource="{Binding SpeedOptions}"
+                                  SelectedIndex="{Binding SelectedSpeedIndex}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 3: BGM + Thumbnail -->
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="BGM" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="28" Height="28"
+                                    Margin="4,0,0,0"
+                                    ToolTip="BGMを解除"
+                                    Command="{Binding ClearBgmCommand}"
+                                    Visibility="{Binding HasBgm, Converter={StaticResource BoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding BgmFileName}"
+                                    Height="28" FontSize="11"
+                                    HorizontalContentAlignment="Left"
+                                    Padding="8,0"
+                                    Command="{Binding SelectBgmCommand}"
+                                    ToolTip="BGMファイルを選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Bottom">
+                        <CheckBox Content="サムネイル生成"
+                                  IsChecked="{Binding GenerateThumbnailEnabled}"
+                                  FontSize="11"
+                                  Foreground="{DynamicResource TextSecondary}"
+                                  shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 4: Intro/Outro -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="イントロ" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding ClearIntroCommand}"
+                                    Visibility="{Binding HasIntro, Converter={StaticResource BoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding IntroFileName}"
+                                    Height="24" FontSize="10"
+                                    HorizontalContentAlignment="Left" Padding="6,0"
+                                    Command="{Binding SelectIntroCommand}"
+                                    ToolTip="オープニング画像/動画を選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="アウトロ" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding ClearOutroCommand}"
+                                    Visibility="{Binding HasOutro, Converter={StaticResource BoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding OutroFileName}"
+                                    Height="24" FontSize="10"
+                                    HorizontalContentAlignment="Left" Padding="6,0"
+                                    Command="{Binding SelectOutroCommand}"
+                                    ToolTip="エンディング画像/動画を選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Row 5: Watermark + Template -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="ロゴ透かし" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,4"/>
+                        <DockPanel>
+                            <ComboBox DockPanel.Dock="Right" Width="56"
+                                      ItemsSource="{Binding WatermarkPositionOptions}"
+                                      SelectedIndex="{Binding SelectedWatermarkPosIndex}"
+                                      Margin="4,0,0,0"
+                                      Visibility="{Binding HasWatermark, Converter={StaticResource BoolToVis}}"
+                                      shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding ClearWatermarkCommand}"
+                                    Visibility="{Binding HasWatermark, Converter={StaticResource BoolToVis}}"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                            <Button Content="{Binding WatermarkFileName}"
+                                    Height="24" FontSize="10"
+                                    HorizontalContentAlignment="Left" Padding="6,0"
+                                    Command="{Binding SelectWatermarkCommand}"
+                                    ToolTip="ロゴ画像（PNG推奨）を選択"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="テンプレ保存"
+                            Height="24" FontSize="10" Padding="8,0"
+                            Margin="0,18,4,0"
+                            Command="{Binding SaveTemplateCommand}"
+                            ToolTip="現在の設定をテンプレートとして保存"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    <Button Grid.Column="2"
+                            Content="テンプレ読込"
+                            Height="24" FontSize="10" Padding="8,0"
+                            Margin="0,18,0,0"
+                            Command="{Binding LoadTemplateCommand}"
+                            ToolTip="保存済みテンプレートを適用"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+                </Grid>
+            </StackPanel>
 
             <!-- ── Action Buttons ── -->
             <StackPanel Grid.Row="2" Margin="0,0,0,8">
@@ -298,19 +461,23 @@
                 <!-- Generating: cancel button -->
                 <Button Content="生成をキャンセル"
                         Height="44" FontSize="13"
-                        Visibility="{Binding IsGenerating, Converter={StaticResource SysBoolToVis}}"
+                        Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVis}}"
                         Command="{Binding CancelCommand}"
                         shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                <!-- Fix 5: Complete buttons — "もう一度" keeps project, "別の資料" resets -->
-                <Grid Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}">
+                <!-- Complete buttons with output folder access -->
+                <Grid Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0"
+                    <Button Grid.Row="0" Grid.Column="0"
                             Content="動画を開く"
                             Height="48" FontSize="13" FontWeight="Bold"
                             Style="{DynamicResource SuccessButton}"
@@ -318,7 +485,7 @@
                             Margin="0,0,4,0"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                    <Button Grid.Column="1"
+                    <Button Grid.Row="0" Grid.Column="1"
                             Content="設定変えて再生成"
                             Height="48" FontSize="13"
                             Command="{Binding GenerateAnotherCommand}"
@@ -326,18 +493,28 @@
                             ToolTip="話者や向きを変えてもう一度生成"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
-                    <Button Grid.Column="2"
+                    <Button Grid.Row="0" Grid.Column="2"
                             Content="別の資料で作る"
                             Height="48" FontSize="13"
                             Command="{Binding ResetAllCommand}"
                             Margin="4,0,0,0"
+                            shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
+
+                    <!-- Extra output access row -->
+                    <Button Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                            Content="出力フォルダを開く（サムネイル・チャプター・メタデータ）"
+                            Height="30" FontSize="11"
+                            Margin="0,6,0,0"
+                            Command="{Binding OpenOutputFolderCommand}"
+                            ToolTip="サムネイル(.jpg)、チャプター(.chapters.txt)、メタデータ(.metadata.txt)が同フォルダに出力されています"
+                            Visibility="{Binding HasExtraOutputs, Converter={StaticResource BoolToVis}}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </Grid>
             </StackPanel>
 
             <!-- ── Progress ── -->
             <StackPanel Grid.Row="3"
-                        Visibility="{Binding ProgressVisible, Converter={StaticResource SysBoolToVis}}">
+                        Visibility="{Binding ProgressVisible, Converter={StaticResource BoolToVis}}">
                 <!-- Fix 4: IsIndeterminate during import (no known total) -->
                 <ProgressBar Value="{Binding ProgressValue}"
                              IsIndeterminate="{Binding IsImporting}"

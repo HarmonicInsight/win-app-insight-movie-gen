@@ -144,14 +144,19 @@ public class SceneGenerator
         string resolution = "1080x1920",
         int fps = 30,
         string? audioPath = null,
-        TextStyle? textStyle = null)
+        TextStyle? textStyle = null,
+        WatermarkSettings? watermark = null)
     {
         try
         {
             // Parse resolution
             string[] resParts = resolution.Split('x');
-            int width = int.Parse(resParts[0]);
-            int height = int.Parse(resParts[1]);
+            if (resParts.Length != 2
+                || !int.TryParse(resParts[0], out int width) || width <= 0
+                || !int.TryParse(resParts[1], out int height) || height <= 0)
+            {
+                return false;
+            }
 
             // Step 1: Generate base video (from image, video, or blank)
             string tempBase = Path.Combine(
@@ -182,8 +187,32 @@ public class SceneGenerator
                 return false;
             }
 
-            // Step 2: Add subtitle if present
+            // Step 2: Add text overlays if present
             string currentFile = tempBase;
+            string? tempOverlay = null;
+
+            if (scene.HasTextOverlays)
+            {
+                tempOverlay = Path.Combine(
+                    Path.GetTempPath(),
+                    $"scene_overlay_{Guid.NewGuid():N}.mp4");
+
+                bool overlaySuccess = AddTextOverlays(
+                    currentFile, tempOverlay, scene.TextOverlays, width, height);
+
+                if (overlaySuccess)
+                {
+                    CleanupTempFile(currentFile);
+                    currentFile = tempOverlay;
+                }
+                else
+                {
+                    CleanupTempFile(tempOverlay);
+                    tempOverlay = null;
+                }
+            }
+
+            // Step 3: Add subtitle if present
             string? tempSubtitle = null;
 
             if (scene.HasSubtitle)
@@ -208,7 +237,31 @@ public class SceneGenerator
                 }
             }
 
-            // Step 3: Add audio if provided
+            // Step 3.5: Add watermark if configured
+            string? tempWatermark = null;
+
+            if (watermark != null && watermark.HasWatermark)
+            {
+                tempWatermark = Path.Combine(
+                    Path.GetTempPath(),
+                    $"scene_wm_{Guid.NewGuid():N}.mp4");
+
+                bool wmSuccess = AddWatermark(
+                    currentFile, tempWatermark, watermark, width, height);
+
+                if (wmSuccess)
+                {
+                    CleanupTempFile(currentFile);
+                    currentFile = tempWatermark;
+                }
+                else
+                {
+                    CleanupTempFile(tempWatermark);
+                    tempWatermark = null;
+                }
+            }
+
+            // Step 4: Add audio if provided
             string? tempAudio = null;
 
             if (!string.IsNullOrEmpty(audioPath) && File.Exists(audioPath))
@@ -231,7 +284,7 @@ public class SceneGenerator
                 }
             }
 
-            // Step 4: Move final output into place
+            // Step 5: Move final output into place
             if (currentFile != outputPath)
             {
                 if (File.Exists(outputPath))
@@ -342,6 +395,82 @@ public class SceneGenerator
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-t", durationStr,
+            $"\"{outputPath}\""
+        };
+
+        return _ffmpeg.RunCommand(args);
+    }
+
+    /// <summary>
+    /// Overlays multiple text layers onto a video using chained drawtext filters.
+    /// Each TextOverlay specifies position (as percentage), font, color, and style.
+    /// </summary>
+    private bool AddTextOverlays(
+        string inputPath, string outputPath, List<TextOverlay> overlays,
+        int width, int height)
+    {
+        var activeOverlays = overlays.Where(o => o.HasText).ToList();
+        if (activeOverlays.Count == 0)
+            return false;
+
+        string fontSpec = BuildFontSpec(new TextStyle()); // default font path
+
+        var filterParts = new List<string>();
+
+        foreach (var overlay in activeOverlays)
+        {
+            string escapedText = EscapeDrawText(overlay.Text);
+
+            string textColorHex = ArrayToFfmpegColor(overlay.TextColor);
+            string strokeColorHex = ArrayToFfmpegColor(overlay.StrokeColor);
+            string shadowColorHex = ArrayToFfmpegColor(overlay.ShadowColor);
+
+            // Calculate pixel position from percentage
+            string xExpr = overlay.Alignment switch
+            {
+                Models.TextAlignment.Left => $"w*{(overlay.XPercent / 100.0).ToString("F4", CultureInfo.InvariantCulture)}",
+                Models.TextAlignment.Right => $"w*{(overlay.XPercent / 100.0).ToString("F4", CultureInfo.InvariantCulture)}-text_w",
+                _ => $"w*{(overlay.XPercent / 100.0).ToString("F4", CultureInfo.InvariantCulture)}-text_w/2"
+            };
+            string yExpr = $"h*{(overlay.YPercent / 100.0).ToString("F4", CultureInfo.InvariantCulture)}-text_h/2";
+
+            // Shadow layer
+            if (overlay.ShadowEnabled && overlay.ShadowOffset.Length >= 2 &&
+                (overlay.ShadowOffset[0] != 0 || overlay.ShadowOffset[1] != 0))
+            {
+                filterParts.Add(
+                    $"drawtext={fontSpec}" +
+                    $"text='{escapedText}':" +
+                    $"fontsize={overlay.FontSize}:" +
+                    $"fontcolor={shadowColorHex}:" +
+                    $"x={xExpr}+{overlay.ShadowOffset[0]}:" +
+                    $"y={yExpr}+{overlay.ShadowOffset[1]}");
+            }
+
+            // Main text layer
+            string mainDraw =
+                $"drawtext={fontSpec}" +
+                $"text='{escapedText}':" +
+                $"fontsize={overlay.FontSize}:" +
+                $"fontcolor={textColorHex}:" +
+                $"borderw={overlay.StrokeWidth}:" +
+                $"bordercolor={strokeColorHex}:" +
+                $"x={xExpr}:" +
+                $"y={yExpr}";
+
+            filterParts.Add(mainDraw);
+        }
+
+        string filterChain = string.Join(",", filterParts);
+
+        var args = new List<string>
+        {
+            "-y",
+            "-i", $"\"{inputPath}\"",
+            "-vf", $"\"{filterChain}\"",
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-c:a", "copy",
             $"\"{outputPath}\""
         };
 
@@ -487,6 +616,73 @@ public class SceneGenerator
                 CleanupTempFile(tempAudioPadded);
             }
         }
+    }
+
+    /// <summary>
+    /// Overlays a watermark image onto the video at the specified position.
+    /// </summary>
+    private bool AddWatermark(
+        string inputPath, string outputPath, WatermarkSettings watermark,
+        int width, int height)
+    {
+        if (!File.Exists(watermark.ImagePath))
+            return false;
+
+        // Calculate watermark size
+        int wmWidth = (int)(width * watermark.Scale);
+
+        // Calculate position based on setting
+        int margin = (int)(width * watermark.MarginPercent / 100.0);
+        string overlayPos = watermark.Position switch
+        {
+            "top-left" => $"x={margin}:y={margin}",
+            "top-right" => $"x=W-w-{margin}:y={margin}",
+            "bottom-left" => $"x={margin}:y=H-h-{margin}",
+            "center" => "x=(W-w)/2:y=(H-h)/2",
+            _ => $"x=W-w-{margin}:y=H-h-{margin}" // bottom-right default
+        };
+
+        string opacityStr = watermark.Opacity.ToString("F2", CultureInfo.InvariantCulture);
+
+        // Scale watermark and apply opacity, then overlay
+        string filter =
+            $"[1:v]scale={wmWidth}:-1,format=rgba," +
+            $"colorchannelmixer=aa={opacityStr}[wm];" +
+            $"[0:v][wm]overlay={overlayPos}";
+
+        var args = new List<string>
+        {
+            "-y",
+            "-i", $"\"{inputPath}\"",
+            "-i", $"\"{watermark.ImagePath}\"",
+            "-filter_complex", $"\"{filter}\"",
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-c:a", "copy",
+            $"\"{outputPath}\""
+        };
+
+        return _ffmpeg.RunCommand(args);
+    }
+
+    /// <summary>
+    /// Extracts a single frame from a video as a thumbnail image.
+    /// </summary>
+    public bool ExtractThumbnail(string videoPath, string outputImagePath, double timeSeconds = 0.5)
+    {
+        string timeStr = timeSeconds.ToString("F2", CultureInfo.InvariantCulture);
+
+        var args = new List<string>
+        {
+            "-y",
+            "-ss", timeStr,
+            "-i", $"\"{videoPath}\"",
+            "-vframes", "1",
+            "-q:v", "2",
+            $"\"{outputImagePath}\""
+        };
+
+        return _ffmpeg.RunCommand(args);
     }
 
     // -----------------------------------------------------------------------

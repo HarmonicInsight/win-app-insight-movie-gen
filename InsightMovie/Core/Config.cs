@@ -9,13 +9,18 @@ using System.Text.Json;
 public class Config
 {
     private static readonly string ConfigDir =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InsightMovie");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "InsightCast");
 
     private static readonly string ConfigPath = Path.Combine(ConfigDir, "config.json");
 
     private Dictionary<string, JsonElement> _data = new();
     private int _batchDepth;
     private bool _dirty;
+
+    /// <summary>
+    /// True if the config file existed but could not be parsed (corrupted).
+    /// </summary>
+    public bool LoadFailed { get; private set; }
 
     public Config()
     {
@@ -36,9 +41,11 @@ public class Config
             _data = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)
                     ?? new Dictionary<string, JsonElement>();
         }
-        catch
+        catch (Exception ex)
         {
             _data = new Dictionary<string, JsonElement>();
+            Debug.WriteLine($"Config.Load failed (file may be corrupted): {ex.Message}");
+            LoadFailed = true;
         }
     }
 
@@ -152,5 +159,23 @@ public class Config
         LicenseKey = null;
         LicenseEmail = null;
         EndUpdate();
+    }
+
+    private const int MaxRecentFiles = 5;
+
+    public List<string> RecentFiles
+    {
+        get => Get<List<string>>("recent_files", new List<string>()) ?? new List<string>();
+        set => Set("recent_files", value);
+    }
+
+    public void AddRecentFile(string path)
+    {
+        var files = RecentFiles;
+        files.Remove(path);
+        files.Insert(0, path);
+        if (files.Count > MaxRecentFiles)
+            files.RemoveRange(MaxRecentFiles, files.Count - MaxRecentFiles);
+        RecentFiles = files;
     }
 }

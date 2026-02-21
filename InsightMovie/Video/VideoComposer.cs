@@ -147,8 +147,14 @@ public class VideoComposer
         }
 
         string[] resParts = resolution.Split('x');
-        int width = int.Parse(resParts[0]);
-        int height = int.Parse(resParts[1]);
+        if (resParts.Length != 2 ||
+            !int.TryParse(resParts[0], out int width) ||
+            !int.TryParse(resParts[1], out int height) ||
+            width <= 0 || height <= 0)
+        {
+            Console.Error.WriteLine($"Invalid resolution format: {resolution}");
+            return false;
+        }
 
         var reEncodedPaths = new List<string>();
 
@@ -450,10 +456,29 @@ public class VideoComposer
             args.AddRange(new[] { "-i", $"\"{path}\"" });
         }
 
+        // Check which inputs have audio streams and generate silent audio pads for those that don't
+        var hasAudio = new List<bool>();
+        foreach (string path in videoPaths)
+        {
+            hasAudio.Add(HasAudioStream(path));
+        }
+
         // Build filter_complex string
         var videoFilters = new List<string>();
         var audioFilters = new List<string>();
+        var audioPadFilters = new List<string>();
         double cumulativeOffset = 0;
+
+        // Generate silent audio pads for inputs without audio
+        for (int i = 0; i < videoPaths.Count; i++)
+        {
+            if (!hasAudio[i])
+            {
+                string durStr = durations[i].ToString("F2", CultureInfo.InvariantCulture);
+                audioPadFilters.Add(
+                    $"aevalsrc=0:d={durStr}:s=44100:c=mono[silent{i}]");
+            }
+        }
 
         for (int i = 0; i < numTransitions; i++)
         {
@@ -484,17 +509,26 @@ public class VideoComposer
                 $"offset={offsetFmt}" +
                 outputLabel);
 
-            // Audio crossfade
-            string audioA = i == 0 ? "[0:a]" : $"[xfa{i - 1}]";
-            string audioB = $"[{i + 1}:a]";
+            // Audio crossfade (use silent pad label if input has no audio)
+            string audioALabel = hasAudio[i == 0 ? 0 : i] ? (i == 0 ? "[0:a]" : $"[xfa{i - 1}]") : (i == 0 ? $"[silent0]" : $"[xfa{i - 1}]");
+            if (i == 0)
+                audioALabel = hasAudio[0] ? "[0:a]" : "[silent0]";
+            else
+                audioALabel = $"[xfa{i - 1}]";
+
+            string audioBLabel = hasAudio[i + 1] ? $"[{i + 1}:a]" : $"[silent{i + 1}]";
             string audioOut = i < numTransitions - 1 ? $"[xfa{i}]" : "[outa]";
 
             audioFilters.Add(
-                $"{audioA}{audioB}acrossfade=d={durationFmt}" +
+                $"{audioALabel}{audioBLabel}acrossfade=d={durationFmt}" +
                 audioOut);
         }
 
-        string filterComplex = string.Join(";", videoFilters.Concat(audioFilters));
+        var allFilters = new List<string>();
+        allFilters.AddRange(audioPadFilters);
+        allFilters.AddRange(videoFilters);
+        allFilters.AddRange(audioFilters);
+        string filterComplex = string.Join(";", allFilters);
 
         args.AddRange(new[]
         {
@@ -509,6 +543,43 @@ public class VideoComposer
         });
 
         return _ffmpeg.RunCommand(args);
+    }
+
+    /// <summary>
+    /// Checks if a video file contains an audio stream using ffprobe.
+    /// </summary>
+    private bool HasAudioStream(string videoPath)
+    {
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = _ffmpeg.FfprobePath,
+                Arguments = $"-v error -select_streams a -show_entries stream=codec_type " +
+                            $"-of default=noprint_wrappers=1:nokey=1 \"{videoPath}\"",
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            using var process = System.Diagnostics.Process.Start(psi);
+            if (process != null)
+            {
+                var stderrTask = process.StandardError.ReadToEndAsync();
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                stderrTask.GetAwaiter().GetResult();
+
+                return !string.IsNullOrWhiteSpace(output);
+            }
+        }
+        catch
+        {
+            // Assume no audio on failure
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -540,18 +611,19 @@ public class VideoComposer
         if (enableDucking)
         {
             // With sidechain compression: original audio controls BGM level
+            // Split main_audio so it can be consumed by both sidechaincompress and amix
             string threshold = duckingThreshold.ToString("F4", CultureInfo.InvariantCulture);
             string ratio = duckingRatio.ToString("F1", CultureInfo.InvariantCulture);
 
-            string mainAudio = "[0:a]aresample=44100[main_audio]";
+            string mainAudio = "[0:a]aresample=44100,asplit=2[main_for_duck][main_for_mix]";
 
             string sidechain =
-                $"[bgm_processed][main_audio]sidechaincompress=" +
+                $"[bgm_processed][main_for_duck]sidechaincompress=" +
                 $"threshold={threshold}:ratio={ratio}:" +
                 $"attack=10:release=200[bgm_ducked]";
 
             string mix =
-                "[main_audio][bgm_ducked]amix=inputs=2:duration=first[audio_out]";
+                "[main_for_mix][bgm_ducked]amix=inputs=2:duration=first[audio_out]";
 
             return $"{bgmChain};{mainAudio};{sidechain};{mix}";
         }

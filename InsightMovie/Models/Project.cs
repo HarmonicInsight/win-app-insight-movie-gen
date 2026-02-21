@@ -17,39 +17,6 @@ namespace InsightMovie.Models
 
         [JsonPropertyName("outputPath")]
         public string? OutputPath { get; set; }
-
-        public OutputSettings()
-        {
-        }
-
-        public Dictionary<string, object?> ToDict()
-        {
-            return new Dictionary<string, object?>
-            {
-                { "resolution", Resolution },
-                { "fps", Fps },
-                { "outputPath", OutputPath }
-            };
-        }
-
-        public static OutputSettings FromDict(Dictionary<string, object?> dict)
-        {
-            var settings = new OutputSettings();
-
-            if (dict.TryGetValue("resolution", out var resolution) && resolution != null)
-                settings.Resolution = resolution.ToString()!;
-
-            if (dict.TryGetValue("fps", out var fps) && fps != null)
-            {
-                if (fps is JsonElement fpsElem) settings.Fps = fpsElem.GetInt32();
-                else if (int.TryParse(fps.ToString(), out var f)) settings.Fps = f;
-            }
-
-            if (dict.TryGetValue("outputPath", out var outputPath) && outputPath != null)
-                settings.OutputPath = outputPath.ToString();
-
-            return settings;
-        }
     }
 
     public class ProjectSettings
@@ -65,40 +32,6 @@ namespace InsightMovie.Models
 
         [JsonPropertyName("fontPath")]
         public string? FontPath { get; set; }
-
-        public ProjectSettings()
-        {
-        }
-
-        public Dictionary<string, object?> ToDict()
-        {
-            return new Dictionary<string, object?>
-            {
-                { "voicevoxBaseUrl", VoicevoxBaseUrl },
-                { "voicevoxRunExe", VoicevoxRunExe },
-                { "ffmpegPath", FfmpegPath },
-                { "fontPath", FontPath }
-            };
-        }
-
-        public static ProjectSettings FromDict(Dictionary<string, object?> dict)
-        {
-            var settings = new ProjectSettings();
-
-            if (dict.TryGetValue("voicevoxBaseUrl", out var baseUrl) && baseUrl != null)
-                settings.VoicevoxBaseUrl = baseUrl.ToString()!;
-
-            if (dict.TryGetValue("voicevoxRunExe", out var runExe) && runExe != null)
-                settings.VoicevoxRunExe = runExe.ToString();
-
-            if (dict.TryGetValue("ffmpegPath", out var ffmpegPath) && ffmpegPath != null)
-                settings.FfmpegPath = ffmpegPath.ToString();
-
-            if (dict.TryGetValue("fontPath", out var fontPath) && fontPath != null)
-                settings.FontPath = fontPath.ToString();
-
-            return settings;
-        }
     }
 
     public class Project
@@ -125,6 +58,39 @@ namespace InsightMovie.Models
 
         [JsonPropertyName("bgm")]
         public BGMSettings Bgm { get; set; } = new();
+
+        [JsonPropertyName("watermark")]
+        public WatermarkSettings Watermark { get; set; } = new();
+
+        [JsonPropertyName("introMediaPath")]
+        public string? IntroMediaPath { get; set; }
+
+        [JsonPropertyName("introDuration")]
+        public double IntroDuration { get; set; } = 3.0;
+
+        [JsonPropertyName("outroMediaPath")]
+        public string? OutroMediaPath { get; set; }
+
+        [JsonPropertyName("outroDuration")]
+        public double OutroDuration { get; set; } = 3.0;
+
+        [JsonPropertyName("defaultTransition")]
+        public TransitionType DefaultTransition { get; set; } = TransitionType.Fade;
+
+        [JsonPropertyName("defaultTransitionDuration")]
+        public double DefaultTransitionDuration { get; set; } = 0.5;
+
+        [JsonPropertyName("generateThumbnail")]
+        public bool GenerateThumbnail { get; set; } = true;
+
+        [JsonPropertyName("generateChapters")]
+        public bool GenerateChapters { get; set; } = true;
+
+        [JsonIgnore]
+        public bool HasIntro => !string.IsNullOrEmpty(IntroMediaPath);
+
+        [JsonIgnore]
+        public bool HasOutro => !string.IsNullOrEmpty(OutroMediaPath);
 
         public Project()
         {

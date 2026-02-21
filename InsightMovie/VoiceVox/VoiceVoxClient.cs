@@ -190,7 +190,7 @@ public class VoiceVoxClient : IDisposable
     public async Task<List<JsonElement>> GetSpeakersAsync()
     {
         using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var response = await _httpClient.GetAsync($"{_baseUrl}/speakers", cts.Token);
+        using var response = await _httpClient.GetAsync($"{_baseUrl}/speakers", cts.Token);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -308,7 +308,7 @@ public class VoiceVoxClient : IDisposable
         var encodedText = Uri.EscapeDataString(text);
         var url = $"{_baseUrl}/audio_query?text={encodedText}&speaker={speakerId}";
 
-        var response = await _httpClient.PostAsync(url, null, cts.Token);
+        using var response = await _httpClient.PostAsync(url, null, cts.Token);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -329,7 +329,7 @@ public class VoiceVoxClient : IDisposable
         var queryJson = JsonSerializer.Serialize(query);
         var content = new StringContent(queryJson, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(url, content, cts.Token);
+        using var response = await _httpClient.PostAsync(url, content, cts.Token);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadAsByteArrayAsync();
@@ -340,11 +340,56 @@ public class VoiceVoxClient : IDisposable
     /// </summary>
     /// <param name="text">The text to convert to speech.</param>
     /// <param name="speakerId">The speaker/style ID to use.</param>
+    /// <param name="speedScale">Speech speed multiplier (0.5 = slow, 1.0 = normal, 2.0 = fast).</param>
     /// <returns>The synthesized audio data as a WAV byte array.</returns>
-    public async Task<byte[]> GenerateAudioAsync(string text, int speakerId)
+    public async Task<byte[]> GenerateAudioAsync(string text, int speakerId, double speedScale = 1.0)
     {
-        var query = await CreateAudioQueryAsync(text, speakerId);
-        return await SynthesizeAsync(query, speakerId);
+        const int maxRetries = 3;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                var query = await CreateAudioQueryAsync(text, speakerId);
+
+                if (Math.Abs(speedScale - 1.0) > 0.01)
+                {
+                    query = ModifyQuerySpeed(query, speedScale);
+                }
+
+                return await SynthesizeAsync(query, speakerId);
+            }
+            catch (Exception) when (attempt < maxRetries)
+            {
+                await Task.Delay(1000 * attempt); // backoff: 1s, 2s
+            }
+        }
+
+        // Final attempt without catch — let exception propagate
+        var finalQuery = await CreateAudioQueryAsync(text, speakerId);
+        if (Math.Abs(speedScale - 1.0) > 0.01)
+            finalQuery = ModifyQuerySpeed(finalQuery, speedScale);
+        return await SynthesizeAsync(finalQuery, speakerId);
+    }
+
+    /// <summary>
+    /// Modifies the speedScale property in an audio query JSON.
+    /// </summary>
+    private static JsonElement ModifyQuerySpeed(JsonElement query, double speedScale)
+    {
+        var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(query.GetRawText())!;
+        var modified = new Dictionary<string, object?>();
+
+        foreach (var kv in dict)
+        {
+            if (kv.Key == "speedScale")
+                modified[kv.Key] = speedScale;
+            else
+                modified[kv.Key] = kv.Value;
+        }
+
+        var json = JsonSerializer.Serialize(modified);
+        return JsonSerializer.Deserialize<JsonElement>(json);
     }
 
     /// <summary>

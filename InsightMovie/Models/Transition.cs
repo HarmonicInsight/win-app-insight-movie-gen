@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace InsightMovie.Models
@@ -80,37 +77,6 @@ namespace InsightMovie.Models
         [JsonIgnore]
         public bool HasTransition => Type != TransitionType.None;
 
-        public Dictionary<string, object?> ToDict()
-        {
-            return new Dictionary<string, object?>
-            {
-                { "type", Type.ToString() },
-                { "duration", Duration }
-            };
-        }
-
-        public static TransitionSettings FromDict(Dictionary<string, object?> dict)
-        {
-            var settings = new TransitionSettings();
-
-            if (dict.TryGetValue("type", out var typeVal) && typeVal != null)
-            {
-                if (Enum.TryParse<TransitionType>(typeVal.ToString(), true, out var parsedType))
-                {
-                    settings.Type = parsedType;
-                }
-            }
-
-            if (dict.TryGetValue("duration", out var durVal) && durVal != null)
-            {
-                if (double.TryParse(durVal.ToString(), out var parsedDur))
-                {
-                    settings.Duration = parsedDur;
-                }
-            }
-
-            return settings;
-        }
     }
 
     public static class PresetTransitions
