@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using InsightMovie.Services;
 using InsightMovie.VoiceVox;
 using Microsoft.Win32;
 
@@ -193,7 +194,7 @@ public partial class SetupWizard : Window
         // Reset UI to scanning state
         Dispatcher.Invoke(() =>
         {
-            EngineStatusLabel.Text = "エンジンを検索中...";
+            EngineStatusLabel.Text = LocalizationService.GetString("Setup.Engine.Searching");
             EngineProgressBar.IsIndeterminate = true;
             EngineProgressBar.Visibility = Visibility.Visible;
             EnginePathLabel.Text = "";
@@ -225,7 +226,7 @@ public partial class SetupWizard : Window
         {
             Dispatcher.Invoke(() =>
             {
-                EngineStatusLabel.Text = $"検出エラー: {ex.Message}";
+                EngineStatusLabel.Text = LocalizationService.GetString("Setup.Engine.DetectError", ex.Message);
                 EngineProgressBar.IsIndeterminate = false;
                 EngineProgressBar.Visibility = Visibility.Collapsed;
                 RetryDetectionButton.Visibility = Visibility.Visible;
@@ -240,11 +241,11 @@ public partial class SetupWizard : Window
 
         Dispatcher.Invoke(() =>
         {
-            EngineStatusLabel.Text = "VOICEVOXエンジンが見つかりました";
+            EngineStatusLabel.Text = LocalizationService.GetString("Setup.Engine.Found");
             EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Success");
             EngineProgressBar.IsIndeterminate = false;
             EngineProgressBar.Visibility = Visibility.Collapsed;
-            EnginePathLabel.Text = $"接続先: {baseUrl}";
+            EnginePathLabel.Text = LocalizationService.GetString("Setup.Engine.ConnectedTo", baseUrl);
             LaunchEngineButton.Visibility = Visibility.Collapsed;
             RetryDetectionButton.Visibility = Visibility.Collapsed;
             ManualSetupButton.Visibility = Visibility.Collapsed;
@@ -256,11 +257,11 @@ public partial class SetupWizard : Window
     {
         Dispatcher.Invoke(() =>
         {
-            EngineStatusLabel.Text = "VOICEVOXエンジンが見つかりませんでした";
+            EngineStatusLabel.Text = LocalizationService.GetString("Setup.Engine.NotFound");
             EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("Warning");
             EngineProgressBar.IsIndeterminate = false;
             EngineProgressBar.Visibility = Visibility.Collapsed;
-            EnginePathLabel.Text = "エンジンを起動するか、手動でパスを指定してください。";
+            EnginePathLabel.Text = LocalizationService.GetString("Setup.Engine.NotFound.Hint");
             LaunchEngineButton.Visibility = Visibility.Visible;
             RetryDetectionButton.Visibility = Visibility.Visible;
             ManualSetupButton.Visibility = Visibility.Visible;
@@ -272,7 +273,7 @@ public partial class SetupWizard : Window
     {
         Dispatcher.Invoke(() =>
         {
-            EngineStatusLabel.Text = "エンジンを起動中...";
+            EngineStatusLabel.Text = LocalizationService.GetString("Setup.Engine.Launching");
             EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextTertiary");
             EngineProgressBar.IsIndeterminate = true;
             EngineProgressBar.Visibility = Visibility.Visible;

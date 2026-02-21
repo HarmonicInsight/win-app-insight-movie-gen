@@ -153,6 +153,12 @@ public class Config
         EndUpdate();
     }
 
+    public string Language
+    {
+        get => Get<string>("language", "ja") ?? "ja";
+        set => Set("language", value);
+    }
+
     public void ClearLicense()
     {
         BeginUpdate();

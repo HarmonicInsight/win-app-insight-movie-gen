@@ -49,9 +49,9 @@ namespace InsightMovie.ViewModels
         private bool _isExporting;
         private CancellationTokenSource? _exportCts;
 
-        private string _windowTitle = "InsightCast - 新規プロジェクト";
+        private string _windowTitle = LocalizationService.GetString("VM.NewProject");
         private string _statusText = string.Empty;
-        private string _mediaName = "（未選択）";
+        private string _mediaName = LocalizationService.GetString("Common.Unselected");
         private string _narrationText = string.Empty;
         private string _subtitleText = string.Empty;
         private bool _keepOriginalAudio;
@@ -61,7 +61,7 @@ namespace InsightMovie.ViewModels
         private int _selectedTransitionIndex;
         private string _transitionDuration = "0.5";
         private int _selectedSceneSpeakerIndex;
-        private string _bgmStatusText = "BGM: 未設定";
+        private string _bgmStatusText = LocalizationService.GetString("BGM.NotSet");
         private bool _bgmActive;
         private string _fpsText = "30";
         private int _selectedResolutionIndex;
@@ -76,7 +76,7 @@ namespace InsightMovie.ViewModels
         private bool _canSubtitleStyle;
         private bool _canTransition;
         private bool _canPptx;
-        private string _subtitlePlaceholder = "画面下部に表示される字幕";
+        private string _subtitlePlaceholder = LocalizationService.GetString("Scene.Subtitle.Default");
 
         // Style
         private TextStyle _defaultSubtitleStyle;
@@ -383,11 +383,11 @@ namespace InsightMovie.ViewModels
         public bool OverlayListVisible => OverlayItems.Count > 0;
         public bool OverlayEditorVisible => _selectedOverlayIndex >= 0 && _selectedOverlayIndex < OverlayItems.Count;
 
-        public List<string> AlignmentOptions { get; } = new() { "中央", "左", "右" };
+        public List<string> AlignmentOptions { get; } = new() { LocalizationService.GetString("Align.Center"), LocalizationService.GetString("Align.Left"), LocalizationService.GetString("Align.Right") };
 
         public List<string> OverlayColorOptions { get; } = new()
         {
-            "白", "黒", "赤", "青", "黄", "金", "ピンク", "水色"
+            LocalizationService.GetString("Color.White"), LocalizationService.GetString("Color.Black"), LocalizationService.GetString("Color.Red"), LocalizationService.GetString("Color.Blue"), LocalizationService.GetString("Color.Yellow"), LocalizationService.GetString("Color.Gold"), LocalizationService.GetString("Color.Pink"), LocalizationService.GetString("Color.LightBlue")
         };
 
         private static readonly int[][] OverlayColorValues =

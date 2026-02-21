@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using InsightMovie.Services;
 
 namespace InsightMovie.Views
 {
@@ -54,7 +55,7 @@ namespace InsightMovie.Views
             }
             else
             {
-                SceneLabel.Text = "シーン: 0/0";
+                SceneLabel.Text = LocalizationService.GetString("Preview.Scene", 0, 0);
                 PlayPauseBtn.IsEnabled = false;
             }
         }
@@ -76,8 +77,8 @@ namespace InsightMovie.Views
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"動画ファイルの読み込みに失敗しました:\n{ex.Message}",
-                    "エラー",
+                    LocalizationService.GetString("Preview.LoadError", ex.Message),
+                    LocalizationService.GetString("Common.Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -85,7 +86,7 @@ namespace InsightMovie.Views
 
         private void UpdateSceneLabel()
         {
-            SceneLabel.Text = $"シーン: {_currentSceneIndex + 1}/{_videoFiles.Count}";
+            SceneLabel.Text = LocalizationService.GetString("Preview.Scene", _currentSceneIndex + 1, _videoFiles.Count);
         }
 
         // ── Playback Control ────────────────────────────────────────────
@@ -94,7 +95,7 @@ namespace InsightMovie.Views
         {
             MediaPlayer.Play();
             _isPlaying = true;
-            PlayPauseBtn.Content = "\u23F8 一時停止";
+            PlayPauseBtn.Content = LocalizationService.GetString("Preview.Pause");
             _positionTimer.Start();
         }
 
@@ -102,7 +103,7 @@ namespace InsightMovie.Views
         {
             MediaPlayer.Pause();
             _isPlaying = false;
-            PlayPauseBtn.Content = "\u25B6 再生";
+            PlayPauseBtn.Content = LocalizationService.GetString("Preview.Play");
             _positionTimer.Stop();
         }
 
@@ -110,7 +111,7 @@ namespace InsightMovie.Views
         {
             MediaPlayer.Stop();
             _isPlaying = false;
-            PlayPauseBtn.Content = "\u25B6 再生";
+            PlayPauseBtn.Content = LocalizationService.GetString("Preview.Play");
             _positionTimer.Stop();
             CurrentTimeLabel.Text = "00:00";
             SeekSlider.Value = 0;
@@ -140,7 +141,7 @@ namespace InsightMovie.Views
         {
             _positionTimer.Stop();
             _isPlaying = false;
-            PlayPauseBtn.Content = "\u25B6 再生";
+            PlayPauseBtn.Content = LocalizationService.GetString("Preview.Play");
 
             // Auto-advance to next scene
             if (_currentSceneIndex < _videoFiles.Count - 1)
@@ -160,11 +161,12 @@ namespace InsightMovie.Views
         {
             _positionTimer.Stop();
             _isPlaying = false;
-            PlayPauseBtn.Content = "\u25B6 再生";
+            PlayPauseBtn.Content = LocalizationService.GetString("Preview.Play");
 
+            var errorMsg = e.ErrorException?.Message ?? "";
             MessageBox.Show(
-                $"メディアの再生に失敗しました:\n{e.ErrorException?.Message ?? "不明なエラー"}",
-                "再生エラー",
+                LocalizationService.GetString("Preview.PlayError", errorMsg),
+                LocalizationService.GetString("Preview.PlayError.Title"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }

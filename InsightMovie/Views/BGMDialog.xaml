@@ -1,7 +1,7 @@
 <Window x:Class="InsightMovie.Views.BGMDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="BGM設定"
+        Title="{DynamicResource BGM.Title}"
         MinWidth="500" MinHeight="700"
         Width="540" Height="760"
         WindowStartupLocation="CenterOwner"
@@ -53,10 +53,10 @@
             <StackPanel>
 
                 <!-- File Selection -->
-                <TextBlock Text="ファイル選択" Style="{StaticResource SectionHeader}"/>
+                <TextBlock Text="{DynamicResource BGM.FileSection}" Style="{StaticResource SectionHeader}"/>
                 <Border Style="{StaticResource SectionBorder}">
                     <StackPanel>
-                        <TextBlock Text="BGMファイル:" Style="{StaticResource FieldLabel}"/>
+                        <TextBlock Text="{DynamicResource BGM.File}" Style="{StaticResource FieldLabel}"/>
                         <Grid Margin="0,4,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -64,23 +64,23 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="FilePathLabel" Grid.Column="0"
-                                       Text="（未選択）"
+                                       Text="{DynamicResource Common.Unselected}"
                                        Foreground="{DynamicResource TextTertiary}"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
                                        Margin="0,0,8,0"/>
                             <Button x:Name="BrowseButton" Grid.Column="1"
-                                    Content="参照..." Style="{StaticResource DialogButton}"
+                                    Content="{DynamicResource BGM.Browse}" Style="{StaticResource DialogButton}"
                                     MinWidth="70" Click="BrowseButton_Click"/>
                             <Button x:Name="ClearFileButton" Grid.Column="2"
-                                    Content="クリア" Style="{StaticResource DialogButton}"
+                                    Content="{DynamicResource Common.Clear}" Style="{StaticResource DialogButton}"
                                     MinWidth="60" Click="ClearFileButton_Click"/>
                         </Grid>
                     </StackPanel>
                 </Border>
 
                 <!-- Volume Settings -->
-                <TextBlock Text="音量設定" Style="{StaticResource SectionHeader}"/>
+                <TextBlock Text="{DynamicResource BGM.Volume}" Style="{StaticResource SectionHeader}"/>
                 <Border Style="{StaticResource SectionBorder}">
                     <StackPanel>
                         <!-- Main Volume -->
@@ -90,7 +90,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="50"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="メイン音量:" Style="{StaticResource FieldLabel}"/>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource BGM.MainVolume}" Style="{StaticResource FieldLabel}"/>
                             <Slider x:Name="MainVolumeSlider" Grid.Column="1"
                                     Minimum="0" Maximum="100" Value="80"
                                     VerticalAlignment="Center"
@@ -103,7 +103,7 @@
                         </Grid>
 
                         <!-- Ducking -->
-                        <CheckBox x:Name="DuckingCheckBox" Content="ナレーション時にダッキング"
+                        <CheckBox x:Name="DuckingCheckBox" Content="{DynamicResource BGM.Ducking}"
                                   Margin="0,0,0,6"
                                   Checked="DuckingCheckBox_Changed"
                                   Unchecked="DuckingCheckBox_Changed"/>
@@ -116,7 +116,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="ダッキング音量:" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Grid.Column="0" Text="{DynamicResource BGM.DuckingVolume}" Style="{StaticResource FieldLabel}"/>
                                 <Slider x:Name="DuckingVolumeSlider" Grid.Column="1"
                                         Minimum="0" Maximum="100" Value="20"
                                         VerticalAlignment="Center"
@@ -135,7 +135,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="アタック:" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Grid.Column="0" Text="{DynamicResource BGM.Attack}" Style="{StaticResource FieldLabel}"/>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                                     <Button Content="-" Style="{StaticResource SmallSpinButton}"
                                             Click="AttackDown_Click"/>
@@ -156,7 +156,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="リリース:" Style="{StaticResource FieldLabel}"/>
+                                <TextBlock Grid.Column="0" Text="{DynamicResource BGM.Release}" Style="{StaticResource FieldLabel}"/>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                                     <Button Content="-" Style="{StaticResource SmallSpinButton}"
                                             Click="ReleaseDown_Click"/>
@@ -174,14 +174,14 @@
                 </Border>
 
                 <!-- Fade Settings -->
-                <TextBlock Text="フェード設定" Style="{StaticResource SectionHeader}"/>
+                <TextBlock Text="{DynamicResource BGM.Fade}" Style="{StaticResource SectionHeader}"/>
                 <Border Style="{StaticResource SectionBorder}">
                     <StackPanel>
                         <!-- Fade In -->
-                        <TextBlock Text="フェードイン" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource BGM.FadeIn}" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"
                                    Margin="0,0,0,4"/>
                         <StackPanel Margin="12,0,0,10">
-                            <CheckBox x:Name="FadeInCheckBox" Content="有効"
+                            <CheckBox x:Name="FadeInCheckBox" Content="{DynamicResource Common.Enabled}"
                                       Margin="0,0,0,4"
                                       Checked="FadeInCheckBox_Changed"
                                       Unchecked="FadeInCheckBox_Changed"/>
@@ -192,7 +192,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="時間:" Style="{StaticResource FieldLabel}"
+                                    <TextBlock Grid.Column="0" Text="{DynamicResource BGM.Duration}" Style="{StaticResource FieldLabel}"
                                                MinWidth="60"/>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                                         <Button Content="-" Style="{StaticResource SmallSpinButton}"
@@ -202,7 +202,7 @@
                                                  Text="2.0"/>
                                         <Button Content="+" Style="{StaticResource SmallSpinButton}"
                                                 Click="FadeInDurationUp_Click"/>
-                                        <TextBlock Text="秒" Foreground="{DynamicResource TextSecondary}"
+                                        <TextBlock Text="{DynamicResource BGM.Sec}" Foreground="{DynamicResource TextSecondary}"
                                                    VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </StackPanel>
                                 </Grid>
@@ -211,7 +211,7 @@
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="タイプ:" Style="{StaticResource FieldLabel}"
+                                    <TextBlock Grid.Column="0" Text="{DynamicResource BGM.Type}" Style="{StaticResource FieldLabel}"
                                                MinWidth="60"/>
                                     <ComboBox x:Name="FadeInTypeCombo" Grid.Column="1"
                                               Width="140" HorizontalAlignment="Left">
@@ -223,10 +223,10 @@
                         </StackPanel>
 
                         <!-- Fade Out -->
-                        <TextBlock Text="フェードアウト" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"
+                        <TextBlock Text="{DynamicResource BGM.FadeOut}" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold"
                                    Margin="0,0,0,4"/>
                         <StackPanel Margin="12,0,0,4">
-                            <CheckBox x:Name="FadeOutCheckBox" Content="有効"
+                            <CheckBox x:Name="FadeOutCheckBox" Content="{DynamicResource Common.Enabled}"
                                       Margin="0,0,0,4"
                                       Checked="FadeOutCheckBox_Changed"
                                       Unchecked="FadeOutCheckBox_Changed"/>
@@ -237,7 +237,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="時間:" Style="{StaticResource FieldLabel}"
+                                    <TextBlock Grid.Column="0" Text="{DynamicResource BGM.Duration}" Style="{StaticResource FieldLabel}"
                                                MinWidth="60"/>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                                         <Button Content="-" Style="{StaticResource SmallSpinButton}"
@@ -247,7 +247,7 @@
                                                  Text="3.0"/>
                                         <Button Content="+" Style="{StaticResource SmallSpinButton}"
                                                 Click="FadeOutDurationUp_Click"/>
-                                        <TextBlock Text="秒" Foreground="{DynamicResource TextSecondary}"
+                                        <TextBlock Text="{DynamicResource BGM.Sec}" Foreground="{DynamicResource TextSecondary}"
                                                    VerticalAlignment="Center" Margin="4,0,0,0"/>
                                     </StackPanel>
                                 </Grid>
@@ -256,7 +256,7 @@
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="タイプ:" Style="{StaticResource FieldLabel}"
+                                    <TextBlock Grid.Column="0" Text="{DynamicResource BGM.Type}" Style="{StaticResource FieldLabel}"
                                                MinWidth="60"/>
                                     <ComboBox x:Name="FadeOutTypeCombo" Grid.Column="1"
                                               Width="140" HorizontalAlignment="Left">
@@ -271,7 +271,7 @@
 
                 <!-- Loop Setting -->
                 <Border Style="{StaticResource SectionBorder}">
-                    <CheckBox x:Name="LoopCheckBox" Content="ループ再生"
+                    <CheckBox x:Name="LoopCheckBox" Content="{DynamicResource BGM.Loop}"
                               IsChecked="True"/>
                 </Border>
 
@@ -280,9 +280,9 @@
 
         <!-- OK / Cancel Buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="OK" Style="{StaticResource DialogButton}"
+            <Button Content="{DynamicResource Common.OK}" Style="{StaticResource DialogButton}"
                     IsDefault="True" Click="OkButton_Click"/>
-            <Button Content="キャンセル" Style="{StaticResource DialogButton}"
+            <Button Content="{DynamicResource Common.Cancel}" Style="{StaticResource DialogButton}"
                     IsCancel="True" Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>

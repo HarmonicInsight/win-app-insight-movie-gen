@@ -3,6 +3,7 @@ namespace InsightMovie;
 using System;
 using System.Windows;
 using InsightMovie.Core;
+using InsightMovie.Services;
 using InsightMovie.Video;
 using InsightMovie.Views;
 using InsightMovie.VoiceVox;
@@ -23,9 +24,8 @@ public partial class App : Application
         DispatcherUnhandledException += (_, args) =>
         {
             MessageBox.Show(
-                $"予期しないエラーが発生しました。\n\n{args.Exception.Message}\n\n" +
-                "アプリケーションの動作が不安定になる可能性があります。",
-                "InsightCast - エラー",
+                LocalizationService.GetString("App.Error.Unexpected", args.Exception.Message),
+                LocalizationService.GetString("App.Error.Unexpected.Title"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             args.Handled = true;
@@ -35,8 +35,8 @@ public partial class App : Application
             if (args.ExceptionObject is Exception ex)
             {
                 MessageBox.Show(
-                    $"致命的なエラーが発生しました。\n\n{ex.Message}",
-                    "InsightCast - 致命的エラー",
+                    LocalizationService.GetString("App.Error.Fatal", ex.Message),
+                    LocalizationService.GetString("App.Error.Fatal.Title"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -49,8 +49,8 @@ public partial class App : Application
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"起動中にエラーが発生しました。\n\n{ex.Message}",
-                "InsightCast - 起動エラー",
+                LocalizationService.GetString("App.Error.Startup", ex.Message),
+                LocalizationService.GetString("App.Error.Startup.Title"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             Shutdown();
@@ -63,12 +63,14 @@ public partial class App : Application
         // ── 1. Load configuration ──────────────────────────────────
         var config = new Config();
 
+        // ── 1.5. Initialize localization ─────────────────────────────
+        LocalizationService.Initialize(config.Language);
+
         if (config.LoadFailed)
         {
             MessageBox.Show(
-                "設定ファイルが破損していたため、デフォルト設定で起動します。\n" +
-                "エンジンURL、話者ID、ライセンス情報の再設定が必要な場合があります。",
-                "InsightCast - 設定ファイル警告",
+                LocalizationService.GetString("App.Config.Corrupted"),
+                LocalizationService.GetString("App.Config.Corrupted.Title"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -135,11 +137,7 @@ public partial class App : Application
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"FFmpeg の初期化に失敗しました。\n動画生成機能は使用できません。\n\n{ex.Message}\n\n" +
-                "以下のいずれかの方法でFFmpegを配置してください:\n" +
-                "• PATH環境変数にffmpeg.exeのあるフォルダを追加\n" +
-                "• アプリフォルダ内に tools\\ffmpeg\\bin\\ffmpeg.exe を配置\n" +
-                "• build.ps1 を実行して自動ダウンロード",
+                LocalizationService.GetString("App.FFmpeg.Error", ex.Message),
                 "InsightCast",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
