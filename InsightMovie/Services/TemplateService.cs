@@ -77,6 +77,12 @@ namespace InsightMovie.Services
             }
         }
 
+        private static T DeepCopy<T>(T obj) where T : class
+        {
+            var json = JsonSerializer.Serialize(obj);
+            return JsonSerializer.Deserialize<T>(json)!;
+        }
+
         public static ProjectTemplate CreateFromProject(Project project, string name, string description = "")
         {
             return new ProjectTemplate
@@ -84,9 +90,9 @@ namespace InsightMovie.Services
                 Name = name,
                 Description = description,
                 CreatedAt = DateTime.Now,
-                Bgm = project.Bgm,
-                Watermark = project.Watermark,
-                Output = project.Output,
+                Bgm = DeepCopy(project.Bgm),
+                Watermark = DeepCopy(project.Watermark),
+                Output = DeepCopy(project.Output),
                 DefaultTransition = project.DefaultTransition,
                 DefaultTransitionDuration = project.DefaultTransitionDuration,
                 IntroMediaPath = project.IntroMediaPath,
@@ -100,9 +106,9 @@ namespace InsightMovie.Services
 
         public static void ApplyToProject(ProjectTemplate template, Project project)
         {
-            project.Bgm = template.Bgm;
-            project.Watermark = template.Watermark;
-            project.Output = template.Output;
+            project.Bgm = DeepCopy(template.Bgm);
+            project.Watermark = DeepCopy(template.Watermark);
+            project.Output = DeepCopy(template.Output);
             project.DefaultTransition = template.DefaultTransition;
             project.DefaultTransitionDuration = template.DefaultTransitionDuration;
             project.IntroMediaPath = template.IntroMediaPath;
@@ -136,9 +142,9 @@ namespace InsightMovie.Services
                     if (template != null)
                         templates.Add(template);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Skip invalid files
+                    System.Diagnostics.Debug.WriteLine($"[WARN] Template load failed: {file}: {ex.Message}");
                 }
             }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.Json.Serialization;
@@ -56,16 +57,25 @@ namespace InsightMovie.Models
         [JsonIgnore]
         public bool HasBgm => !string.IsNullOrEmpty(FilePath);
 
-        public string GetFfmpegVolumeFilter()
+        public string GetFfmpegVolumeFilter(double totalDuration = 0)
         {
             var volumeStr = Volume.ToString("F2", CultureInfo.InvariantCulture);
             var filter = $"volume={volumeStr}";
 
-            if (FadeInEnabled && FadeInDuration > 0)
+            if (FadeInEnabled && FadeInDuration > 0 && FadeInType != FadeType.None)
             {
                 var fadeInDur = FadeInDuration.ToString("F2", CultureInfo.InvariantCulture);
                 var curve = FadeInType == FadeType.Exponential ? "exp" : "lin";
                 filter += $",afade=t=in:d={fadeInDur}:curve={curve}";
+            }
+
+            if (FadeOutEnabled && FadeOutDuration > 0 && FadeOutType != FadeType.None && totalDuration > 0)
+            {
+                var fadeOutStart = Math.Max(0, totalDuration - FadeOutDuration);
+                var fadeOutStartStr = fadeOutStart.ToString("F2", CultureInfo.InvariantCulture);
+                var fadeOutDur = FadeOutDuration.ToString("F2", CultureInfo.InvariantCulture);
+                var curve = FadeOutType == FadeType.Exponential ? "exp" : "lin";
+                filter += $",afade=t=out:st={fadeOutStartStr}:d={fadeOutDur}:curve={curve}";
             }
 
             return filter;

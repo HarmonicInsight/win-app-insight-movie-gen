@@ -75,7 +75,7 @@ namespace InsightMovie.Services
 
             var sceneGen = new SceneGenerator(_ffmpeg);
             var composer = new VideoComposer(_ffmpeg);
-            var tempDir = Path.Combine(Path.GetTempPath(), "insightmovie_build");
+            var tempDir = Path.Combine(Path.GetTempPath(), $"insightcast_build_{Guid.NewGuid():N}");
             Directory.CreateDirectory(tempDir);
 
             var scenePaths = new List<string>();
@@ -113,7 +113,7 @@ namespace InsightMovie.Services
                     scenePaths.Add(introPath);
                     chapterTimes.Add((0, "イントロ"));
                     cumulativeDuration += project.IntroDuration;
-                    transitions.Add((project.DefaultTransition, project.DefaultTransitionDuration));
+                    // Transition to next scene will be added by the content scene loop
                 }
             }
 
@@ -248,7 +248,7 @@ namespace InsightMovie.Services
             }
 
             // Step: Add BGM
-            if (project.Bgm.HasBgm)
+            if (project.Bgm?.HasBgm == true)
             {
                 progress.Report("BGMを追加中...");
                 var withBgm = outputPath + ".bgm.mp4";

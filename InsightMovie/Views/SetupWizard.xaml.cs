@@ -9,7 +9,7 @@ using Microsoft.Win32;
 namespace InsightMovie.Views;
 
 /// <summary>
-/// Setup wizard window for first-time InsightMovie configuration.
+/// Setup wizard window for first-time InsightCast configuration.
 /// Guides the user through engine detection, speaker selection, and initial setup.
 /// </summary>
 public partial class SetupWizard : Window
@@ -73,7 +73,7 @@ public partial class SetupWizard : Window
             }
             else
             {
-                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
+                _stepLabels[i].Foreground = (System.Windows.Media.Brush)FindResource("TextTertiary");
                 _stepLabels[i].FontWeight = FontWeights.Normal;
             }
         }
@@ -163,6 +163,10 @@ public partial class SetupWizard : Window
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
+        _client?.Dispose();
+        _client = null;
+        _launcher?.Dispose();
+        _launcher = null;
         DialogResult = false;
         Close();
     }
@@ -206,6 +210,8 @@ public partial class SetupWizard : Window
 
             if (engineInfo != null)
             {
+                // Dispose previous client if it exists
+                _client?.Dispose();
                 _client = client;
                 OnEngineFound(engineInfo.BaseUrl);
             }
@@ -267,7 +273,7 @@ public partial class SetupWizard : Window
         Dispatcher.Invoke(() =>
         {
             EngineStatusLabel.Text = "エンジンを起動中...";
-            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
+            EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextTertiary");
             EngineProgressBar.IsIndeterminate = true;
             EngineProgressBar.Visibility = Visibility.Visible;
             EnginePathLabel.Text = "";
@@ -278,6 +284,7 @@ public partial class SetupWizard : Window
 
         try
         {
+            _launcher?.Dispose();
             _launcher = new EngineLauncher();
             var launched = await Task.Run(() => _launcher.Launch());
 
@@ -344,7 +351,7 @@ public partial class SetupWizard : Window
             Dispatcher.Invoke(() =>
             {
                 EngineStatusLabel.Text = "選択されたエンジンで接続を試行中...";
-                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
+                EngineStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextTertiary");
                 EngineProgressBar.IsIndeterminate = true;
                 EngineProgressBar.Visibility = Visibility.Visible;
                 EnginePathLabel.Text = $"パス: {selectedPath}";
@@ -361,6 +368,7 @@ public partial class SetupWizard : Window
     {
         try
         {
+            _launcher?.Dispose();
             _launcher = new EngineLauncher(enginePath);
             var launched = await Task.Run(() => _launcher.Launch());
 
@@ -407,7 +415,7 @@ public partial class SetupWizard : Window
         Dispatcher.Invoke(() =>
         {
             SpeakerStatusLabel.Text = "話者情報を取得中...";
-            SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextMuted");
+            SpeakerStatusLabel.Foreground = (System.Windows.Media.Brush)FindResource("TextTertiary");
             SpeakerProgressBar.IsIndeterminate = true;
             SpeakerProgressBar.Visibility = Visibility.Visible;
             SpeakerResultPanel.Visibility = Visibility.Collapsed;

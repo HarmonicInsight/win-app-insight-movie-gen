@@ -126,7 +126,7 @@ namespace InsightMovie.Views
                 Margin = new Thickness(2),
                 CornerRadius = new CornerRadius(4),
                 BorderThickness = new Thickness(2),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
+                BorderBrush = (System.Windows.Media.Brush)FindResource("BorderDefault"),
                 Background = brush,
                 Cursor = Cursors.Hand,
                 ToolTip = tooltip,
@@ -192,7 +192,7 @@ namespace InsightMovie.Views
                 {
                     Text = preset.Name,
                     FontSize = 10,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xCC)),
+                    Foreground = new SolidColorBrush(Colors.White),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     TextTrimming = TextTrimming.CharacterEllipsis,
                     Margin = new Thickness(0, 2, 0, 0)
@@ -213,7 +213,7 @@ namespace InsightMovie.Views
                     Margin = new Thickness(4),
                     CornerRadius = new CornerRadius(4),
                     BorderThickness = new Thickness(2),
-                    BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)),
+                    BorderBrush = (System.Windows.Media.Brush)FindResource("BorderDefault"),
                     Background = new SolidColorBrush(Color.FromRgb(0x3C, 0x3C, 0x3C)),
                     Cursor = Cursors.Hand,
                     Child = stack,

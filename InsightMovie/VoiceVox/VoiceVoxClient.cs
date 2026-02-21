@@ -190,7 +190,7 @@ public class VoiceVoxClient : IDisposable
     public async Task<List<JsonElement>> GetSpeakersAsync()
     {
         using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var response = await _httpClient.GetAsync($"{_baseUrl}/speakers", cts.Token);
+        using var response = await _httpClient.GetAsync($"{_baseUrl}/speakers", cts.Token);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -308,7 +308,7 @@ public class VoiceVoxClient : IDisposable
         var encodedText = Uri.EscapeDataString(text);
         var url = $"{_baseUrl}/audio_query?text={encodedText}&speaker={speakerId}";
 
-        var response = await _httpClient.PostAsync(url, null, cts.Token);
+        using var response = await _httpClient.PostAsync(url, null, cts.Token);
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -329,7 +329,7 @@ public class VoiceVoxClient : IDisposable
         var queryJson = JsonSerializer.Serialize(query);
         var content = new StringContent(queryJson, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(url, content, cts.Token);
+        using var response = await _httpClient.PostAsync(url, content, cts.Token);
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadAsByteArrayAsync();

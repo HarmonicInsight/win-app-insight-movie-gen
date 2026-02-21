@@ -812,6 +812,7 @@ namespace InsightMovie.ViewModels
             OnPropertyChanged(nameof(SubtitlePlaceholderVisible));
 
             if (_isLoadingScene || _currentScene == null) return;
+            _isDirty = true;
             _currentScene.SubtitleText = _subtitleText;
         }
 
@@ -838,6 +839,7 @@ namespace InsightMovie.ViewModels
                                     : MediaType.None;
 
             MediaName = Path.GetFileName(path);
+            _isDirty = true;
 
             if (_currentScene.MediaType == MediaType.Image)
                 ThumbnailUpdateRequested?.Invoke(_currentScene.MediaPath);
@@ -853,6 +855,7 @@ namespace InsightMovie.ViewModels
             _currentScene.MediaPath = null;
             _currentScene.MediaType = MediaType.None;
             MediaName = "（未選択）";
+            _isDirty = true;
             ThumbnailUpdateRequested?.Invoke(null);
             _logger.Log("素材をクリアしました。");
         }
@@ -860,7 +863,8 @@ namespace InsightMovie.ViewModels
         private void OnDurationModeChanged()
         {
             if (_isLoadingScene || _currentScene == null) return;
-            _currentScene.DurationMode = _isFixedDuration ? DurationMode.Fixed : DurationMode.Auto;
+            _currentScene.DurationMode = _isAutoDuration ? DurationMode.Auto : DurationMode.Fixed;
+            _isDirty = true;
         }
 
         private void OnDurationSecondsChanged()
@@ -870,6 +874,7 @@ namespace InsightMovie.ViewModels
                     CultureInfo.InvariantCulture, out var seconds))
             {
                 _currentScene.FixedSeconds = Math.Clamp(seconds, 0.1, 60.0);
+                _isDirty = true;
             }
         }
 
@@ -878,9 +883,10 @@ namespace InsightMovie.ViewModels
             if (_isLoadingScene || _currentScene == null) return;
             if (_selectedTransitionIndex >= 0)
             {
-                var types = TransitionNames.DisplayNames.Keys.ToList();
+                var types = ((TransitionType[])Enum.GetValues(typeof(TransitionType))).ToList();
                 if (_selectedTransitionIndex < types.Count)
                     _currentScene.TransitionType = types[_selectedTransitionIndex];
+                _isDirty = true;
             }
         }
 
@@ -891,6 +897,7 @@ namespace InsightMovie.ViewModels
                     CultureInfo.InvariantCulture, out var dur))
             {
                 _currentScene.TransitionDuration = Math.Clamp(dur, 0.2, 2.0);
+                _isDirty = true;
             }
         }
 
@@ -901,6 +908,7 @@ namespace InsightMovie.ViewModels
             {
                 var si = SceneSpeakers[_selectedSceneSpeakerIndex];
                 _currentScene.SpeakerId = si.StyleId == -1 ? null : si.StyleId;
+                _isDirty = true;
             }
         }
 
@@ -1239,7 +1247,7 @@ namespace InsightMovie.ViewModels
                 }
 
                 _currentScene.AudioCachePath = audioPath;
-                PlayAudioRequested?.Invoke(audioPath, 1.0);
+                PlayAudioRequested?.Invoke(audioPath, _currentScene.SpeechSpeed);
                 _logger.Log("再生中...");
             }
             catch (Exception ex)
@@ -1668,7 +1676,7 @@ namespace InsightMovie.ViewModels
                 OnPropertyChanged(nameof(HasOutro));
                 OnPropertyChanged(nameof(OutroFileName));
             }
-            if (_project.Watermark.HasWatermark)
+            if (_project.Watermark?.HasWatermark == true)
             {
                 WatermarkFilePath = _project.Watermark.ImagePath!;
                 OnPropertyChanged(nameof(HasWatermark));
@@ -1782,12 +1790,21 @@ namespace InsightMovie.ViewModels
         {
             try
             {
+                // Serialize on UI thread to avoid concurrent access to _project
+                string? json = null;
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+                {
+                    json = JsonSerializer.Serialize(_project);
+                });
+
+                if (json == null) return;
+
                 var autoSaveDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "InsightCast", "AutoSave");
                 Directory.CreateDirectory(autoSaveDir);
                 var autoSavePath = Path.Combine(autoSaveDir, "autosave.json");
-                _project.Save(autoSavePath);
+                File.WriteAllText(autoSavePath, json);
             }
             catch
             {

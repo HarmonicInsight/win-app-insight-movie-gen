@@ -42,6 +42,24 @@ public partial class App : Application
             }
         };
 
+        try
+        {
+            await StartupAsync(e);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"起動中にエラーが発生しました。\n\n{ex.Message}",
+                "InsightCast - 起動エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            Shutdown();
+        }
+    }
+
+    private async Task StartupAsync(StartupEventArgs e)
+    {
+
         // ── 1. Load configuration ──────────────────────────────────
         var config = new Config();
 
@@ -101,7 +119,9 @@ public partial class App : Application
                 var discovered = await client.DiscoverEngineAsync();
                 if (discovered != null)
                 {
+                    config.BeginUpdate();
                     config.EngineUrl = discovered.BaseUrl;
+                    config.EndUpdate();
                 }
             }
         }

@@ -39,10 +39,10 @@ public static class License
 
     private static readonly Dictionary<string, PlanCode[]> FEATURE_MATRIX = new()
     {
-        { "subtitle", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
-        { "subtitle_style", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
-        { "transition", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
-        { "pptx_import", new[] { PlanCode.Trial, PlanCode.Pro, PlanCode.Ent } },
+        { "subtitle", new[] { PlanCode.Trial, PlanCode.Std, PlanCode.Pro, PlanCode.Ent } },
+        { "subtitle_style", new[] { PlanCode.Trial, PlanCode.Std, PlanCode.Pro, PlanCode.Ent } },
+        { "transition", new[] { PlanCode.Trial, PlanCode.Std, PlanCode.Pro, PlanCode.Ent } },
+        { "pptx_import", new[] { PlanCode.Trial, PlanCode.Std, PlanCode.Pro, PlanCode.Ent } },
     };
 
     // ── Base32 エンコード (RFC 4648, Python/TypeScript 標準と同一) ──
@@ -145,7 +145,7 @@ public static class License
                 IsValid = false,
                 ProductCode = productCode,
                 Plan = PlanCode.Free,
-                ErrorMessage = $"このキーは {productCode} 用です。{PRODUCT_CODE} 用のキーを入力してください。"
+                ErrorMessage = "このキーは InsightCast 用ではありません。InsightCast 用のキーを入力してください。"
             };
         }
 

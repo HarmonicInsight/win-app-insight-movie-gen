@@ -23,7 +23,6 @@
 
     <Window.Resources>
         <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
-        <BooleanToVisibilityConverter x:Key="SysBoolToVis"/>
     </Window.Resources>
 
     <Grid>
@@ -72,7 +71,7 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,6,0,6">
                     <TextBlock Text="InsightCast" FontSize="18" FontWeight="Bold"
                                Foreground="{DynamicResource TitlebarFg}" VerticalAlignment="Center"/>
-                    <TextBlock Text="v1.0.0" Foreground="{DynamicResource TitlebarSecondary}" FontSize="11"
+                    <TextBlock x:Name="VersionLabel" Text="v1.0.0" Foreground="{DynamicResource TitlebarSecondary}" FontSize="11"
                                VerticalAlignment="Bottom" Margin="8,0,0,4"/>
                 </StackPanel>
             </DockPanel>
@@ -152,7 +151,7 @@
                               Fill="{DynamicResource ActionUpdate}"
                               Width="24" Height="24" Stretch="Uniform"
                               VerticalAlignment="Center" Margin="0,0,8,0"
-                              Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}"/>
+                              Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}}"/>
                         <!-- Doc icon for pre-complete -->
                         <Path Data="M6,2 C4.9,2 4,2.9 4,4 V20 C4,21.1 4.9,22 6,22 H18 C19.1,22 20,21.1 20,20 V8 L14,2 H6 Z M13,9 V3.5 L18.5,9 H13 Z"
                               Fill="{DynamicResource BrandPrimary}"
@@ -177,7 +176,7 @@
                                TextTrimming="CharacterEllipsis"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Bottom" Margin="0,0,0,-4"
-                               Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}"/>
+                               Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}}"/>
 
                     <!-- Fix 1: Thumbnail strip -->
                     <ScrollViewer Grid.Row="1"
@@ -206,7 +205,7 @@
                                                    Stretch="UniformToFill"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center"
-                                                   Visibility="{Binding HasImage, Converter={StaticResource SysBoolToVis}}"/>
+                                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}"/>
                                             <!-- Text-only scenes: show label -->
                                             <TextBlock Text="{Binding Label}"
                                                        FontSize="10"
@@ -319,7 +318,7 @@
                                     Margin="4,0,0,0"
                                     ToolTip="BGMを解除"
                                     Command="{Binding ClearBgmCommand}"
-                                    Visibility="{Binding HasBgm, Converter={StaticResource SysBoolToVis}}"
+                                    Visibility="{Binding HasBgm, Converter={StaticResource BoolToVis}}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                             <Button Content="{Binding BgmFileName}"
                                     Height="28" FontSize="11"
@@ -354,7 +353,7 @@
                             <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
                                     Margin="4,0,0,0"
                                     Command="{Binding ClearIntroCommand}"
-                                    Visibility="{Binding HasIntro, Converter={StaticResource SysBoolToVis}}"
+                                    Visibility="{Binding HasIntro, Converter={StaticResource BoolToVis}}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                             <Button Content="{Binding IntroFileName}"
                                     Height="24" FontSize="10"
@@ -372,7 +371,7 @@
                             <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
                                     Margin="4,0,0,0"
                                     Command="{Binding ClearOutroCommand}"
-                                    Visibility="{Binding HasOutro, Converter={StaticResource SysBoolToVis}}"
+                                    Visibility="{Binding HasOutro, Converter={StaticResource BoolToVis}}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                             <Button Content="{Binding OutroFileName}"
                                     Height="24" FontSize="10"
@@ -400,12 +399,12 @@
                                       ItemsSource="{Binding WatermarkPositionOptions}"
                                       SelectedIndex="{Binding SelectedWatermarkPosIndex}"
                                       Margin="4,0,0,0"
-                                      Visibility="{Binding HasWatermark, Converter={StaticResource SysBoolToVis}}"
+                                      Visibility="{Binding HasWatermark, Converter={StaticResource BoolToVis}}"
                                       shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                             <Button DockPanel.Dock="Right" Content="✕" Width="24" Height="24"
                                     Margin="4,0,0,0"
                                     Command="{Binding ClearWatermarkCommand}"
-                                    Visibility="{Binding HasWatermark, Converter={StaticResource SysBoolToVis}}"
+                                    Visibility="{Binding HasWatermark, Converter={StaticResource BoolToVis}}"
                                     shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                             <Button Content="{Binding WatermarkFileName}"
                                     Height="24" FontSize="10"
@@ -462,12 +461,12 @@
                 <!-- Generating: cancel button -->
                 <Button Content="生成をキャンセル"
                         Height="44" FontSize="13"
-                        Visibility="{Binding IsGenerating, Converter={StaticResource SysBoolToVis}}"
+                        Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVis}}"
                         Command="{Binding CancelCommand}"
                         shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
 
                 <!-- Complete buttons with output folder access -->
-                <Grid Visibility="{Binding IsComplete, Converter={StaticResource SysBoolToVis}}">
+                <Grid Visibility="{Binding IsComplete, Converter={StaticResource BoolToVis}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -508,14 +507,14 @@
                             Margin="0,6,0,0"
                             Command="{Binding OpenOutputFolderCommand}"
                             ToolTip="サムネイル(.jpg)、チャプター(.chapters.txt)、メタデータ(.metadata.txt)が同フォルダに出力されています"
-                            Visibility="{Binding HasExtraOutputs, Converter={StaticResource SysBoolToVis}}"
+                            Visibility="{Binding HasExtraOutputs, Converter={StaticResource BoolToVis}}"
                             shell:WindowChrome.IsHitTestVisibleInChrome="True"/>
                 </Grid>
             </StackPanel>
 
             <!-- ── Progress ── -->
             <StackPanel Grid.Row="3"
-                        Visibility="{Binding ProgressVisible, Converter={StaticResource SysBoolToVis}}">
+                        Visibility="{Binding ProgressVisible, Converter={StaticResource BoolToVis}}">
                 <!-- Fix 4: IsIndeterminate during import (no known total) -->
                 <ProgressBar Value="{Binding ProgressValue}"
                              IsIndeterminate="{Binding IsImporting}"

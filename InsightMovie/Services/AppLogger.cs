@@ -15,8 +15,15 @@ namespace InsightMovie.Services
 
         public void LogError(string message, Exception? ex = null)
         {
-            var detail = ex != null ? $"{message}: {ex.Message}" : message;
-            Log(detail);
+            if (ex != null)
+            {
+                Log($"{message}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERROR] {message}: {ex}");
+            }
+            else
+            {
+                Log(message);
+            }
         }
     }
 }

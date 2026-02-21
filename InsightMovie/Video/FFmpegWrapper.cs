@@ -195,8 +195,10 @@ public class FFmpegWrapper
             using var process = Process.Start(psi);
             if (process != null)
             {
-                process.StandardOutput.ReadToEnd();
+                // Read stdout asynchronously to prevent deadlock
+                var stdoutTask = process.StandardOutput.ReadToEndAsync();
                 process.StandardError.ReadToEnd();
+                stdoutTask.GetAwaiter().GetResult();
                 process.WaitForExit();
                 return process.ExitCode == 0;
             }
@@ -337,9 +339,10 @@ public class FFmpegWrapper
             using var process = Process.Start(psi);
             if (process != null)
             {
-                // ffmpeg writes media info to stderr
-                process.StandardOutput.ReadToEnd();
+                // Read stdout asynchronously to prevent deadlock
+                var stdoutTask = process.StandardOutput.ReadToEndAsync();
                 string stderr = process.StandardError.ReadToEnd();
+                stdoutTask.GetAwaiter().GetResult();
                 process.WaitForExit();
 
                 // Parse Duration: HH:MM:SS.CC

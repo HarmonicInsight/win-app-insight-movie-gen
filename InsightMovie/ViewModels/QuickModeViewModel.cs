@@ -244,10 +244,8 @@ namespace InsightMovie.ViewModels
             ? "（なし）"
             : Path.GetFileName(_bgmFilePath);
 
-        public List<string> TransitionOptions { get; } = new()
-        {
-            "なし", "フェード", "ディゾルブ", "ワイプ左", "ワイプ右", "スライド左", "スライド右", "ズームイン"
-        };
+        public List<string> TransitionOptions { get; } =
+            TransitionNames.DisplayNames.Values.ToList();
 
         public List<string> SpeedOptions { get; } = new()
         {
@@ -769,7 +767,7 @@ namespace InsightMovie.ViewModels
                 OnPropertyChanged(nameof(OutroFileName));
             }
 
-            if (_project.Watermark.HasWatermark)
+            if (_project.Watermark?.HasWatermark == true)
             {
                 WatermarkFilePath = _project.Watermark.ImagePath!;
                 OnPropertyChanged(nameof(HasWatermark));
@@ -1087,6 +1085,22 @@ namespace InsightMovie.ViewModels
             ImportSummary = string.Empty;
             OutputPath = string.Empty;
             StatusText = string.Empty;
+
+            // Clear BGM, intro/outro, and watermark
+            BgmFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasBgm));
+            OnPropertyChanged(nameof(BgmFileName));
+
+            IntroFilePath = string.Empty;
+            OutroFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasIntro));
+            OnPropertyChanged(nameof(HasOutro));
+            OnPropertyChanged(nameof(IntroFileName));
+            OnPropertyChanged(nameof(OutroFileName));
+
+            WatermarkFilePath = string.Empty;
+            OnPropertyChanged(nameof(HasWatermark));
+            OnPropertyChanged(nameof(WatermarkFileName));
         }
 
         private void Cancel()

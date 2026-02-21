@@ -417,6 +417,21 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ProgressBar">
                     <Grid SnapsToDevicePixels="True">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Determinate"/>
+                                <VisualState x:Name="Indeterminate">
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation
+                                            Storyboard.TargetName="IndeterminateIndicator"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                            From="-200" To="800"
+                                            Duration="0:0:1.5"/>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+
                         <Border x:Name="PART_Track"
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="3" />
@@ -424,7 +439,26 @@
                                 Background="{TemplateBinding Foreground}"
                                 CornerRadius="3"
                                 HorizontalAlignment="Left" />
+
+                        <!-- Indeterminate mode sliding indicator -->
+                        <Border x:Name="IndeterminateIndicator"
+                                Background="{TemplateBinding Foreground}"
+                                CornerRadius="3"
+                                Width="120"
+                                HorizontalAlignment="Left"
+                                Visibility="Collapsed"
+                                ClipToBounds="True">
+                            <Border.RenderTransform>
+                                <TranslateTransform X="0"/>
+                            </Border.RenderTransform>
+                        </Border>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsIndeterminate" Value="True">
+                            <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="IndeterminateIndicator" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

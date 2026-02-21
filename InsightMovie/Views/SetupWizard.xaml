@@ -149,7 +149,7 @@
                                 CornerRadius="8" Padding="24,20" Margin="0,10,0,0">
                             <StackPanel>
                                 <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,16">
-                                    InsightMovie は、VOICEVOX エンジンを使用してナレーション付き動画を自動生成するツールです。
+                                    InsightCast は、VOICEVOX エンジンを使用してナレーション付き動画を自動生成するツールです。
                                 </TextBlock>
                                 <TextBlock Style="{StaticResource BodyText}" Margin="0,0,0,8">
                                     このセットアップでは以下の設定を行います:

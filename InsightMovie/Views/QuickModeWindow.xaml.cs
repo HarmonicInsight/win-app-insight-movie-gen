@@ -39,6 +39,11 @@ namespace InsightMovie.Views
             _vm = new QuickModeViewModel(voiceVoxClient, speakerId, ffmpegWrapper, config);
             DataContext = _vm;
 
+            // Set version label dynamically
+            var version = typeof(QuickModeWindow).Assembly.GetName().Version;
+            if (version != null)
+                VersionLabel.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
+
             _vm.Logger.LogReceived += OnLogReceived;
             _vm.OpenEditorRequested += OnOpenEditorRequested;
             _vm.OpenFileRequested += OnOpenFileRequested;
@@ -199,13 +204,22 @@ namespace InsightMovie.Views
                     UseShellExecute = true
                 });
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _vm.Logger.LogError("ファイルを開けませんでした", ex);
+            }
         }
+
+        private const int MaxLogLength = 100_000;
 
         private void OnLogReceived(string message)
         {
             Dispatcher.Invoke(() =>
             {
+                if (LogTextBox.Text.Length > MaxLogLength)
+                {
+                    LogTextBox.Text = LogTextBox.Text[^(MaxLogLength / 2)..];
+                }
                 if (LogTextBox.Text.Length > 0) LogTextBox.AppendText(Environment.NewLine);
                 LogTextBox.AppendText(message);
                 LogTextBox.ScrollToEnd();
@@ -220,8 +234,21 @@ namespace InsightMovie.Views
             => WindowState = WindowState.Minimized;
 
         private void MaximizeButton_Click(object sender, RoutedEventArgs e)
-            => WindowState = WindowState == WindowState.Maximized
+        {
+            WindowState = WindowState == WindowState.Maximized
                 ? WindowState.Normal : WindowState.Maximized;
+            UpdateMaximizeIcon();
+        }
+
+        private void UpdateMaximizeIcon()
+        {
+            if (MaximizeIcon != null)
+            {
+                MaximizeIcon.Data = WindowState == WindowState.Maximized
+                    ? System.Windows.Media.Geometry.Parse("M3,3 L3,0 L10,0 L10,7 L7,7 M0,3 L7,3 L7,10 L0,10 Z")
+                    : System.Windows.Media.Geometry.Parse("M0,0 L10,0 L10,10 L0,10 Z");
+            }
+        }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
             => Close();
@@ -230,12 +257,13 @@ namespace InsightMovie.Views
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            OnStopAudioRequested();
             if (!_vm.CanClose())
             {
                 e.Cancel = true;
                 return;
             }
+
+            OnStopAudioRequested();
 
             // Unsubscribe event handlers to prevent memory leaks
             _vm.Logger.LogReceived -= OnLogReceived;

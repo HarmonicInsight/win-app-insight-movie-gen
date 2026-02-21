@@ -61,19 +61,22 @@ namespace InsightMovie.Models
         [JsonIgnore]
         public string HexStrokeColor => GetHexStrokeColor();
 
+        private static int SafeChannel(int[] arr, int index)
+            => arr != null && index < arr.Length ? Math.Clamp(arr[index], 0, 255) : 0;
+
         public string GetHexTextColor()
         {
-            return $"#{TextColor[0]:X2}{TextColor[1]:X2}{TextColor[2]:X2}";
+            return $"#{SafeChannel(TextColor, 0):X2}{SafeChannel(TextColor, 1):X2}{SafeChannel(TextColor, 2):X2}";
         }
 
         public string GetHexStrokeColor()
         {
-            return $"#{StrokeColor[0]:X2}{StrokeColor[1]:X2}{StrokeColor[2]:X2}";
+            return $"#{SafeChannel(StrokeColor, 0):X2}{SafeChannel(StrokeColor, 1):X2}{SafeChannel(StrokeColor, 2):X2}";
         }
 
         // --- Presets ---
 
-        public static readonly List<TextStyle> PRESET_STYLES = new()
+        public static readonly IReadOnlyList<TextStyle> PRESET_STYLES = new List<TextStyle>()
         {
             new TextStyle
             {

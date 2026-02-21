@@ -56,12 +56,7 @@ public class PptxImporter
         try
         {
             // Verify that OpenXml types are loadable
-            var testType = typeof(PresentationDocument);
-            if (testType == null)
-            {
-                return (false, "DocumentFormat.OpenXml assembly is not available.");
-            }
-
+            _ = typeof(PresentationDocument);
             return (true, "OpenXml is available. Notes extraction is supported.");
         }
         catch (Exception ex)

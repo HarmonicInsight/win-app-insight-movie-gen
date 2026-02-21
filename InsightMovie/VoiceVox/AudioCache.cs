@@ -26,7 +26,7 @@ public class AudioCache
     public AudioCache(string? cacheDir = null)
     {
         _cacheDir = cacheDir
-            ?? Path.Combine(Path.GetTempPath(), "insightmovie_cache", "audio");
+            ?? Path.Combine(Path.GetTempPath(), "insightcast_cache", "audio");
 
         Directory.CreateDirectory(_cacheDir);
     }

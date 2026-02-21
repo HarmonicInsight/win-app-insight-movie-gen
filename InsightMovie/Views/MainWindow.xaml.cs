@@ -33,10 +33,15 @@ namespace InsightMovie.Views
             _vm.StylePreviewUpdateRequested += OnStylePreviewUpdateRequested;
             _vm.OpenFileRequested += OnOpenFileRequested;
             _vm.PreviewVideoReady += OnPreviewVideoReady;
-            _vm.ExitRequested += () => Close();
+            _vm.ExitRequested += OnExitRequested;
 
             // Wire up logger to log TextBox
             _vm.Logger.LogReceived += OnLogReceived;
+
+            // Set version label dynamically
+            var version = typeof(MainWindow).Assembly.GetName().Version;
+            if (version != null)
+                VersionLabel.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
 
             Loaded += async (_, _) =>
             {
@@ -56,17 +61,13 @@ namespace InsightMovie.Views
 
         #region ViewModel Event Handlers (UI-specific)
 
+        private void OnExitRequested() => Close();
+
         private void OnPlayAudioRequested(string path, double speed)
         {
             Dispatcher.Invoke(() =>
             {
-                double actualSpeed = speed;
-                if (SpeedComboBox.SelectedItem is ComboBoxItem speedItem &&
-                    speedItem.Tag is string tagStr &&
-                    double.TryParse(tagStr, out var parsed))
-                    actualSpeed = parsed;
-
-                AudioPlayer.SpeedRatio = actualSpeed;
+                AudioPlayer.SpeedRatio = speed;
                 AudioPlayer.Source = new Uri(path, UriKind.Absolute);
                 AudioPlayer.Play();
             });
@@ -161,10 +162,17 @@ namespace InsightMovie.Views
             });
         }
 
+        private const int MaxLogLength = 100_000;
+
         private void OnLogReceived(string message)
         {
             Dispatcher.Invoke(() =>
             {
+                if (LogTextBox.Text.Length > MaxLogLength)
+                {
+                    // Trim to last half when exceeding limit
+                    LogTextBox.Text = LogTextBox.Text[^(MaxLogLength / 2)..];
+                }
                 if (LogTextBox.Text.Length > 0) LogTextBox.AppendText(Environment.NewLine);
                 LogTextBox.AppendText(message);
                 LogTextBox.ScrollToEnd();
@@ -278,6 +286,11 @@ namespace InsightMovie.Views
 
         #region Recent Files
 
+        private void RecentFilesMenu_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            PopulateRecentFiles();
+        }
+
         private void PopulateRecentFiles()
         {
             RecentFilesMenu.Items.Clear();
@@ -322,6 +335,7 @@ namespace InsightMovie.Views
             _vm.StylePreviewUpdateRequested -= OnStylePreviewUpdateRequested;
             _vm.OpenFileRequested -= OnOpenFileRequested;
             _vm.PreviewVideoReady -= OnPreviewVideoReady;
+            _vm.ExitRequested -= OnExitRequested;
             _vm.Logger.LogReceived -= OnLogReceived;
         }
 
